@@ -1,0 +1,25 @@
+{
+  "name": "socket-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsc-watch --onSuccess \"node dist/index.js\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.5.12",
+    "tsc-watch": "^6.2.0"
+  },
+  "dependencies": {
+    "chess.js": "1.0.0-beta.8",
+    "dotenv": "^16.4.5",
+    "uuid": "^10.0.0",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  }
+}
