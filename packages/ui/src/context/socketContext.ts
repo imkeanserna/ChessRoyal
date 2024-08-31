@@ -4,6 +4,7 @@ interface ISocketContext {
   socket: WebSocket | null;
   sendMessage: (event: string, data?: any) => void;
   errorMessage: string | null;
+  on: (event: string, eventHandler: (data: any) => void) => void;
 }
 
 export const SocketContext = createContext<ISocketContext | null>(null);

@@ -36,6 +36,8 @@
     "./components/*": [
       "./src/components/*.tsx",
       "./src/components/*.ts"
-    ]
+    ],
+    "./socket/*": "./src/socket/*.tsx",
+    "./context/*": "./src/context/*.ts"
   }
 }

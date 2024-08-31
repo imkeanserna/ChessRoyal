@@ -16,44 +16,52 @@ export const SocketContextProvider: React.FC<PropsWithChildren> = ({
   const eventHandlers = eventHandlerRef.current;
 
   const closeEventListener = (event: CloseEvent) => {
+    console.log("error")
     if (!event.wasClean) {
       setErrorMessage("Connection was closed due to an error");
     }
   }
 
-  const openEventListener = () => {
+  function openEventListener() {
     console.log("You need to send an id to the server");
+    if (!socket) {
+      return
+    }
+    // you must authentication here
+    // socket.send(JSON.stringify({ event: "init_game" }));
   }
 
   useEffect(() => {
-    const newSocket = new WebSocket(process.env.NEXT_PUBLIC_SOCKET_URL!);
+    const newSocket = new WebSocket(process.env.NEXT_PUBLIC_BACKEND_URL!);
 
-    newSocket.addEventListener("open", openEventListener);
     newSocket.addEventListener("close", closeEventListener);
+    newSocket.addEventListener("open", openEventListener);
 
-    // newSocket.onmessage = (messageEvent) => {
-    //   const { event, data } = JSON.parse(messageEvent.data);
-    //
-    //   if (!event || !data) {
-    //     return;
-    //   }
-    //
-    //   if (event === "error") {
-    //     if (data.message && typeof data.message === "string") {
-    //       setErrorMessage(data.message);
-    //     } else {
-    //       setErrorMessage("Something went wrong");
-    //     }
-    //     return;
-    //   }
-    //
-    //   const eventHandler = eventHandlers[event];
-    //
-    //   if (eventHandler) {
-    //     eventHandler(data);
-    //   }
-    // }
+    newSocket.onmessage = (messageEvent) => {
+      console.log("message", messageEvent.data);
+      const { event, data } = JSON.parse(messageEvent.data);
 
+      if (!event || !data) {
+        return;
+      }
+
+      if (event === "error") {
+        if (data.message && typeof data.message === "string") {
+          setErrorMessage(data.message);
+        } else {
+          setErrorMessage("Something went wrong");
+        }
+        return;
+      }
+
+      const eventHandler = eventHandlers[event];
+
+      if (eventHandler) {
+        eventHandler(data);
+      }
+    }
+
+    console.log("iniside useeffect", newSocket);
     setSocket(newSocket);
 
     return () => {
@@ -64,7 +72,10 @@ export const SocketContextProvider: React.FC<PropsWithChildren> = ({
   }, []);
 
   const sendMessage = (event: string, data?: any) => {
+    console.log("enter the send message", event);
+    console.log(socket)
     if (!socket) {
+      console.log("no socket");
       return;
     }
 
@@ -88,6 +99,7 @@ export const SocketContextProvider: React.FC<PropsWithChildren> = ({
       socket,
       sendMessage,
       errorMessage,
+      on
     }}
   >
     {children}
