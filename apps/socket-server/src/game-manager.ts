@@ -1,8 +1,9 @@
 import { WebSocket } from "ws"
 import { ChessGame } from "./games/chess";
 import { User } from "./games/user";
-import { GameStatus } from "./types";
+// import { GameStatus } from "./types";
 import { socketManager } from "./socket-manager";
+import { GameStatus } from "@repo/chess/gameStatus";
 
 export class GameManager {
   private games: ChessGame[];
@@ -43,6 +44,7 @@ export class GameManager {
           game.addSecondPlayer(user.id);
           this.pendingGameId = null;
         } else {
+          console.log("create a new game")
           const game: ChessGame = new ChessGame(user.id);
           this.pendingGameId = game.id;
           this.games.push(game);
@@ -51,8 +53,10 @@ export class GameManager {
           socketManager.broadcast(
             game.id,
             JSON.stringify({
-              event: GameStatus.INIT_GAME,
-              gameId: game.id
+              event: GameStatus.GAME_ADDED,
+              payload: {
+                gameId: game.id
+              }
             })
           )
         }

@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { User } from './user';
-import { GameResult, GameStatus } from '../types';
+// import { GameResult, GameStatus } from '../types';
+import { GameResult, GameStatus } from "@repo/chess/gameStatus";
 import { Chess, Move, Square } from 'chess.js';
 import { socketManager } from '../socket-manager';
 

@@ -8,7 +8,7 @@ export default async function Page() {
       <p>Choose what type of play</p>
       <Button>
         <Link href="play/online" replace={true}>
-          Play Online
+          Chose to play "playh with guest" or "play with friend"
         </Link>
       </Button>
     </div>

@@ -1,23 +1,13 @@
 "use client";
 
-import { useSocketContext } from "@repo/ui/context/socketContext"
-import { useEffect } from "react"
-
+import ChessMenu from "@/components/ChessMenu";
 
 export default function Page() {
-  const { socket, sendMessage, errorMessage } = useSocketContext();
-
-  useEffect(() => {
-    if (!socket) {
-      return;
-    }
-    console.log("welcome to the online play page");
-  }, []);
+  // do authentication here
 
   return (
     <div>
-      {errorMessage}
-      <p>Choose what type of play</p>
+      <ChessMenu />
     </div>
   )
 }

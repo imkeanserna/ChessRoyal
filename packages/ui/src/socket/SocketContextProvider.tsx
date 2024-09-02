@@ -16,14 +16,12 @@ export const SocketContextProvider: React.FC<PropsWithChildren> = ({
   const eventHandlers = eventHandlerRef.current;
 
   const closeEventListener = (event: CloseEvent) => {
-    console.log("error")
     if (!event.wasClean) {
       setErrorMessage("Connection was closed due to an error");
     }
   }
 
   function openEventListener() {
-    console.log("You need to send an id to the server");
     if (!socket) {
       return
     }
@@ -38,7 +36,6 @@ export const SocketContextProvider: React.FC<PropsWithChildren> = ({
     newSocket.addEventListener("open", openEventListener);
 
     newSocket.onmessage = (messageEvent) => {
-      console.log("message", messageEvent.data);
       const { event, data } = JSON.parse(messageEvent.data);
 
       if (!event || !data) {
@@ -57,11 +54,14 @@ export const SocketContextProvider: React.FC<PropsWithChildren> = ({
       const eventHandler = eventHandlers[event];
 
       if (eventHandler) {
-        eventHandler(data);
+        eventHandler({
+          data: {
+            test: "test"
+          }
+        });
       }
     }
 
-    console.log("iniside useeffect", newSocket);
     setSocket(newSocket);
 
     return () => {
@@ -72,8 +72,6 @@ export const SocketContextProvider: React.FC<PropsWithChildren> = ({
   }, []);
 
   const sendMessage = (event: string, data?: any) => {
-    console.log("enter the send message", event);
-    console.log(socket)
     if (!socket) {
       console.log("no socket");
       return;
