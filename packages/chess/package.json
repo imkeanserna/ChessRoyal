@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "exports": {
-    "./gameStatus": "./src/GameEnums.ts"
+    "./gameStatus": "./src/GameEnums.ts",
+    "./playerTypes": "./src/PlayerTypes.ts"
   }
 }

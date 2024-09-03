@@ -6,17 +6,43 @@ import { useSocketContext } from "@repo/ui/context/socketContext";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import WaitingForOpponent from "./WaitingForOpponent";
+import { Player } from "@repo/chess/playerTypes";
+import { useSetRecoilState } from "recoil";
+import { gameMetadataAtom, remoteGameIdAtom } from "@repo/store/gameMetadata";
+
+export interface Players {
+  blackPlayer: Player;
+  whitePlayer: Player;
+}
 
 const ChessMenu: React.FC = () => {
   const { socket, sendMessage } = useSocketContext();
   const router = useRouter();
 
-  const [remoteGameId, setRemoteGameId] = useState("");
+  const setgameMetadataAtom = useSetRecoilState<Players>(gameMetadataAtom);
+  const setRemoteGameIdAtom = useSetRecoilState(remoteGameIdAtom);
   const [isWaiting, setIsWaiting] = useState(false);
 
   const handleGameAdded = useCallback(({ gameId }: { gameId: string }) => {
-    console.log("game added", gameId);
-    setRemoteGameId(gameId);
+    setRemoteGameIdAtom(gameId);
+  }, []);
+
+  const handleGameInit = useCallback((payload: any) => {
+    setIsWaiting(false);
+    setgameMetadataAtom({
+      whitePlayer: {
+        id: payload.whitePlayer.id,
+        name: payload.whitePlayer.name,
+        isGuest: true
+      },
+      blackPlayer: {
+        id: payload.blackPlayer.id,
+        name: payload.blackPlayer.name,
+        isGuest: true
+      }
+    });
+
+    router.push(`/play/${payload.gameId}`);
   }, []);
 
   useEffect(() => {
@@ -31,8 +57,8 @@ const ChessMenu: React.FC = () => {
       switch (event) {
         case GameStatus.INIT_GAME:
           // an id and initialize those store/atoms
-          setIsWaiting(false);
-          router.push(`/play/${payload.gameId}`);
+          setRemoteGameIdAtom(payload.gameId);
+          handleGameInit(payload);
           break;
         case GameStatus.GAME_ADDED:
           setIsWaiting(true);

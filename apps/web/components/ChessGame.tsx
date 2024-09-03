@@ -1,9 +1,14 @@
 "use client";
 
 import { GameStatus } from "@repo/chess/gameStatus";
+import { gameMetadataAtom, remoteGameIdAtom } from "@repo/store/gameMetadata";
 import { Button } from "@repo/ui/components/ui/button";
 import { useSocketContext } from "@repo/ui/context/socketContext";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
+import { Players } from "./ChessMenu";
+import ChessBoard from "./ChessBoard";
+import { Chess } from "chess.js";
 
 interface ChessGameProps {
   gameId: string
@@ -11,6 +16,10 @@ interface ChessGameProps {
 
 const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const { socket } = useSocketContext();
+  const gameMetadataState = useRecoilValue<Players>(gameMetadataAtom);
+  const remoteGameId = useRecoilValue(remoteGameIdAtom);
+  const [chess, setChess] = useState(new Chess());
+  const [board, setBoard] = useState(chess.board());
 
   useEffect(() => {
     if (!socket) {
@@ -55,6 +64,8 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   return (
     <div>
       <Button onClick={moveHandler}>Move</Button>
+      <Button onClick={() => console.log(gameMetadataState)}>Testing</Button>
+      <ChessBoard board={board} />
     </div>
   )
 }
