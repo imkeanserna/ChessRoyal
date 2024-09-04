@@ -77,12 +77,12 @@ export const SocketContextProvider: React.FC<PropsWithChildren> = ({
       return;
     }
 
-    const payload: { event: string, data?: any } = {
+    const payload: { event: string, payload?: any } = {
       event: event,
     };
 
     if (data) {
-      payload.data = data;
+      payload.payload = data;
     }
 
     socket.send(JSON.stringify(payload));

@@ -15,7 +15,7 @@ interface ChessGameProps {
 }
 
 const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
-  const { socket } = useSocketContext();
+  const { socket, sendMessage } = useSocketContext();
   const gameMetadataState = useRecoilValue<Players>(gameMetadataAtom);
   const remoteGameId = useRecoilValue(remoteGameIdAtom);
   const [chess, setChess] = useState(new Chess());
@@ -32,7 +32,9 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       switch (event) {
         case GameStatus.MOVE:
           // do something
-          console.log("move", payload);
+          console.log("move", payload.move);
+          chess.move(payload.move);
+          setBoard(chess.board());
           break;
         case GameStatus.GAME_OVER:
           // do something
@@ -51,21 +53,27 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       console.log("no socket");
       return
     }
-    socket.send(JSON.stringify({
-      event: "move",
+    sendMessage("move", {
       gameId: gameId,
-      data: {
+      move: {
         from: "e2",
         to: "e4"
       }
-    }));
+    });
   };
 
   return (
     <div>
       <Button onClick={moveHandler}>Move</Button>
       <Button onClick={() => console.log(gameMetadataState)}>Testing</Button>
-      <ChessBoard board={board} />
+      <ChessBoard
+        setBoard={setBoard}
+        gameId={gameId}
+        board={board}
+        chess={chess}
+        socket={socket!}
+        sendMessage={sendMessage}
+      />
     </div>
   )
 }

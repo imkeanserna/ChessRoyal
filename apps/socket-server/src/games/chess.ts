@@ -39,7 +39,6 @@ export class ChessGame {
 
     // we can do the logic of moving the piece here
     try {
-      console.log("move inside try catch", move);
       if (this.isPromoting(this.board, move.from, move.to)) {
         const moveResult = this.board.move({
           from: move.from,

@@ -22,8 +22,8 @@ export class GameManager {
   }
 
   private addHandler(user: User) {
-    user.socket.on("message", (payload) => {
-      const { event, data } = JSON.parse(payload.toString());
+    user.socket.on("message", (data) => {
+      const { event, payload } = JSON.parse(data.toString());
 
       if (event === GameStatus.INIT_GAME) {
         if (this.pendingGameId) {
@@ -63,7 +63,7 @@ export class GameManager {
       }
 
       if (event === GameStatus.MOVE) {
-        const { gameId } = JSON.parse(payload.toString());
+        const { gameId, move } = payload;
         const game: ChessGame | undefined = this.games.find((game: ChessGame) => game.id === gameId);
 
         if (!game) {
@@ -71,7 +71,7 @@ export class GameManager {
           return;
         } else {
           // make a move here
-          game.move(user, data);
+          game.move(user, move);
           if (game.result) {
             this.removeGame(game.id);
           }

@@ -8,11 +8,14 @@ interface ChessSquareProps {
     type: PieceSymbol;
     color: Color;
   } | null;
+  onClick: () => any;
 }
 
-const ChessSquare: React.FC<ChessSquareProps> = ({ isMainBoxColor, piece, square }) => {
+const ChessSquare: React.FC<ChessSquareProps> = ({ isMainBoxColor, piece, square, onClick }) => {
   return (
-    <div className={`w-16 h-16 ${isMainBoxColor ? "bg-gray-400" : "bg-white"}`}>
+    <div
+      onClick={onClick}
+      className={`w-16 h-16 ${isMainBoxColor ? "bg-gray-400" : "bg-white"}`}>
       {square ? (
         <div className="w-full h-full flex justify-center items-center">
           <img className="w-12" src={`/cardinal/${square?.color}/${piece}.svg`} alt="" />
