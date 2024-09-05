@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "exports": {
-    "./gameMetadata": "./src/atoms/player.ts"
+    "./gameMetadata": "./src/atoms/player.ts",
+    "./chessBoard": "./src/atoms/chessBoard.ts",
+    "./user": "./src/atoms/user.ts"
   },
   "keywords": [],
   "author": "",

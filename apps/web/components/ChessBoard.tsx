@@ -2,18 +2,30 @@
 
 import { Color, PieceSymbol, Square, Move, Chess } from "chess.js";
 import ChessSquare from "./chess/ChessSquare";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { GameStatus } from "@repo/chess/gameStatus";
+import { isPromoting } from "@repo/chess/isPromoting";
+import { useRecoilState } from "recoil";
+import { movesAtom } from "@repo/store/chessBoard";
 
 interface ChessBoardProps {
   gameId: string;
-  setBoard: (board: any) => void;
+  setBoard: React.Dispatch<
+    React.SetStateAction<
+      ({
+        square: Square;
+        type: PieceSymbol;
+        color: Color;
+      } | null)[][]
+    >
+  >;
   board: ({
     square: Square;
     type: PieceSymbol;
     color: Color;
   } | null)[][];
   chess: Chess;
-  socket: WebSocket;
+  myColor: Color;
   sendMessage: (event: string, data?: any) => void;
 }
 
@@ -22,11 +34,17 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   gameId,
   board,
   chess,
-  socket,
-  sendMessage
+  sendMessage,
+  myColor
 }) => {
   const [from, setFrom] = useState<Square | null>(null);
-  const [moves, setMoves] = useState<Move[]>([]);
+  const [moves, setMoves] = useRecoilState(movesAtom);
+  const isMyTurn: boolean = chess.turn() === myColor;
+
+  useEffect(() => {
+    console.log(isMyTurn);
+    setBoard(chess.board());
+  }, [moves]);
 
   return (
     <div className="w-full h-full flex flex-col justify-center items-center">
@@ -54,17 +72,26 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                   }
 
                   let moveResult: Move;
-                  moveResult = chess.move({
-                    from,
-                    to: squareRepresentation
-                  });
+                  if (isPromoting(chess, from, squareRepresentation)) {
+                    console.log("isPromoting")
+                    moveResult = chess.move({
+                      from,
+                      to: squareRepresentation,
+                      promotion: 'q'
+                    });
+                  } else {
+                    moveResult = chess.move({
+                      from,
+                      to: squareRepresentation
+                    });
+                  }
 
                   if (moveResult) {
+                    console.log("moving.....................")
                     setMoves((prevMove) => [...prevMove, moveResult]);
                     setFrom(null);
 
-                    setBoard(chess.board());
-                    sendMessage("move", {
+                    sendMessage(GameStatus.MOVE, {
                       gameId,
                       move: moveResult
                     });

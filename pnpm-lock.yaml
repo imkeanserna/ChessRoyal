@@ -125,7 +125,11 @@ importers:
         specifier: ^5.4.5
         version: 5.4.5
 
-  packages/chess: {}
+  packages/chess:
+    dependencies:
+      chess.js:
+        specifier: 1.0.0-beta.8
+        version: 1.0.0-beta.8
 
   packages/eslint-config:
     devDependencies:

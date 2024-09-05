@@ -7,8 +7,9 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import WaitingForOpponent from "./WaitingForOpponent";
 import { Player } from "@repo/chess/playerTypes";
-import { useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import { gameMetadataAtom, remoteGameIdAtom } from "@repo/store/gameMetadata";
+import { userAtom } from "@repo/store/user";
 
 export interface Players {
   blackPlayer: Player;
@@ -21,6 +22,7 @@ const ChessMenu: React.FC = () => {
 
   const setgameMetadataAtom = useSetRecoilState<Players>(gameMetadataAtom);
   const setRemoteGameIdAtom = useSetRecoilState(remoteGameIdAtom);
+  const [user, setUser] = useRecoilState(userAtom);
   const [isWaiting, setIsWaiting] = useState(false);
 
   const handleGameAdded = useCallback(({ gameId }: { gameId: string }) => {
@@ -29,6 +31,11 @@ const ChessMenu: React.FC = () => {
 
   const handleGameInit = useCallback((payload: any) => {
     setIsWaiting(false);
+    if (!user) {
+      setUser({
+        id: payload.blackPlayer.id
+      })
+    }
     setgameMetadataAtom({
       whitePlayer: {
         id: payload.whitePlayer.id,
@@ -57,10 +64,14 @@ const ChessMenu: React.FC = () => {
       switch (event) {
         case GameStatus.INIT_GAME:
           // an id and initialize those store/atoms
+          console.log("initialize game");
           setRemoteGameIdAtom(payload.gameId);
           handleGameInit(payload);
           break;
         case GameStatus.GAME_ADDED:
+          setUser({
+            id: payload.userId
+          })
           setIsWaiting(true);
           handleGameAdded({ gameId: payload.gameId });
           break;

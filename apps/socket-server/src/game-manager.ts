@@ -55,6 +55,7 @@ export class GameManager {
             JSON.stringify({
               event: GameStatus.GAME_ADDED,
               payload: {
+                userId: user.id,
                 gameId: game.id
               }
             })
