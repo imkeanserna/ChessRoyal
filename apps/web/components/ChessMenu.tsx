@@ -1,6 +1,6 @@
 "use client";
 
-import { GameStatus } from "@repo/chess/gameStatus";
+import { GameMessages } from "@repo/chess/gameStatus";
 import { Button } from "@repo/ui/components/ui/button";
 import { useSocketContext } from "@repo/ui/context/socketContext";
 import { useRouter } from "next/navigation";
@@ -62,13 +62,14 @@ const ChessMenu: React.FC = () => {
     socket.onmessage = (messageEvent) => {
       const { event, payload } = JSON.parse(messageEvent.data);
 
+      console.log(JSON.parse(messageEvent.data));
       switch (event) {
-        case GameStatus.INIT_GAME:
+        case GameMessages.INIT_GAME:
           // an id and initialize those store/atoms
           setRemoteGameIdAtom(payload.gameId);
           handleGameInit(payload);
           break;
-        case GameStatus.GAME_ADDED:
+        case GameMessages.GAME_ADDED:
           setUser({
             id: payload.userId
           })
@@ -86,7 +87,7 @@ const ChessMenu: React.FC = () => {
       console.log("no socket");
       return
     }
-    sendMessage("init_game");
+    sendMessage(GameMessages.INIT_GAME);
   }
 
   return (

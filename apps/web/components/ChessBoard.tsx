@@ -3,12 +3,13 @@
 import { Color, PieceSymbol, Square, Move, Chess } from "chess.js";
 import ChessSquare from "./chess/ChessSquare";
 import { useEffect, useState } from "react";
-import { GameStatus } from "@repo/chess/gameStatus";
+import { GameMessages } from "@repo/chess/gameStatus";
 import { isPromoting } from "@repo/chess/isPromoting";
 import { useRecoilState } from "recoil";
 import { movesAtom } from "@repo/store/chessBoard";
 
 interface ChessBoardProps {
+  started: boolean;
   gameId: string;
   setBoard: React.Dispatch<
     React.SetStateAction<
@@ -30,6 +31,7 @@ interface ChessBoardProps {
 }
 
 const ChessBoard: React.FC<ChessBoardProps> = ({
+  started,
   setBoard,
   gameId,
   board,
@@ -40,6 +42,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   const [from, setFrom] = useState<Square | null>(null);
   const [moves, setMoves] = useRecoilState(movesAtom);
   const isMyTurn: boolean = chess.turn() === myColor;
+  const [gameOver, setGameOver] = useState(false);
 
   useEffect(() => {
     console.log(isMyTurn);
@@ -62,46 +65,53 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
 
             return <ChessSquare
               onClick={() => {
-                try {
-                  if (!isMyTurn) {
-                    return;
-                  }
+                if (!started) return;
 
-                  if (!from) {
-                    setFrom(squareRepresentation);
-                  }
+                if (!from && square?.color !== chess.turn() || !isMyTurn) return;
 
-                  if (!from) {
-                    return;
-                  }
+                if (from !== squareRepresentation) {
+                  setFrom(squareRepresentation);
+                } else {
+                  setFrom(null);
+                }
 
-                  let moveResult: Move;
-                  if (isPromoting(chess, from, squareRepresentation)) {
-                    console.log("isPromoting")
-                    moveResult = chess.move({
-                      from,
-                      to: squareRepresentation,
-                      promotion: 'q'
-                    });
-                  } else {
-                    moveResult = chess.move({
-                      from,
-                      to: squareRepresentation
-                    });
-                  }
+                if (!from) {
+                  setFrom(squareRepresentation);
+                } else {
+                  try {
+                    let moveResult: Move;
+                    if (isPromoting(chess, from, squareRepresentation)) {
+                      console.log("isPromoting")
+                      moveResult = chess.move({
+                        from,
+                        to: squareRepresentation,
+                        promotion: 'q'
+                      });
+                    } else {
+                      moveResult = chess.move({
+                        from,
+                        to: squareRepresentation
+                      });
+                    }
 
-                  if (moveResult) {
-                    console.log("moving.....................")
-                    setMoves((prevMove) => [...prevMove, moveResult]);
-                    setFrom(null);
+                    if (moveResult) {
+                      console.log(moveResult);
+                      console.log("moving.....................")
+                      setMoves((prevMove) => [...prevMove, moveResult]);
+                      setFrom(null);
 
-                    sendMessage(GameStatus.MOVE, {
-                      gameId,
-                      move: moveResult
-                    });
+                      if (moveResult.san.includes('#')) {
+                        setGameOver(true);
+                      }
+
+                      sendMessage(GameMessages.MOVE, {
+                        gameId,
+                        move: moveResult
+                      });
+                    }
+                  } catch (error) {
+                    console.log(error);
                   }
-                } catch (error) {
-                  console.log(error);
                 }
               }}
               isMainBoxColor={isMainBoxColor}

@@ -1,6 +1,6 @@
 "use client";
 
-import { GameStatus } from "@repo/chess/gameStatus";
+import { GameMessages, GameResult, GameStatus } from "@repo/chess/gameStatus";
 import { gameMetadataAtom, remoteGameIdAtom } from "@repo/store/gameMetadata";
 import { useSocketContext } from "@repo/ui/context/socketContext";
 import React, { useEffect, useState } from "react";
@@ -11,6 +11,7 @@ import { Chess, Move } from "chess.js";
 import { isPromoting } from "@repo/chess/isPromoting";
 import { movesAtom } from "@repo/store/chessBoard";
 import { userAtom } from "@repo/store/user";
+import { useRouter } from "next/navigation";
 
 interface ChessGameProps {
   gameId: string
@@ -24,6 +25,30 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [board, setBoard] = useState(chess.board());
   const setMoves = useSetRecoilState(movesAtom);
   const user = useRecoilValue(userAtom);
+  const router = useRouter();
+  const [started, setStarted] = useState(false);
+
+  const startedGameHandler = async (gameId: string) => {
+    try {
+      const response = await fetch(`/api/game/${gameId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+      });
+      if (response.ok) {
+        const { started } = await response.json();
+        if (!started) {
+          router.push("/play/online");
+          return;
+        }
+        setStarted(started);
+      }
+    } catch (error) {
+      console.log("Error", error);
+    }
+  }
 
   useEffect(() => {
     if (!socket) {
@@ -31,16 +56,18 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       return;
     }
 
+    startedGameHandler(gameId);
+
     if (user === null) {
       return;
     }
 
     socket.onmessage = (messageEvent) => {
       const { event, payload } = JSON.parse(messageEvent.data);
+      let wonBy: GameResult | null = null;
 
-      console.log("message", event, payload);
       switch (event) {
-        case GameStatus.MOVE:
+        case GameMessages.MOVE:
           // do something
           console.log("move", payload.move);
           try {
@@ -61,11 +88,29 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
             console.log("Error", error);
           }
           break;
-        case GameStatus.GAME_OVER:
+        case GameMessages.GAME_ENDED:
           // do something
+          console.log(JSON.parse(messageEvent.data))
+          console.log(payload);
+
+          switch (payload.status) {
+            case GameStatus.COMPLETED:
+              wonBy = payload.result === GameResult.DRAW ? GameResult.DRAW : payload.result === GameResult.WHITE_WINS ? GameResult.WHITE_WINS : GameResult.BLACK_WINS;
+              console.log(wonBy);
+              break;
+            case GameStatus.DRAW:
+              break;
+            case GameStatus.TIME_UP:
+              break;
+            case GameStatus.ABANDONED:
+              break;
+            case GameStatus.PLAYER_EXIT:
+              break;
+          }
           break;
-        case GameStatus.WAITING:
+        case GameMessages.WAITING:
           // do something
+          console.log("asdasd")
           break;
         default:
           break;
@@ -76,6 +121,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   return (
     <div>
       <ChessBoard
+        started={started}
         setBoard={setBoard}
         gameId={gameId}
         board={board}

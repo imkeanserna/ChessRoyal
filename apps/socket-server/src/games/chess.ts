@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { User } from './user';
 // import { GameResult, GameStatus } from '../types';
-import { GameResult, GameStatus } from "@repo/chess/gameStatus";
+import { GameMessages, GameResult, GameStatus } from "@repo/chess/gameStatus";
 import { Chess, Move, Square } from 'chess.js';
 import { socketManager } from '../socket-manager';
 
@@ -60,7 +60,7 @@ export class ChessGame {
     socketManager.broadcast(
       this.id,
       JSON.stringify({
-        event: GameStatus.MOVE,
+        event: GameMessages.MOVE,
         payload: {
           move
         }
@@ -68,6 +68,15 @@ export class ChessGame {
     );
 
     // --TODO: check if the game is over and test it in the client (front-end)
+    if (this.board.isGameOver()) {
+      const result: boolean = this.board.isDraw();
+      if (result) {
+        this.result = GameResult.DRAW;
+      } else {
+        this.result = this.board.turn() === 'w' ? GameResult.BLACK_WINS : GameResult.WHITE_WINS;
+      }
+      this.GameEnded(GameStatus.COMPLETED, this.result);
+    }
   }
 
   async addSecondPlayer(player2UserId: string) {
@@ -78,7 +87,7 @@ export class ChessGame {
     socketManager.broadcast(
       this.id,
       JSON.stringify({
-        event: GameStatus.INIT_GAME,
+        event: GameMessages.INIT_GAME,
         payload: {
           gameId: this.id,
           whitePlayer: {
@@ -124,5 +133,28 @@ export class ChessGame {
       .moves({ square: from, verbose: true })
       .map((it: { to: Square }) => it.to)
       .includes(to);
+  }
+
+  private async GameEnded(status: GameStatus, result: GameResult) {
+    socketManager.broadcast(
+      this.id,
+      JSON.stringify({
+        event: GameMessages.GAME_ENDED,
+        payload: {
+          result,
+          status,
+          whitePlayer: {
+            id: this.player1UserId,
+            name: "Guest",
+            isGuest: true
+          },
+          blackPlayer: {
+            id: this.player2UserId,
+            name: "Guest",
+            isGuest: true
+          }
+        }
+      })
+    );
   }
 }

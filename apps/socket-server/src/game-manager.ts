@@ -1,9 +1,8 @@
 import { WebSocket } from "ws"
 import { ChessGame } from "./games/chess";
 import { User } from "./games/user";
-// import { GameStatus } from "./types";
 import { socketManager } from "./socket-manager";
-import { GameStatus } from "@repo/chess/gameStatus";
+import { GameMessages } from "@repo/chess/gameStatus";
 
 export class GameManager {
   private games: ChessGame[];
@@ -25,7 +24,7 @@ export class GameManager {
     user.socket.on("message", (data) => {
       const { event, payload } = JSON.parse(data.toString());
 
-      if (event === GameStatus.INIT_GAME) {
+      if (event === GameMessages.INIT_GAME) {
         if (this.pendingGameId) {
           const game: ChessGame | undefined = this.games.find((game: ChessGame) => game.id === this.pendingGameId);
           if (!game) {
@@ -53,7 +52,7 @@ export class GameManager {
           socketManager.broadcast(
             game.id,
             JSON.stringify({
-              event: GameStatus.GAME_ADDED,
+              event: GameMessages.GAME_ADDED,
               payload: {
                 userId: user.id,
                 gameId: game.id
@@ -63,7 +62,7 @@ export class GameManager {
         }
       }
 
-      if (event === GameStatus.MOVE) {
+      if (event === GameMessages.MOVE) {
         const { gameId, move } = payload;
         const game: ChessGame | undefined = this.games.find((game: ChessGame) => game.id === gameId);
 
