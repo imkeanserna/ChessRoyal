@@ -31,7 +31,8 @@ const ChessMenu: React.FC = () => {
 
   const handleGameInit = useCallback((payload: any) => {
     setIsWaiting(false);
-    if (!user) {
+
+    if (!user || user.id !== payload.blackPlayer.id) {
       setUser({
         id: payload.blackPlayer.id
       })
@@ -64,7 +65,6 @@ const ChessMenu: React.FC = () => {
       switch (event) {
         case GameStatus.INIT_GAME:
           // an id and initialize those store/atoms
-          console.log("initialize game");
           setRemoteGameIdAtom(payload.gameId);
           handleGameInit(payload);
           break;

@@ -31,7 +31,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       return;
     }
 
-    console.log(user);
     if (user === null) {
       return;
     }

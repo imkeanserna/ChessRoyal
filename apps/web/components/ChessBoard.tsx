@@ -63,6 +63,10 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
             return <ChessSquare
               onClick={() => {
                 try {
+                  if (!isMyTurn) {
+                    return;
+                  }
+
                   if (!from) {
                     setFrom(squareRepresentation);
                   }
