@@ -43,6 +43,13 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   const [moves, setMoves] = useRecoilState(movesAtom);
   const isMyTurn: boolean = chess.turn() === myColor;
   const [gameOver, setGameOver] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  useEffect(() => {
+    if (myColor === 'b') {
+      setIsFlipped(true);
+    }
+  }, [myColor]);
 
   useEffect(() => {
     console.log(isMyTurn);
@@ -52,11 +59,13 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   return (
     <div className="w-full h-full flex flex-col justify-center items-center">
       Chess Board
-      {board.map((row, i) => {
-        i = 8 - i;
+      {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
+        i = isFlipped ? i + 1 : 8 - i;
+
+        row = isFlipped ? row.slice().reverse() : row;
         return <div key={i} className="flex">
           {row.map((square, j) => {
-            j = j % 8;
+            j = isFlipped ? 7 - (j % 8) : j % 8;
 
             const isMainBoxColor: boolean = (i + j) % 2 !== 0;
             const isPiece: boolean = !!square;
