@@ -12,6 +12,7 @@ import { isPromoting } from "@repo/chess/isPromoting";
 import { movesAtom } from "@repo/store/chessBoard";
 import { userAtom } from "@repo/store/user";
 import { useRouter } from "next/navigation";
+import TimerCountDown from "./chess/TimerCountDown";
 
 interface ChessGameProps {
   gameId: string
@@ -27,6 +28,9 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const user = useRecoilValue(userAtom);
   const router = useRouter();
   const [started, setStarted] = useState(false);
+  const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(0);
+  const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(0);
+  const initialTime = 10 * 60 * 1000;
 
   const startedGameHandler = async (gameId: string) => {
     try {
@@ -69,7 +73,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       switch (event) {
         case GameMessages.MOVE:
           // do something
-          console.log("move", payload.move);
           try {
             if (isPromoting(chess, payload.move.from, payload.move.to)) {
               chess.move({
@@ -120,6 +123,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
   return (
     <div>
+      <TimerCountDown duration={player2ConsumeTimer || initialTime} isPaused={(chess.turn() === (user?.id === gameMetadataState.whitePlayer.id ? 'w' : 'b'))} />
       <ChessBoard
         started={started}
         setBoard={setBoard}
@@ -129,6 +133,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         sendMessage={sendMessage}
         myColor={user?.id === gameMetadataState.whitePlayer.id ? 'w' : 'b'}
       />
+      <TimerCountDown duration={player1ConsumeTimer || initialTime} isPaused={!(chess.turn() === (user?.id === gameMetadataState.whitePlayer.id ? 'w' : 'b'))} />
     </div>
   )
 }

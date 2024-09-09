@@ -65,6 +65,7 @@ const ChessMenu: React.FC = () => {
       console.log(JSON.parse(messageEvent.data));
       switch (event) {
         case GameMessages.INIT_GAME:
+          console.log(payload);
           // an id and initialize those store/atoms
           setRemoteGameIdAtom(payload.gameId);
           handleGameInit(payload);

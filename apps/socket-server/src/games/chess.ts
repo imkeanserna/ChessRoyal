@@ -4,17 +4,21 @@ import { User } from './user';
 import { GameMessages, GameResult, GameStatus } from "@repo/chess/gameStatus";
 import { Chess, Move, Square } from 'chess.js';
 import { socketManager } from '../socket-manager';
+import { GameTimer } from './gameTimer';
 
 export class ChessGame {
   public id: string;
   public result: GameResult | null = null;
   public player1UserId: string;
   public player2UserId: string;
+  public initializeTime: number;
+  public gameTimer: GameTimer | null = null;
   private board: Chess;
 
   constructor(player1UserId: string, player2UserId?: string) {
     this.player1UserId = player1UserId;
     this.player2UserId = player2UserId || "";
+    this.initializeTime = new Date().getTime();
     this.id = uuidv4();
     this.board = new Chess();
   }
@@ -34,6 +38,16 @@ export class ChessGame {
 
     if (this.result) {
       console.error(`Game ${this.id} is already over with result ${this.result}`);
+      return;
+    }
+
+    this.gameTimer?.switchTurn();
+
+    const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
+
+    console.log(player1RemainingTime, player2RemainingTime);
+    if (player1RemainingTime! <= 0 || player2RemainingTime! <= 0) {
+      console.log("Game over");
       return;
     }
 
@@ -62,12 +76,12 @@ export class ChessGame {
       JSON.stringify({
         event: GameMessages.MOVE,
         payload: {
-          move
+          move,
+          // --TODO: try to send the remaining time to the other player
         }
       })
     );
 
-    // --TODO: check if the game is over and test it in the client (front-end)
     if (this.board.isGameOver()) {
       const result: boolean = this.board.isDraw();
       if (result) {
@@ -84,6 +98,9 @@ export class ChessGame {
 
     // if the applications get bigger then we need a database to store the players
 
+    // after the initialization the whitePlayer should start the time (let test the 10mins)
+    this.gameTimer = new GameTimer(10 * 60 * 1000, 10 * 60 * 1000);
+
     socketManager.broadcast(
       this.id,
       JSON.stringify({
@@ -93,12 +110,12 @@ export class ChessGame {
           whitePlayer: {
             id: this.player1UserId,
             name: "Guest",
-            isGuest: true
+            isGuest: true,
           },
           blackPlayer: {
             id: this.player2UserId,
             name: "Guest",
-            isGuest: true
+            isGuest: true,
           },
           fen: this.board.fen(),
           moves: [],
