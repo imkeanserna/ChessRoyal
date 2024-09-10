@@ -44,6 +44,8 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   const isMyTurn: boolean = chess.turn() === myColor;
   const [gameOver, setGameOver] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [legalMoves, setLegalMoves] = useState<Square[]>([]);
+  const [captureMoves, setCaptureMoves] = useState<Square[]>([]);
 
   useEffect(() => {
     if (myColor === 'b') {
@@ -68,7 +70,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
             j = isFlipped ? 7 - (j % 8) : j % 8;
 
             const isMainBoxColor: boolean = (i + j) % 2 !== 0;
-            const isPiece: boolean = !!square;
+            const isPiece: boolean = square !== null && square !== undefined;
             const squareRepresentation = (String.fromCharCode(97 + j) + '' + i) as Square;
             const piece = square && square.type;
 
@@ -80,12 +82,48 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
 
                 if (from !== squareRepresentation) {
                   setFrom(squareRepresentation);
+                  if (!isPiece) {
+                    const moves = chess
+                      .moves({
+                        square: squareRepresentation,
+                        verbose: true
+                      })
+
+                    setLegalMoves(
+                      moves
+                        .filter((move: { flags: string }) => !move.flags.includes("c"))
+                        .map((it: { to: Square }) => it.to)
+                    );
+
+                    setCaptureMoves(
+                      moves
+                        .filter((move: { flags: string }) => move.flags.includes("c"))
+                        .map((it: { to: Square }) => it.to)
+                    );
+                  }
                 } else {
                   setFrom(null);
                 }
 
                 if (!from) {
                   setFrom(squareRepresentation);
+                  const moves = chess
+                    .moves({
+                      square: squareRepresentation,
+                      verbose: true
+                    })
+
+                  setLegalMoves(
+                    moves
+                      .filter((move: { flags: string }) => !move.flags.includes("c"))
+                      .map((it: { to: Square }) => it.to)
+                  );
+
+                  setCaptureMoves(
+                    moves
+                      .filter((move: { flags: string }) => move.flags.includes("c"))
+                      .map((it: { to: Square }) => it.to)
+                  );
                 } else {
                   try {
                     let moveResult: Move;
@@ -118,11 +156,16 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                         move: moveResult
                       });
                     }
+
+                    setLegalMoves([]);
+                    setCaptureMoves([]);
                   } catch (error) {
                     console.log(error);
                   }
                 }
               }}
+              isCaptured={captureMoves.includes(squareRepresentation)}
+              isHighlighted={legalMoves.includes(squareRepresentation)}
               isMainBoxColor={isMainBoxColor}
               piece={piece}
               key={j}
