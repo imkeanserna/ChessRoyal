@@ -54,7 +54,6 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   }, [myColor]);
 
   useEffect(() => {
-    console.log(isMyTurn);
     setBoard(chess.board());
   }, [moves]);
 

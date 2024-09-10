@@ -14,6 +14,7 @@ export class ChessGame {
   public initializeTime: number;
   public gameTimer: GameTimer | null = null;
   private board: Chess;
+  private moves: Move[];
 
   constructor(player1UserId: string, player2UserId?: string) {
     this.player1UserId = player1UserId;
@@ -21,6 +22,7 @@ export class ChessGame {
     this.initializeTime = new Date().getTime();
     this.id = uuidv4();
     this.board = new Chess();
+    this.moves = [];
   }
 
   move(user: User, move: Move) {
@@ -69,6 +71,10 @@ export class ChessGame {
       console.error("Erorr in move", error);
       return;
     }
+
+    // add the move to the database
+    this.moves.push(move);
+    console.log(this.moves);
 
     // send the move to the other player
     socketManager.broadcast(

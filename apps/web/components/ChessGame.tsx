@@ -13,6 +13,7 @@ import { movesAtom } from "@repo/store/chessBoard";
 import { userAtom } from "@repo/store/user";
 import { useRouter } from "next/navigation";
 import TimerCountDown from "./chess/TimerCountDown";
+import MovesTable from "./ui/MovesTable";
 
 interface ChessGameProps {
   gameId: string
@@ -125,23 +126,26 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
   return (
     <div>
-      <TimerCountDown
-        duration={user?.id !== blackPlayer.id ? player1ConsumeTimer : player2ConsumeTimer}
-        isPaused={(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
-      />
-      <ChessBoard
-        started={started}
-        setBoard={setBoard}
-        gameId={gameId}
-        board={board}
-        chess={chess}
-        sendMessage={sendMessage}
-        myColor={user?.id === whitePlayer.id ? 'w' : 'b'}
-      />
-      <TimerCountDown
-        duration={user?.id === whitePlayer.id ? player1ConsumeTimer : player2ConsumeTimer}
-        isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
-      />
+      <div>
+        <TimerCountDown
+          duration={user?.id !== blackPlayer.id ? player1ConsumeTimer : player2ConsumeTimer}
+          isPaused={(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
+        />
+        <ChessBoard
+          started={started}
+          setBoard={setBoard}
+          gameId={gameId}
+          board={board}
+          chess={chess}
+          sendMessage={sendMessage}
+          myColor={user?.id === whitePlayer.id ? 'w' : 'b'}
+        />
+        <TimerCountDown
+          duration={user?.id === whitePlayer.id ? player1ConsumeTimer : player2ConsumeTimer}
+          isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
+        />
+      </div>
+      <MovesTable />
     </div>
   )
 }
