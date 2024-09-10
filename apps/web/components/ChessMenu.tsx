@@ -41,15 +41,18 @@ const ChessMenu: React.FC = () => {
       whitePlayer: {
         id: payload.whitePlayer.id,
         name: payload.whitePlayer.name,
-        isGuest: true
+        isGuest: true,
+        remainingTime: payload.whitePlayer.remainingTime
       },
       blackPlayer: {
         id: payload.blackPlayer.id,
         name: payload.blackPlayer.name,
-        isGuest: true
+        isGuest: true,
+        remainingTime: payload.blackPlayer.remainingTime
       }
     });
 
+    // let say they initialize it into 10 minutes
     router.push(`/play/${payload.gameId}`);
   }, []);
 

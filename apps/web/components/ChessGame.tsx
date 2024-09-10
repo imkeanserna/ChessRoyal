@@ -20,7 +20,7 @@ interface ChessGameProps {
 
 const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const { socket, sendMessage } = useSocketContext();
-  const gameMetadataState = useRecoilValue<Players>(gameMetadataAtom);
+  const { blackPlayer, whitePlayer } = useRecoilValue<Players>(gameMetadataAtom);
   const remoteGameId = useRecoilValue(remoteGameIdAtom);
   const [chess, setChess] = useState(new Chess());
   const [board, setBoard] = useState(chess.board());
@@ -28,9 +28,8 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const user = useRecoilValue(userAtom);
   const router = useRouter();
   const [started, setStarted] = useState(false);
-  const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(0);
-  const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(0);
-  const initialTime = 10 * 60 * 1000;
+  const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer.remainingTime);
+  const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer.remainingTime);
 
   const startedGameHandler = async (gameId: string) => {
     try {
@@ -74,6 +73,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         case GameMessages.MOVE:
           // do something
           try {
+            console.log(payload);
             if (isPromoting(chess, payload.move.from, payload.move.to)) {
               chess.move({
                 from: payload.move.from,
@@ -87,6 +87,8 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
               });
             }
             setMoves((moves) => [...moves, payload.move]);
+            setPlayer1ConsumeTimer(payload.player1RemainingTime);
+            setPlayer2ConsumeTimer(payload.player2RemainingTime);
           } catch (error) {
             console.log("Error", error);
           }
@@ -123,7 +125,10 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
   return (
     <div>
-      <TimerCountDown duration={player2ConsumeTimer || initialTime} isPaused={(chess.turn() === (user?.id === gameMetadataState.whitePlayer.id ? 'w' : 'b'))} />
+      <TimerCountDown
+        duration={user?.id !== blackPlayer.id ? player1ConsumeTimer : player2ConsumeTimer}
+        isPaused={(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
+      />
       <ChessBoard
         started={started}
         setBoard={setBoard}
@@ -131,9 +136,12 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         board={board}
         chess={chess}
         sendMessage={sendMessage}
-        myColor={user?.id === gameMetadataState.whitePlayer.id ? 'w' : 'b'}
+        myColor={user?.id === whitePlayer.id ? 'w' : 'b'}
       />
-      <TimerCountDown duration={player1ConsumeTimer || initialTime} isPaused={!(chess.turn() === (user?.id === gameMetadataState.whitePlayer.id ? 'w' : 'b'))} />
+      <TimerCountDown
+        duration={user?.id === whitePlayer.id ? player1ConsumeTimer : player2ConsumeTimer}
+        isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
+      />
     </div>
   )
 }

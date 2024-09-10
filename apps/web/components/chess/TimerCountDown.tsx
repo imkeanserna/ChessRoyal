@@ -21,6 +21,7 @@ const TimerCountDown: React.FC<TimerCountDownProps> = ({ duration, isPaused }) =
         if (timeLeft <= 0) {
           clearInterval(timerRef.current);
           setRemainingTime(0);
+          alert("Time's up!");
         } else {
           setRemainingTime(timeLeft);
         }

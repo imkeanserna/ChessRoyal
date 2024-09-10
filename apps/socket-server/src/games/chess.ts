@@ -77,7 +77,8 @@ export class ChessGame {
         event: GameMessages.MOVE,
         payload: {
           move,
-          // --TODO: try to send the remaining time to the other player
+          player1RemainingTime,
+          player2RemainingTime,
         }
       })
     );
@@ -100,6 +101,7 @@ export class ChessGame {
 
     // after the initialization the whitePlayer should start the time (let test the 10mins)
     this.gameTimer = new GameTimer(10 * 60 * 1000, 10 * 60 * 1000);
+    const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
 
     socketManager.broadcast(
       this.id,
@@ -111,11 +113,13 @@ export class ChessGame {
             id: this.player1UserId,
             name: "Guest",
             isGuest: true,
+            remainingTime: player1RemainingTime
           },
           blackPlayer: {
             id: this.player2UserId,
             name: "Guest",
             isGuest: true,
+            remainingTime: player2RemainingTime
           },
           fen: this.board.fen(),
           moves: [],

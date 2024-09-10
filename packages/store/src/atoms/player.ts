@@ -12,12 +12,14 @@ export const gameMetadataAtom = atom<Players>({
     blackPlayer: {
       id: "",
       name: "",
-      isGuest: true
+      isGuest: true,
+      remainingTime: 0
     },
     whitePlayer: {
       id: "",
       name: "",
-      isGuest: true
+      isGuest: true,
+      remainingTime: 0
     }
   }
 });
