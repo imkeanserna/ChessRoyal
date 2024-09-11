@@ -48,6 +48,11 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [captureMoves, setCaptureMoves] = useState<Square[]>([]);
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(userSelectedMoveIndexAtom);
+  const [lastMove, setLastMove] = useState<{ from: Square, to: Square } | null>(null);
+
+  const isHighlightedSquare = (square: Square) => {
+    return lastMove && (lastMove.from === square || lastMove.to === square);
+  }
 
   useEffect(() => {
     if (myColor === 'b') {
@@ -60,6 +65,10 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     if (userSelectedMoveIndex !== null) {
       const move: Move = moves[userSelectedMoveIndex];
       chess.load(move.after);
+      setLastMove({
+        from: move.from,
+        to: move.to
+      });
       setBoard(chess.board());
       return;
     }
@@ -111,6 +120,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                   });
                   setBoard(chess.board());
                   setUserSelectedMoveIndex(null);
+                  setLastMove(null);
                   return;
                 }
 
@@ -201,6 +211,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                 }
               }}
               isCaptured={captureMoves.includes(squareRepresentation)}
+              isHighlightedSquare={isHighlightedSquare(squareRepresentation) || false}
               isHighlighted={legalMoves.includes(squareRepresentation)}
               isMainBoxColor={isMainBoxColor}
               piece={piece}
