@@ -5,8 +5,9 @@ import ChessSquare from "./chess/ChessSquare";
 import { useEffect, useState } from "react";
 import { GameMessages } from "@repo/chess/gameStatus";
 import { isPromoting } from "@repo/chess/isPromoting";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { movesAtom } from "@repo/store/chessBoard";
+import { userSelectedMoveIndexAtom } from "@repo/store/user";
 
 interface ChessBoardProps {
   started: boolean;
@@ -46,6 +47,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [captureMoves, setCaptureMoves] = useState<Square[]>([]);
+  const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(userSelectedMoveIndexAtom);
 
   useEffect(() => {
     if (myColor === 'b') {
@@ -54,7 +56,29 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   }, [myColor]);
 
   useEffect(() => {
-    setBoard(chess.board());
+    console.log(userSelectedMoveIndex);
+    if (userSelectedMoveIndex !== null) {
+      const move: Move = moves[userSelectedMoveIndex];
+      chess.load(move.after);
+      setBoard(chess.board());
+      return;
+    }
+  }, [userSelectedMoveIndex]);
+
+  useEffect(() => {
+    if (userSelectedMoveIndex !== null) {
+      chess.reset();
+      moves.forEach((move: Move) => {
+        chess.move({
+          from: move.from,
+          to: move.to
+        });
+      });
+      setBoard(chess.board());
+      setUserSelectedMoveIndex(null);
+    } else {
+      setBoard(chess.board());
+    }
   }, [moves]);
 
   return (
@@ -76,6 +100,19 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
             return <ChessSquare
               onClick={() => {
                 if (!started) return;
+
+                if (userSelectedMoveIndex !== null) {
+                  chess.reset();
+                  moves.forEach((move: Move) => {
+                    chess.move({
+                      from: move.from,
+                      to: move.to
+                    });
+                  });
+                  setBoard(chess.board());
+                  setUserSelectedMoveIndex(null);
+                  return;
+                }
 
                 if (!from && square?.color !== chess.turn() || !isMyTurn) return;
 
