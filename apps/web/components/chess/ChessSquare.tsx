@@ -1,6 +1,7 @@
 import { Color, PieceSymbol, Square } from "chess.js";
 
 interface ChessSquareProps {
+  isKingChecked: boolean;
   isCaptured: boolean;
   isHighlightedSquare: boolean;
   isHighlighted: boolean;

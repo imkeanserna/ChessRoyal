@@ -1,6 +1,6 @@
 "use client";
 
-import { GameMessages, GameResult, GameStatus } from "@repo/chess/gameStatus";
+import { GameMessages, GameResult, GameStatus, KingStatus } from "@repo/chess/gameStatus";
 import { gameMetadataAtom, remoteGameIdAtom } from "@repo/store/gameMetadata";
 import { useSocketContext } from "@repo/ui/context/socketContext";
 import React, { useEffect, useState } from "react";
@@ -9,11 +9,11 @@ import { Players } from "./ChessMenu";
 import ChessBoard from "./ChessBoard";
 import { Chess, Move } from "chess.js";
 import { isPromoting } from "@repo/chess/isPromoting";
-import { movesAtom } from "@repo/store/chessBoard";
+import { isCheckAtom, movesAtom } from "@repo/store/chessBoard";
 import { userAtom } from "@repo/store/user";
 import { useRouter } from "next/navigation";
 import TimerCountDown from "./chess/TimerCountDown";
-import MovesTable from "./ui/MovesTable";
+import MovesTable from "./chess/MovesTable";
 
 interface ChessGameProps {
   gameId: string
@@ -31,6 +31,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [started, setStarted] = useState(false);
   const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer.remainingTime);
   const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer.remainingTime);
+  const [isCheck, setIsCheck] = useRecoilState(isCheckAtom);
 
   const startedGameHandler = async (gameId: string) => {
     try {
@@ -74,7 +75,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         case GameMessages.MOVE:
           // do something
           try {
-            console.log(payload);
             if (isPromoting(chess, payload.move.from, payload.move.to)) {
               chess.move({
                 from: payload.move.from,
@@ -90,9 +90,20 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
             setMoves((moves) => [...moves, payload.move]);
             setPlayer1ConsumeTimer(payload.player1RemainingTime);
             setPlayer2ConsumeTimer(payload.player2RemainingTime);
+            setIsCheck({
+              king_status: KingStatus.SAFE,
+              player: ""
+            });
           } catch (error) {
             console.log("Error", error);
           }
+          break;
+        case GameMessages.KING_STATUS:
+          console.log(payload);
+          setIsCheck({
+            king_status: payload.kingStatus,
+            player: payload.player
+          });
           break;
         case GameMessages.GAME_ENDED:
           // do something

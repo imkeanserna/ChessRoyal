@@ -8,12 +8,19 @@ export enum GameStatus {
   DRAW = "draw"
 }
 
+export enum KingStatus {
+  SAFE = "safe",
+  CHECKED = "checked",
+  CHECKMATE = "checkmate"
+}
+
 export enum GameMessages {
   GAME_ADDED = "game_added",
   GAME_ENDED = "game_ended",
   INIT_GAME = "init_game",
   WAITING = "waiting",
   MOVE = "move",
+  KING_STATUS = "king_status"
 }
 
 export enum GameResult {

@@ -3,10 +3,10 @@
 import { Color, PieceSymbol, Square, Move, Chess } from "chess.js";
 import ChessSquare from "./chess/ChessSquare";
 import { useEffect, useState } from "react";
-import { GameMessages } from "@repo/chess/gameStatus";
+import { GameMessages, KingStatus } from "@repo/chess/gameStatus";
 import { isPromoting } from "@repo/chess/isPromoting";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { movesAtom } from "@repo/store/chessBoard";
+import { isCheckAtom, movesAtom } from "@repo/store/chessBoard";
 import { userSelectedMoveIndexAtom } from "@repo/store/user";
 
 interface ChessBoardProps {
@@ -49,10 +49,18 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   const [captureMoves, setCaptureMoves] = useState<Square[]>([]);
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(userSelectedMoveIndexAtom);
   const [lastMove, setLastMove] = useState<{ from: Square, to: Square } | null>(null);
+  const [isCheck, setIsCheck] = useRecoilState(isCheckAtom);
 
   const isHighlightedSquare = (square: Square) => {
     return lastMove && (lastMove.from === square || lastMove.to === square);
   }
+
+  useEffect(() => {
+    console.log(board)
+    if (isCheck.king_status === KingStatus.CHECKED) {
+      console.log(isCheck);
+    }
+  }, [isCheck]);
 
   useEffect(() => {
     if (myColor === 'b') {
@@ -61,7 +69,6 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   }, [myColor]);
 
   useEffect(() => {
-    console.log(userSelectedMoveIndex);
     if (userSelectedMoveIndex !== null) {
       const move: Move = moves[userSelectedMoveIndex];
       chess.load(move.after);

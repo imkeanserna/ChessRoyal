@@ -12,7 +12,7 @@ const MovesTable: React.FC = () => {
   return (<div>
     <h1>Moves</h1>
     <div className="grid grid-cols-7 w-full gap-2">
-      {moves.map((move, index) =>
+      {moves.map((move: Move, index: number) =>
         index % 2 === 0 ? (
           <React.Fragment key={index}>
             <span>{index / 2 + 1}.</span>
@@ -26,7 +26,7 @@ const MovesTable: React.FC = () => {
             </div>
           </React.Fragment>
         ) : (
-          <React.Fragment>
+          <React.Fragment key={index}>
             <div className="col-span-3">
               <Button onClick={() => {
                 console.log("clicked");
