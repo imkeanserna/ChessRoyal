@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { User } from './user';
 // import { GameResult, GameStatus } from '../types';
-import { GameMessages, GameResult, GameStatus } from "@repo/chess/gameStatus";
+import { GameMessages, GameResult, GameStatus, KingStatus } from "@repo/chess/gameStatus";
 import { Chess, Move, Square } from 'chess.js';
 import { socketManager } from '../socket-manager';
 import { GameTimer } from './gameTimer';
@@ -76,6 +76,19 @@ export class ChessGame {
     this.moves.push(move);
     console.log(this.moves);
 
+    if (this.board.isCheck()) {
+      socketManager.broadcast(
+        this.id,
+        JSON.stringify({
+          event: GameMessages.KING_STATUS,
+          payload: {
+            kingStatus: this.board.inCheck() ? KingStatus.CHECKED : this.board.isCheckmate() ? KingStatus.CHECKMATE : KingStatus.SAFE,
+            player: this.board.turn()
+          }
+        })
+      );
+    }
+
     // send the move to the other player
     socketManager.broadcast(
       this.id,
@@ -84,7 +97,7 @@ export class ChessGame {
         payload: {
           move,
           player1RemainingTime,
-          player2RemainingTime,
+          player2RemainingTime
         }
       })
     );
