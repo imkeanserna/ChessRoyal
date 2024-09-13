@@ -16,6 +16,7 @@ interface ChessSquareProps {
 }
 
 const ChessSquare: React.FC<ChessSquareProps> = ({
+  isKingChecked,
   isCaptured,
   isHighlightedSquare,
   isHighlighted,
@@ -27,6 +28,7 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
     <div
       onClick={onClick}
       className={`
+        ${isKingChecked ? "bg-red-200" : ""}
         ${isHighlightedSquare ? "bg-yellow-200" : ""}
         ${isCaptured ? "bg-red-400" : ""}
         ${isHighlighted ? "bg-yellow-400" : ""}
