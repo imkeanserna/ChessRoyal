@@ -14,6 +14,7 @@ import { userAtom } from "@repo/store/user";
 import { useRouter } from "next/navigation";
 import TimerCountDown from "./chess/TimerCountDown";
 import MovesTable from "./chess/MovesTable";
+import ModalGameOver from "./ui/ModalGameOver";
 
 interface ChessGameProps {
   gameId: string
@@ -32,6 +33,10 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer.remainingTime);
   const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer.remainingTime);
   const [isCheck, setIsCheck] = useRecoilState(isCheckAtom);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [wonBy, setWonBy] = useState<GameStatus | null>(null);
+  const [playerWon, setPlayerWon] = useState<string | null>(null);
 
   const startedGameHandler = async (gameId: string) => {
     try {
@@ -69,7 +74,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
     socket.onmessage = (messageEvent) => {
       const { event, payload } = JSON.parse(messageEvent.data);
-      let wonBy: GameResult | null = null;
 
       switch (event) {
         case GameMessages.MOVE:
@@ -112,7 +116,10 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
           switch (payload.status) {
             case GameStatus.COMPLETED:
-              wonBy = payload.result === GameResult.DRAW ? GameResult.DRAW : payload.result === GameResult.WHITE_WINS ? GameResult.WHITE_WINS : GameResult.BLACK_WINS;
+              setPlayerWon(payload.result === GameResult.DRAW ? GameResult.DRAW : payload.result === GameResult.WHITE_WINS ? GameResult.WHITE_WINS : GameResult.BLACK_WINS);
+              setWonBy(GameStatus.COMPLETED);
+              setIsGameOver(true);
+              setOpen(true);
               console.log(wonBy);
               break;
             case GameStatus.DRAW:
@@ -136,7 +143,13 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   }, [socket]);
 
   return (
-    <div>
+    <div className="w-full h-full">
+      {isGameOver && playerWon && wonBy && <ModalGameOver
+        playerWon={playerWon}
+        wonBy={wonBy === GameStatus.COMPLETED ? "checkmate" : wonBy}
+        open={open}
+        setOpen={setOpen}
+      />}
       <div>
         <TimerCountDown
           duration={user?.id !== blackPlayer.id ? player1ConsumeTimer : player2ConsumeTimer}
