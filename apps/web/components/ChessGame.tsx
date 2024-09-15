@@ -9,7 +9,7 @@ import { Players } from "./ChessMenu";
 import ChessBoard from "./ChessBoard";
 import { Chess, Move } from "chess.js";
 import { isPromoting } from "@repo/chess/isPromoting";
-import { isCheckAtom, movesAtom } from "@repo/store/chessBoard";
+import { isCheckAtom, isGameOverAtom, movesAtom } from "@repo/store/chessBoard";
 import { userAtom } from "@repo/store/user";
 import { useRouter } from "next/navigation";
 import TimerCountDown from "./chess/TimerCountDown";
@@ -33,10 +33,10 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer.remainingTime);
   const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer.remainingTime);
   const [isCheck, setIsCheck] = useRecoilState(isCheckAtom);
-  const [isGameOver, setIsGameOver] = useState(false);
+  const [isGameOver, setIsGameOver] = useRecoilState(isGameOverAtom);
   const [open, setOpen] = useState(false);
   const [wonBy, setWonBy] = useState<GameStatus | null>(null);
-  const [playerWon, setPlayerWon] = useState<string | null>(null);
+  // const [playerWon, setPlayerWon] = useState<string | null>(null);
 
   const startedGameHandler = async (gameId: string) => {
     try {
@@ -116,9 +116,13 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
           switch (payload.status) {
             case GameStatus.COMPLETED:
-              setPlayerWon(payload.result === GameResult.DRAW ? GameResult.DRAW : payload.result === GameResult.WHITE_WINS ? GameResult.WHITE_WINS : GameResult.BLACK_WINS);
+              // setPlayerWon(payload.result === GameResult.DRAW ? GameResult.DRAW : payload.result === GameResult.WHITE_WINS ? GameResult.WHITE_WINS : GameResult.BLACK_WINS);
+              console.log(payload.result === GameResult.WHITE_WINS ? GameResult.WHITE_WINS : GameResult.BLACK_WINS)
               setWonBy(GameStatus.COMPLETED);
-              setIsGameOver(true);
+              setIsGameOver({
+                isGameOver: true,
+                playerWon: payload.result === GameResult.WHITE_WINS ? GameResult.WHITE_WINS : GameResult.BLACK_WINS
+              });
               setOpen(true);
               console.log(wonBy);
               break;
@@ -144,8 +148,8 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
   return (
     <div className="w-full h-full">
-      {isGameOver && playerWon && wonBy && <ModalGameOver
-        playerWon={playerWon}
+      {isGameOver.playerWon && isGameOver.playerWon && wonBy && <ModalGameOver
+        playerWon={isGameOver.playerWon}
         wonBy={wonBy === GameStatus.COMPLETED ? "checkmate" : wonBy}
         open={open}
         setOpen={setOpen}

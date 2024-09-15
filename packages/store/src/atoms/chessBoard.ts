@@ -17,3 +17,16 @@ export const isCheckAtom = atom<{
     player: null
   }
 });
+
+type IsGameOver = {
+  isGameOver: boolean;
+  playerWon: string | null;
+};
+
+export const isGameOverAtom = atom<IsGameOver>({
+  key: "isGameOver",
+  default: {
+    isGameOver: false,
+    playerWon: null
+  }
+});

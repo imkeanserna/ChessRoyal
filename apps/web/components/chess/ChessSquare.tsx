@@ -1,4 +1,6 @@
+import { isGameOverAtom } from "@repo/store/chessBoard";
 import { Color, PieceSymbol, Square } from "chess.js";
+import { useRecoilValue } from "recoil";
 
 interface ChessSquareProps {
   isKingChecked: boolean;
@@ -24,11 +26,12 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
   piece,
   square,
   onClick }) => {
+  const gameOver = useRecoilValue(isGameOverAtom);
+
   return (
     <div
       onClick={onClick}
       className={`
-        ${isKingChecked ? "bg-red-200" : ""}
         ${isHighlightedSquare ? "bg-yellow-200" : ""}
         ${isCaptured ? "bg-red-400" : ""}
         ${isHighlighted ? "bg-yellow-400" : ""}
@@ -36,8 +39,23 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
         w-16 h-16
       `}>
       {square ? (
-        <div className="w-full h-full flex justify-center items-center">
+        <div
+          className={`${isKingChecked ? "bg-red-200" : ""}
+        ${isKingChecked ? "bg-red-200" : ""}
+           w-full h-full relative flex justify-center items-center`
+          }>
           <img className="w-12" src={`/cardinal/${square?.color}/${piece}.svg`} alt="" />
+          {piece === "k" && gameOver.isGameOver && gameOver.playerWon![0]?.toLowerCase() === square?.color ?
+            <img className="w-6 absolute top-1 right-1" src={`/crown.svg`} alt="" />
+            :
+            null
+          }
+          {gameOver.isGameOver && piece === "k" && gameOver.playerWon![0]?.toLowerCase() !== square?.color &&
+            (gameOver.playerWon![0]?.toLowerCase() !== "w" ?
+              <img className="w-6 absolute top-1 right-1" src={`/black-mate.svg`} alt="" />
+              :
+              <img className="w-6 absolute top-1 right-1" src={`/white-mate.svg`} alt="" />)
+          }
         </div>
       ) : null}
     </div>

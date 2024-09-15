@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { GameMessages } from "@repo/chess/gameStatus";
 import { isPromoting } from "@repo/chess/isPromoting";
 import { useRecoilState } from "recoil";
-import { movesAtom } from "@repo/store/chessBoard";
+import { isGameOverAtom, movesAtom } from "@repo/store/chessBoard";
 import { userSelectedMoveIndexAtom } from "@repo/store/user";
 
 interface ChessBoardProps {
@@ -43,7 +43,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   const [from, setFrom] = useState<Square | null>(null);
   const [moves, setMoves] = useRecoilState(movesAtom);
   const isMyTurn: boolean = chess.turn() === myColor;
-  const [gameOver, setGameOver] = useState(false);
+  const [gameOver, setGameOver] = useRecoilState(isGameOverAtom);
   const [isFlipped, setIsFlipped] = useState(false);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [captureMoves, setCaptureMoves] = useState<Square[]>([]);
@@ -197,7 +197,10 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                       setFrom(null);
 
                       if (moveResult.san.includes('#')) {
-                        setGameOver(true);
+                        setGameOver({
+                          isGameOver: true,
+                          playerWon: chess.turn()
+                        });
                       }
 
                       sendMessage(GameMessages.MOVE, {
