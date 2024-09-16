@@ -20,7 +20,8 @@ export enum GameMessages {
   INIT_GAME = "init_game",
   WAITING = "waiting",
   MOVE = "move",
-  KING_STATUS = "king_status"
+  KING_STATUS = "king_status",
+  TIMER = "timer"
 }
 
 export enum GameResult {

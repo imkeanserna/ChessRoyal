@@ -15,6 +15,14 @@ export class ChessGame {
   public gameTimer: GameTimer | null = null;
   private board: Chess;
   private moves: Move[];
+  private pieceValues: Record<string, number> = {
+    p: 1, //pawn
+    n: 3, //knight
+    b: 3, //bishop
+    r: 5, //rook
+    q: 9, //queen
+    k: 0 //king (not captured)
+  };
 
   constructor(player1UserId: string, player2UserId?: string) {
     this.player1UserId = player1UserId;
@@ -47,11 +55,8 @@ export class ChessGame {
 
     const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
 
-    console.log(player1RemainingTime, player2RemainingTime);
-    if (player1RemainingTime! <= 0 || player2RemainingTime! <= 0) {
-      console.log("Game over");
-      return;
-    }
+    // check if the timer is expired both side.
+    this.timerEnd(player1RemainingTime, player2RemainingTime);
 
     // we can do the logic of moving the piece here
     try {
@@ -74,7 +79,6 @@ export class ChessGame {
 
     // add the move to the database
     this.moves.push(move);
-    console.log(this.moves);
 
     if (this.board.isCheck()) {
       socketManager.broadcast(
@@ -146,6 +150,52 @@ export class ChessGame {
       })
     );
   }
+
+  public timerEnd(player1RemainingTime?: number, player2RemainingTime?: number) {
+    if (player1RemainingTime! <= 0 || player2RemainingTime! <= 0) {
+      const { whiteScore, blackScore } = this.calculateMaterialDifference(this.board);
+
+      if (whiteScore < blackScore) {
+        this.GameEnded(GameStatus.TIME_UP, GameResult.WHITE_WINS);
+      } else if (blackScore < whiteScore) {
+        this.GameEnded(GameStatus.TIME_UP, GameResult.BLACK_WINS);
+      } else {
+        this.GameEnded(GameStatus.TIME_UP, GameResult.DRAW);
+      }
+      return;
+    }
+  }
+
+  private calculateMaterialDifference(game: Chess): {
+    whiteScore: number;
+    blackScore: number;
+  } {
+    const board = game.board();
+    let whiteScore = 0;
+    let blackScore = 0;
+
+    board.forEach((row) => {
+      row.forEach((square) => {
+        if (square !== null) {
+          const piece = square.type;
+          const color = square.color;
+          const pieceValues = this.pieceValues[piece] || 0;
+
+          if (color === 'w') {
+            whiteScore += pieceValues;
+          } else {
+            blackScore += pieceValues;
+          }
+        }
+      });
+    });
+
+    const totalPieceValue = 39;
+    return {
+      whiteScore: totalPieceValue - whiteScore,
+      blackScore: totalPieceValue - blackScore,
+    }
+  };
 
   private isPromoting(chess: Chess, from: Square, to: Square): boolean {
     if (!from || !to) {

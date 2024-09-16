@@ -77,6 +77,23 @@ export class GameManager {
           }
         }
       }
+
+      if (event === GameMessages.TIMER) {
+        const { gameId } = payload;
+        const game: ChessGame | undefined = this.games.find((game: ChessGame) => game.id === gameId);
+
+        if (!game) {
+          console.error("Game not found");
+          return;
+        } else {
+          // the timer is ended.
+          game.gameTimer?.switchTurn();
+          const { player1RemainingTime, player2RemainingTime } = game.gameTimer?.getPlayerTimes() || {};
+
+          console.log("Timer end 1 ", player1RemainingTime, player2RemainingTime);
+          game.timerEnd(player1RemainingTime, player2RemainingTime);
+        }
+      }
     })
   }
 

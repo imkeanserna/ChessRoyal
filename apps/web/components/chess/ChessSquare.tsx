@@ -33,15 +33,15 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
       onClick={onClick}
       className={`
         ${isHighlightedSquare ? "bg-yellow-200" : ""}
-        ${isCaptured ? "bg-red-400" : ""}
         ${isHighlighted ? "bg-yellow-400" : ""}
         ${isMainBoxColor ? "bg-gray-400" : "bg-white"}
         w-16 h-16
       `}>
       {square ? (
         <div
-          className={`${isKingChecked ? "bg-red-200" : ""}
-        ${isKingChecked ? "bg-red-200" : ""}
+          className={`
+          ${isCaptured ? "bg-red-400" : ""}
+          ${isKingChecked ? "bg-red-200" : ""}
            w-full h-full relative flex justify-center items-center`
           }>
           <img className="w-12" src={`/cardinal/${square?.color}/${piece}.svg`} alt="" />

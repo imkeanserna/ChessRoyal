@@ -1,6 +1,10 @@
 "use client";
 
+import { GameMessages } from "@repo/chess/gameStatus";
+import { remoteGameIdAtom } from "@repo/store/gameMetadata";
+import { useSocketContext } from "@repo/ui/context/socketContext";
 import { useEffect, useRef, useState } from "react";
+import { useRecoilValue } from "recoil";
 
 interface TimerCountDownProps {
   duration: number;
@@ -10,6 +14,8 @@ interface TimerCountDownProps {
 const TimerCountDown: React.FC<TimerCountDownProps> = ({ duration, isPaused }) => {
   const [remainingTime, setRemainingTime] = useState(duration);
   const timerRef = useRef<NodeJS.Timeout>();
+  const { socket, sendMessage } = useSocketContext();
+  const gameId = useRecoilValue(remoteGameIdAtom);
 
   useEffect(() => {
     if (!isPaused) {
@@ -21,7 +27,9 @@ const TimerCountDown: React.FC<TimerCountDownProps> = ({ duration, isPaused }) =
         if (timeLeft <= 0) {
           clearInterval(timerRef.current);
           setRemainingTime(0);
-          alert("Time's up!");
+          sendMessage(GameMessages.TIMER, {
+            gameId
+          });
         } else {
           setRemainingTime(timeLeft);
         }

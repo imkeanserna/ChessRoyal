@@ -127,8 +127,15 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
               console.log(wonBy);
               break;
             case GameStatus.DRAW:
+              alert("DRAW");
               break;
             case GameStatus.TIME_UP:
+              setWonBy(GameStatus.TIME_UP);
+              setIsGameOver({
+                isGameOver: true,
+                playerWon: payload.result
+              });
+              setOpen(true);
               break;
             case GameStatus.ABANDONED:
               break;
@@ -149,7 +156,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   return (
     <div className="w-full h-full">
       {isGameOver.playerWon && isGameOver.playerWon && wonBy && <ModalGameOver
-        playerWon={isGameOver.playerWon}
+        playerWon={isGameOver.playerWon === GameResult.DRAW ? GameResult.DRAW : isGameOver.playerWon}
         wonBy={wonBy === GameStatus.COMPLETED ? "checkmate" : wonBy}
         open={open}
         setOpen={setOpen}
