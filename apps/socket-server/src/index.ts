@@ -17,6 +17,7 @@ wss.on("connection", (ws: WebSocket, req) => {
 
   ws.on("close", () => {
     console.log("Client disconnected");
+    gameManager.removeUser(ws);
   })
 })
 

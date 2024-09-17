@@ -166,6 +166,11 @@ export class ChessGame {
     }
   }
 
+  public exitGame(user: User) {
+    console.log("exit game", user.id)
+    this.GameEnded(GameStatus.PLAYER_EXIT, user.id === this.player1UserId ? GameResult.BLACK_WINS : GameResult.WHITE_WINS);
+  }
+
   private calculateMaterialDifference(game: Chess): {
     whiteScore: number;
     blackScore: number;

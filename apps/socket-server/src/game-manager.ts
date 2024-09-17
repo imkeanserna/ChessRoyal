@@ -20,6 +20,19 @@ export class GameManager {
     this.addHandler(user);
   }
 
+  removeUser(socket: WebSocket) {
+    const user = this.users.find((user: User) => user.socket === socket);
+
+    if (!user) {
+      console.log("remove User User not found");
+      return;
+    }
+
+    console.log("user found")
+    this.users = this.users.filter((user: User) => user.socket !== socket);
+    socketManager.removeUser(user.id);
+  }
+
   private addHandler(user: User) {
     user.socket.on("message", (data) => {
       const { event, payload } = JSON.parse(data.toString());
