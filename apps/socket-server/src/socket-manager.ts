@@ -40,12 +40,12 @@ export class SocketManager {
     })
   }
 
-  removeUser(userId: string) {
+  removeUser(userId: string): string | null {
     const roomId = this.userRoomMapping.get(userId);
 
     if (!roomId) {
       console.log("User not found");
-      return;
+      return null;
     }
 
     this.interestedSockets.set(
@@ -54,9 +54,10 @@ export class SocketManager {
     );
     if (this.interestedSockets.get(roomId)?.length === 0) {
       this.interestedSockets.delete(roomId);
-      return;
+      return null;
     }
     this.userRoomMapping.delete(userId);
+    return roomId;
   }
 }
 

@@ -1,3 +1,6 @@
+import { GameStatus } from "@repo/chess/gameStatus";
+import { ChessGame } from "./chess";
+import { GameResult } from "../types";
 
 
 export class GameTimer {
@@ -7,12 +10,16 @@ export class GameTimer {
   private currentTurn: "w" | "b";
   private isPaused: boolean;
 
+  private timerInterval: NodeJS.Timeout | null;
+  private totalAbortTime = 60;
+
   constructor(player1Time: number, player2Time: number) {
     this.player1RemainingTime = player1Time;
     this.player2RemainingTime = player2Time;
     this.lastTurnTime = Date.now();
     this.currentTurn = 'w';
     this.isPaused = false;
+    this.timerInterval = null;
   }
 
   switchTurn() {
@@ -64,6 +71,48 @@ export class GameTimer {
       player1RemainingTime: this.player1RemainingTime,
       player2RemainingTime: this.player2RemainingTime,
     };
+  }
+
+  resetTimer() {
+    console.log("Timer reset " + this.totalAbortTime);
+    this.stop();
+    this.totalAbortTime = 60;
+    console.log("Timer reset after " + this.totalAbortTime);
+  }
+
+  tickTimer(game: ChessGame, playerExitId: string) {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
+
+    let seconds = 0;
+    this.timerInterval = setInterval(() => {
+      seconds = this.totalAbortTime % 60;
+
+      console.log("00: " + seconds);
+
+      if (--this.totalAbortTime < 0) {
+        if (this.timerInterval) {
+          clearInterval(this.timerInterval);
+          console.log("Time's up");
+          // then notify the client by broadcasting it.
+          // the who is the winner or the one who is left
+
+          game.GameEnded(
+            GameStatus.PLAYER_EXIT,
+            playerExitId === game.player1UserId ? GameResult.BLACK_WINS : GameResult.WHITE_WINS
+          );
+
+          this.stop();
+        }
+      }
+    }, 1000);
+  }
+
+  stop() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
   }
 
   startTime() {

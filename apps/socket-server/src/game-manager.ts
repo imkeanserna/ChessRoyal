@@ -3,11 +3,13 @@ import { ChessGame } from "./games/chess";
 import { User } from "./games/user";
 import { socketManager } from "./socket-manager";
 import { GameMessages } from "@repo/chess/gameStatus";
+import { GameTimer } from "./games/gameTimer";
 
 export class GameManager {
   private games: ChessGame[];
   private pendingGameId: string | null;
   private users: User[];
+  private timers: Map<string, GameTimer> = new Map();
 
   constructor() {
     this.games = [];
@@ -30,7 +32,18 @@ export class GameManager {
 
     console.log("user found")
     this.users = this.users.filter((user: User) => user.socket !== socket);
-    socketManager.removeUser(user.id);
+
+    const gameId: string | null = socketManager.removeUser(user.id);
+    const game: ChessGame | undefined = this.games.find((game: ChessGame) => game.id === gameId);
+
+    console.log(user.id, game?.player1UserId)
+    console.log(user.id, game?.player2UserId)
+    if (game) {
+      const gameTimer = this.getTimer(game.id);
+
+      // let just test this for the a moment.
+      gameTimer?.tickTimer(game, user.id);
+    }
   }
 
   private addHandler(user: User) {
@@ -54,6 +67,9 @@ export class GameManager {
 
           // afte the pending to fill, it needs to be assigned to null
           game.addSecondPlayer(user.id);
+
+          this.createTimer(game.id);
+
           this.pendingGameId = null;
         } else {
           console.log("create a new game")
@@ -108,6 +124,15 @@ export class GameManager {
         }
       }
     })
+  }
+
+  private getTimer(gameId: string) {
+    return this.timers.get(gameId);
+  }
+
+  private createTimer(gameId: string) {
+    // set the 60 seconds for each player
+    this.timers.set(gameId, new GameTimer(0 * 60 & 1000, 0 * 60 & 1000));
   }
 
   private removeGame(gameId: string) {

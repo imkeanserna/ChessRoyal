@@ -230,7 +230,7 @@ export class ChessGame {
       .includes(to);
   }
 
-  private async GameEnded(status: GameStatus, result: GameResult) {
+  public async GameEnded(status: GameStatus, result: GameResult) {
     socketManager.broadcast(
       this.id,
       JSON.stringify({

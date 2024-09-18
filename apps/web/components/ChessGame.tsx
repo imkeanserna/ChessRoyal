@@ -140,6 +140,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
             case GameStatus.ABANDONED:
               break;
             case GameStatus.PLAYER_EXIT:
+              alert("player exit");
               break;
           }
           break;
