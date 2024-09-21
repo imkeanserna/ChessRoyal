@@ -17,7 +17,7 @@ import MovesTable from "./chess/MovesTable";
 import ModalGameOver from "./ui/ModalGameOver";
 
 interface ChessGameProps {
-  gameId: string
+  gameId: string;
 }
 
 const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
@@ -27,7 +27,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [chess, setChess] = useState(new Chess());
   const [board, setBoard] = useState(chess.board());
   const setMoves = useSetRecoilState(movesAtom);
-  const user = useRecoilValue(userAtom);
+  const [user, setUser] = useRecoilState(userAtom);
   const router = useRouter();
   const [started, setStarted] = useState(false);
   const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer.remainingTime);
@@ -36,15 +36,13 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [isGameOver, setIsGameOver] = useRecoilState(isGameOverAtom);
   const [open, setOpen] = useState(false);
   const [wonBy, setWonBy] = useState<GameStatus | null>(null);
-  // const [playerWon, setPlayerWon] = useState<string | null>(null);
+  const setGameMetaDataAtom = useSetRecoilState<Players>(gameMetadataAtom);
 
   const startedGameHandler = async (gameId: string) => {
     try {
       const response = await fetch(`/api/game/${gameId}`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
       if (response.ok) {
@@ -56,116 +54,148 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         setStarted(started);
       }
     } catch (error) {
-      console.log("Error", error);
+      console.error("Error fetching game status:", error);
     }
-  }
+  };
 
   useEffect(() => {
-    if (!socket) {
-      console.log("no socket");
-      return;
-    }
+    let retryTimeout: NodeJS.Timeout;
 
-    startedGameHandler(gameId);
+    const tryJoinRoom = () => {
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        console.log('Socket not open, retrying...');
+        retryTimeout = setTimeout(tryJoinRoom, 1000);
+        return;
+      }
 
-    if (user === null) {
-      return;
-    }
-
-    socket.onmessage = (messageEvent) => {
-      const { event, payload } = JSON.parse(messageEvent.data);
-
-      switch (event) {
-        case GameMessages.MOVE:
-          // do something
-          try {
-            if (isPromoting(chess, payload.move.from, payload.move.to)) {
-              chess.move({
-                from: payload.move.from,
-                to: payload.move.to,
-                promotion: 'q'
-              });
-            } else {
-              chess.move({
-                from: payload.move.from,
-                to: payload.move.to
-              });
-            }
-            setMoves((moves) => [...moves, payload.move]);
-            setPlayer1ConsumeTimer(payload.player1RemainingTime);
-            setPlayer2ConsumeTimer(payload.player2RemainingTime);
-            setIsCheck({
-              king_status: KingStatus.SAFE,
-              player: ""
-            });
-          } catch (error) {
-            console.log("Error", error);
-          }
-          break;
-        case GameMessages.KING_STATUS:
-          console.log(payload);
-          setIsCheck({
-            king_status: payload.kingStatus,
-            player: payload.player
-          });
-          break;
-        case GameMessages.GAME_ENDED:
-          // do something
-          console.log(JSON.parse(messageEvent.data))
-          console.log(payload);
-
-          switch (payload.status) {
-            case GameStatus.COMPLETED:
-              // setPlayerWon(payload.result === GameResult.DRAW ? GameResult.DRAW : payload.result === GameResult.WHITE_WINS ? GameResult.WHITE_WINS : GameResult.BLACK_WINS);
-              console.log(payload.result === GameResult.WHITE_WINS ? GameResult.WHITE_WINS : GameResult.BLACK_WINS)
-              setWonBy(GameStatus.COMPLETED);
-              setIsGameOver({
-                isGameOver: true,
-                playerWon: payload.result === GameResult.WHITE_WINS ? GameResult.WHITE_WINS : GameResult.BLACK_WINS
-              });
-              setOpen(true);
-              console.log(wonBy);
-              break;
-            case GameStatus.DRAW:
-              alert("DRAW");
-              break;
-            case GameStatus.TIME_UP:
-              setWonBy(GameStatus.TIME_UP);
-              setIsGameOver({
-                isGameOver: true,
-                playerWon: payload.result
-              });
-              setOpen(true);
-              break;
-            case GameStatus.ABANDONED:
-              break;
-            case GameStatus.PLAYER_EXIT:
-              alert("player exit");
-              break;
-          }
-          break;
-        case GameMessages.WAITING:
-          // do something
-          console.log("asdasd")
-          break;
-        default:
-          break;
+      if (gameId) {
+        console.log('Joining room', gameId);
+        startedGameHandler(gameId);
+        sendMessage(GameMessages.JOIN_ROOM, { gameId });
       }
     };
-  }, [socket]);
+
+    if (socket) {
+      socket.onmessage = (messageEvent) => {
+        const { event, payload } = JSON.parse(messageEvent.data);
+
+        switch (event) {
+          case GameMessages.JOIN_ROOM:
+            handleJoinRoom(payload);
+            break;
+          case GameMessages.MOVE:
+            handleMove(payload);
+            break;
+          case GameMessages.KING_STATUS:
+            setIsCheck({ king_status: payload.kingStatus, player: payload.player });
+            break;
+          case GameMessages.GAME_ENDED:
+            handleGameEnded(payload);
+            break;
+          case GameMessages.WAITING:
+            console.log("Waiting for players...");
+            break;
+          default:
+            console.warn("Unhandled message event:", event);
+        }
+      };
+
+      if (socket.readyState === WebSocket.OPEN) {
+        tryJoinRoom();
+      } else {
+        socket.addEventListener('open', tryJoinRoom);
+      }
+    }
+
+    return () => {
+      if (socket) {
+        socket.removeEventListener('open', tryJoinRoom);
+        socket.onmessage = null;
+      }
+      clearTimeout(retryTimeout);
+    };
+  }, [socket, chess]);
+
+  const handleJoinRoom = (payload: any) => {
+    console.log("Joined room:", payload);
+
+    setGameMetaDataAtom({
+      whitePlayer: {
+        id: payload.whitePlayer.id,
+        name: payload.whitePlayer.name,
+        isGuest: true,
+        remainingTime: payload.whitePlayer.remainingTime,
+      },
+      blackPlayer: {
+        id: payload.blackPlayer.id,
+        name: payload.blackPlayer.name,
+        isGuest: true,
+        remainingTime: payload.blackPlayer.remainingTime,
+      },
+    });
+
+    payload.moves.forEach((move: Move) => {
+      chess.move(isPromoting(chess, move.from, move.to) ? { ...move, promotion: 'q' } : move);
+    });
+
+    setPlayer1ConsumeTimer(payload.whitePlayer.remainingTime);
+    setPlayer2ConsumeTimer(payload.blackPlayer.remainingTime);
+    setMoves(payload.moves);
+  };
+
+  const handleMove = (payload: any) => {
+    console.log("MOVE received:", payload);
+    try {
+      chess.move(isPromoting(chess, payload.move.from, payload.move.to) ?
+        { from: payload.move.from, to: payload.move.to, promotion: 'q' } :
+        { from: payload.move.from, to: payload.move.to });
+      setMoves(prev => [...prev, payload.move]);
+      setPlayer1ConsumeTimer(payload.player1RemainingTime);
+      setPlayer2ConsumeTimer(payload.player2RemainingTime);
+      setIsCheck({ king_status: KingStatus.SAFE, player: "" });
+    } catch (error) {
+      console.error("Error processing move:", error);
+    }
+  };
+
+  const handleGameEnded = (payload: any) => {
+    console.log("Game ended:", payload);
+    switch (payload.status) {
+      case GameStatus.COMPLETED:
+        setWonBy(GameStatus.COMPLETED);
+        setIsGameOver({ isGameOver: true, playerWon: payload.result });
+        setOpen(true);
+        break;
+      case GameStatus.DRAW:
+        alert("DRAW");
+        break;
+      case GameStatus.TIME_UP:
+        setWonBy(GameStatus.TIME_UP);
+        setIsGameOver({ isGameOver: true, playerWon: payload.result });
+        setOpen(true);
+        break;
+      case GameStatus.PLAYER_EXIT:
+        alert("A player has exited the game.");
+        break;
+      default:
+        console.warn("Unhandled game end status:", payload.status);
+    }
+  };
 
   return (
     <div className="w-full h-full">
-      {isGameOver.playerWon && isGameOver.playerWon && wonBy && <ModalGameOver
-        playerWon={isGameOver.playerWon === GameResult.DRAW ? GameResult.DRAW : isGameOver.playerWon}
-        wonBy={wonBy === GameStatus.COMPLETED ? "checkmate" : wonBy}
-        open={open}
-        setOpen={setOpen}
-      />}
+      {isGameOver.playerWon && wonBy && (
+        <ModalGameOver
+          playerWon={isGameOver.playerWon === GameResult.DRAW ? GameResult.DRAW : isGameOver.playerWon}
+          wonBy={wonBy === GameStatus.COMPLETED ? "checkmate" : wonBy}
+          open={open}
+          setOpen={setOpen}
+        />
+      )}
       <div>
         <TimerCountDown
           duration={user?.id !== blackPlayer.id ? player1ConsumeTimer : player2ConsumeTimer}
-          isPaused={(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
+          isPaused={chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b')}
         />
         <ChessBoard
           started={started}
@@ -183,7 +213,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       </div>
       <MovesTable />
     </div>
-  )
+  );
 }
 
 export default ChessGame;

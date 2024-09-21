@@ -202,6 +202,10 @@ export class ChessGame {
     }
   };
 
+  getMoves() {
+    return this.moves;
+  }
+
   private isPromoting(chess: Chess, from: Square, to: Square): boolean {
     if (!from || !to) {
       return false;

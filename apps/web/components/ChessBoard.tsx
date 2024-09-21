@@ -127,7 +127,10 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                   return;
                 }
 
-                if (!from && square?.color !== chess.turn() || !isMyTurn) return;
+                if (!from && square?.color !== chess.turn() || !isMyTurn) {
+                  console.log("not my turn");
+                  return;
+                }
 
                 if (from !== squareRepresentation) {
                   setFrom(squareRepresentation);

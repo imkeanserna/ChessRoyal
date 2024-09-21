@@ -36,13 +36,18 @@ export class GameManager {
     const gameId: string | null = socketManager.removeUser(user.id);
     const game: ChessGame | undefined = this.games.find((game: ChessGame) => game.id === gameId);
 
-    console.log(user.id, game?.player1UserId)
-    console.log(user.id, game?.player2UserId)
     if (game) {
       const gameTimer = this.getTimer(game.id);
 
       // let just test this for the a moment.
       gameTimer?.tickTimer(game, user.id);
+
+      // then make the string of the player exited to null
+      if (user.id === game.player1UserId) {
+        game.player1UserId = "";
+      } else {
+        game.player2UserId = "";
+      }
     }
   }
 
@@ -89,6 +94,58 @@ export class GameManager {
             })
           )
         }
+      }
+
+      if (event === GameMessages.JOIN_ROOM) {
+        const { gameId } = payload;
+        const game = this.games.find((game: ChessGame) => game.id === gameId);
+
+        if (!gameId || !game) {
+          console.error("Game not found");
+          return;
+        }
+
+        if (game.player1UserId === "") {
+          game.player1UserId = user.id;
+        }
+
+        if (game.player2UserId === "") {
+          game.player2UserId = user.id;
+        }
+
+        const { player1RemainingTime, player2RemainingTime } = game.gameTimer?.getPlayerTimes() || {};
+        console.log(player1RemainingTime, player2RemainingTime);
+
+        console.log(user.id)
+        socketManager.addUser(user, game.id);
+        const gameTimer = this.getTimer(gameId);
+        gameTimer?.resetTimer();
+
+        // get the moves here
+        socketManager.broadcast(
+          gameId,
+          JSON.stringify({
+            event: GameMessages.JOIN_ROOM,
+            payload: {
+              userId: user.id,
+              gameId,
+              moves: game.getMoves(),
+              whitePlayer: {
+                id: game.player1UserId,
+                name: "Guest",
+                isGuest: true,
+                remainingTime: player1RemainingTime
+              },
+              blackPlayer: {
+                id: game.player2UserId,
+                name: "Guest",
+                isGuest: true,
+                remainingTime: player2RemainingTime
+              }
+            }
+          })
+        );
+
       }
 
       if (event === GameMessages.MOVE) {

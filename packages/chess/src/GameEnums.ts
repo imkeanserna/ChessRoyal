@@ -18,6 +18,7 @@ export enum GameMessages {
   GAME_ADDED = "game_added",
   GAME_ENDED = "game_ended",
   INIT_GAME = "init_game",
+  JOIN_ROOM = "join_room",
   WAITING = "waiting",
   MOVE = "move",
   KING_STATUS = "king_status",

@@ -48,13 +48,16 @@ export class SocketManager {
       return null;
     }
 
+    const room = this.interestedSockets.get(roomId) || [];
+    const remainingUsers = room.filter(u =>
+      u.id !== userId
+    );
     this.interestedSockets.set(
       roomId,
-      this.interestedSockets.get(roomId)?.filter((user: User) => user.id !== userId) || []
+      remainingUsers
     );
     if (this.interestedSockets.get(roomId)?.length === 0) {
       this.interestedSockets.delete(roomId);
-      return null;
     }
     this.userRoomMapping.delete(userId);
     return roomId;

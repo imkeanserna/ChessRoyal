@@ -89,12 +89,9 @@ export class GameTimer {
     this.timerInterval = setInterval(() => {
       seconds = this.totalAbortTime % 60;
 
-      console.log("00: " + seconds);
-
       if (--this.totalAbortTime < 0) {
         if (this.timerInterval) {
           clearInterval(this.timerInterval);
-          console.log("Time's up");
           // then notify the client by broadcasting it.
           // the who is the winner or the one who is left
 

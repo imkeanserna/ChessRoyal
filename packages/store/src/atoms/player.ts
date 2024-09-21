@@ -1,4 +1,4 @@
-import { atom } from "recoil";
+import { atom, selector } from "recoil";
 import { Player } from "../../../chess/src/PlayerTypes";
 
 interface Players {
