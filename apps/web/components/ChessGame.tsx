@@ -1,7 +1,7 @@
 "use client";
 
 import { GameMessages, GameResult, GameStatus, KingStatus } from "@repo/chess/gameStatus";
-import { gameMetadataAtom, remoteGameIdAtom } from "@repo/store/gameMetadata";
+import { gameMetadataAtom, gameMetadataSelector, remoteGameIdAtom } from "@repo/store/gameMetadata";
 import { useSocketContext } from "@repo/ui/context/socketContext";
 import React, { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -22,7 +22,7 @@ interface ChessGameProps {
 
 const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const { socket, sendMessage } = useSocketContext();
-  const { blackPlayer, whitePlayer } = useRecoilValue<Players>(gameMetadataAtom);
+  const { blackPlayer, whitePlayer } = useRecoilValue<Players>(gameMetadataSelector);
   const remoteGameId = useRecoilValue(remoteGameIdAtom);
   const [chess, setChess] = useState(new Chess());
   const [board, setBoard] = useState(chess.board());
@@ -30,13 +30,21 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [user, setUser] = useRecoilState(userAtom);
   const router = useRouter();
   const [started, setStarted] = useState(false);
-  const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer.remainingTime);
-  const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer.remainingTime);
+  const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer?.remainingTime || 0);
+  const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer?.remainingTime || 0);
   const [isCheck, setIsCheck] = useRecoilState(isCheckAtom);
   const [isGameOver, setIsGameOver] = useRecoilState(isGameOverAtom);
   const [open, setOpen] = useState(false);
   const [wonBy, setWonBy] = useState<GameStatus | null>(null);
   const setGameMetaDataAtom = useSetRecoilState<Players>(gameMetadataAtom);
+
+  useEffect(() => {
+    if (blackPlayer && whitePlayer) {
+      console.log(blackPlayer, whitePlayer);
+      setPlayer1ConsumeTimer(blackPlayer.remainingTime);
+      setPlayer2ConsumeTimer(whitePlayer.remainingTime);
+    }
+  }, [blackPlayer, whitePlayer]);
 
   const startedGameHandler = async (gameId: string) => {
     try {
