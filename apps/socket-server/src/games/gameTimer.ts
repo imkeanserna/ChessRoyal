@@ -22,6 +22,10 @@ export class GameTimer {
     this.timerInterval = null;
   }
 
+  getLastTurnTime() {
+    return this.lastTurnTime;
+  }
+
   switchTurn() {
     if (this.isPaused) return;
 

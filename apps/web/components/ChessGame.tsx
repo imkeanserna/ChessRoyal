@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import TimerCountDown from "./chess/TimerCountDown";
 import MovesTable from "./chess/MovesTable";
 import ModalGameOver from "./ui/ModalGameOver";
+import { Button } from "@repo/ui/components/ui/button";
 
 interface ChessGameProps {
   gameId: string;
@@ -22,16 +23,13 @@ interface ChessGameProps {
 
 const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const { socket, sendMessage } = useSocketContext();
-  const { blackPlayer, whitePlayer } = useRecoilValue<Players>(gameMetadataSelector);
-  const remoteGameId = useRecoilValue(remoteGameIdAtom);
+  const setRemoteGameId = useSetRecoilState(remoteGameIdAtom);
   const [chess, setChess] = useState(new Chess());
   const [board, setBoard] = useState(chess.board());
   const setMoves = useSetRecoilState(movesAtom);
   const [user, setUser] = useRecoilState(userAtom);
   const router = useRouter();
   const [started, setStarted] = useState(false);
-  const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer?.remainingTime || 0);
-  const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer?.remainingTime || 0);
   const [isCheck, setIsCheck] = useRecoilState(isCheckAtom);
   const [isGameOver, setIsGameOver] = useRecoilState(isGameOverAtom);
   const [open, setOpen] = useState(false);
@@ -39,12 +37,13 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const setGameMetaDataAtom = useSetRecoilState<Players>(gameMetadataAtom);
 
   useEffect(() => {
-    if (blackPlayer && whitePlayer) {
-      console.log(blackPlayer, whitePlayer);
-      setPlayer1ConsumeTimer(blackPlayer.remainingTime);
-      setPlayer2ConsumeTimer(whitePlayer.remainingTime);
-    }
-  }, [blackPlayer, whitePlayer]);
+    setRemoteGameId(gameId);
+  }, [gameId, setRemoteGameId]);
+
+
+  const { blackPlayer, whitePlayer } = useRecoilValue<Players | null>(gameMetadataSelector) || {};
+  const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer?.remainingTime || 0);
+  const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer?.remainingTime || 0);
 
   const startedGameHandler = async (gameId: string) => {
     try {
@@ -54,12 +53,12 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         credentials: "include",
       });
       if (response.ok) {
-        const { started } = await response.json();
-        if (!started) {
+        const { game } = await response.json();
+        if (!game.id) {
           router.push("/play/online");
           return;
         }
-        setStarted(started);
+        setStarted(true);
       }
     } catch (error) {
       console.error("Error fetching game status:", error);
@@ -125,8 +124,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   }, [socket, chess]);
 
   const handleJoinRoom = (payload: any) => {
-    console.log("Joined room:", payload);
-
     setGameMetaDataAtom({
       whitePlayer: {
         id: payload.whitePlayer.id,
@@ -152,7 +149,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   };
 
   const handleMove = (payload: any) => {
-    console.log("MOVE received:", payload);
     try {
       chess.move(isPromoting(chess, payload.move.from, payload.move.to) ?
         { from: payload.move.from, to: payload.move.to, promotion: 'q' } :
@@ -201,25 +197,37 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         />
       )}
       <div>
-        <TimerCountDown
-          duration={user?.id !== blackPlayer.id ? player1ConsumeTimer : player2ConsumeTimer}
-          isPaused={chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b')}
-        />
-        <ChessBoard
-          started={started}
-          setBoard={setBoard}
-          gameId={gameId}
-          board={board}
-          chess={chess}
-          sendMessage={sendMessage}
-          myColor={user?.id === whitePlayer.id ? 'w' : 'b'}
-        />
-        <TimerCountDown
-          duration={user?.id === whitePlayer.id ? player1ConsumeTimer : player2ConsumeTimer}
-          isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
-        />
+        {blackPlayer && whitePlayer ? (
+          <div>
+            <TimerCountDown
+              duration={user?.id === blackPlayer.id ? blackPlayer.remainingTime : whitePlayer.remainingTime}
+              isPaused={chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b')}
+            />
+            <ChessBoard
+              started={started}
+              setBoard={setBoard}
+              gameId={gameId}
+              board={board}
+              chess={chess}
+              sendMessage={sendMessage}
+              myColor={user?.id === whitePlayer.id ? 'w' : 'b'}
+            />
+
+            <TimerCountDown
+              duration={user?.id === whitePlayer.id ? whitePlayer.remainingTime : blackPlayer.remainingTime}
+              isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
+            />
+          </div>
+        ) : (
+          <div>Loading...</div>
+        )
+        }
       </div>
       <MovesTable />
+      <Button onClick={() => {
+        console.log("asdasdasd");
+        startedGameHandler(gameId)
+      }}>asdasdasd</Button>
     </div>
   );
 }

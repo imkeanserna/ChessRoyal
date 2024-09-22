@@ -1,4 +1,5 @@
 import { User } from "./games/user";
+import db from "@repo/db/client";
 
 export class SocketManager {
   private static instance: SocketManager;
@@ -19,7 +20,7 @@ export class SocketManager {
     return SocketManager.instance;
   }
 
-  addUser(user: User, roomId: string) {
+  async addUser(user: User, roomId: string) {
     this.interestedSockets.set(roomId, [
       ...this.interestedSockets.get(roomId) || [],
       user

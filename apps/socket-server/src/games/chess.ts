@@ -5,6 +5,7 @@ import { GameMessages, GameResult, GameStatus, KingStatus } from "@repo/chess/ga
 import { Chess, Move, Square } from 'chess.js';
 import { socketManager } from '../socket-manager';
 import { GameTimer } from './gameTimer';
+import db from "@repo/db/client";
 
 export class ChessGame {
   public id: string;
@@ -33,7 +34,7 @@ export class ChessGame {
     this.moves = [];
   }
 
-  move(user: User, move: Move) {
+  async move(user: User, move: Move) {
     // use the chess library to make move
 
     if (this.board.turn() === 'w' && user.id !== this.player1UserId) {
@@ -54,6 +55,22 @@ export class ChessGame {
     this.gameTimer?.switchTurn();
 
     const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
+
+    try {
+      const response = await db.game.update({
+        where: {
+          id: this.id,
+        },
+        data: {
+          whitePlayerId: this.player1UserId,
+          blackPlayerId: this.player2UserId,
+          whitePlayerRemainingTime: player1RemainingTime,
+          blackPlayerRemainingTime: player2RemainingTime
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
 
     // check if the timer is expired both side.
     this.timerEnd(player1RemainingTime, player2RemainingTime);
@@ -125,6 +142,22 @@ export class ChessGame {
     // after the initialization the whitePlayer should start the time (let test the 10mins)
     this.gameTimer = new GameTimer(10 * 60 * 1000, 10 * 60 * 1000);
     const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
+
+    try {
+      const response = await db.game.create({
+        data: {
+          id: this.id,
+          whitePlayerId: this.player1UserId,
+          blackPlayerId: this.player2UserId,
+          whitePlayerRemainingTime: player1RemainingTime || 0,
+          blackPlayerRemainingTime: player2RemainingTime || 0,
+        }
+      });
+      console.log(response)
+    } catch (error) {
+      console.error("Erorr in addSecondPlayer", error);
+      return;
+    }
 
     socketManager.broadcast(
       this.id,

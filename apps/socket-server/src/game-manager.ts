@@ -4,6 +4,7 @@ import { User } from "./games/user";
 import { socketManager } from "./socket-manager";
 import { GameMessages } from "@repo/chess/gameStatus";
 import { GameTimer } from "./games/gameTimer";
+import db from "@repo/db/client";
 
 export class GameManager {
   private games: ChessGame[];
@@ -52,7 +53,7 @@ export class GameManager {
   }
 
   private addHandler(user: User) {
-    user.socket.on("message", (data) => {
+    user.socket.on("message", async (data) => {
       const { event, payload } = JSON.parse(data.toString());
 
       if (event === GameMessages.INIT_GAME) {
@@ -114,37 +115,51 @@ export class GameManager {
         }
 
         const { player1RemainingTime, player2RemainingTime } = game.gameTimer?.getPlayerTimes() || {};
-        console.log(player1RemainingTime, player2RemainingTime);
 
-        console.log(user.id)
         socketManager.addUser(user, game.id);
         const gameTimer = this.getTimer(gameId);
         gameTimer?.resetTimer();
 
-        // get the moves here
-        socketManager.broadcast(
-          gameId,
-          JSON.stringify({
-            event: GameMessages.JOIN_ROOM,
-            payload: {
-              userId: user.id,
-              gameId,
-              moves: game.getMoves(),
-              whitePlayer: {
-                id: game.player1UserId,
-                name: "Guest",
-                isGuest: true,
-                remainingTime: player1RemainingTime
-              },
-              blackPlayer: {
-                id: game.player2UserId,
-                name: "Guest",
-                isGuest: true,
-                remainingTime: player2RemainingTime
-              }
+        try {
+          const response = await db.game.update({
+            where: {
+              id: gameId,
+            },
+            data: {
+              whitePlayerId: game.player1UserId,
+              blackPlayerId: game.player2UserId,
+              whitePlayerRemainingTime: user.id === game.player1UserId ? player1RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player1RemainingTime,
+              blackPlayerRemainingTime: user.id === game.player2UserId ? player2RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player2RemainingTime
             }
-          })
-        );
+          });
+
+          // get the moves here
+          socketManager.broadcast(
+            gameId,
+            JSON.stringify({
+              event: GameMessages.JOIN_ROOM,
+              payload: {
+                userId: user.id,
+                gameId,
+                moves: game.getMoves(),
+                whitePlayer: {
+                  id: game.player1UserId,
+                  name: "Guest",
+                  isGuest: true,
+                  remainingTime: response.whitePlayerRemainingTime
+                },
+                blackPlayer: {
+                  id: game.player2UserId,
+                  name: "Guest",
+                  isGuest: true,
+                  remainingTime: response.blackPlayerRemainingTime
+                }
+              }
+            })
+          );
+        } catch (error) {
+          console.log(error);
+        }
 
       }
 

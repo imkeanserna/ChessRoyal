@@ -14,17 +14,15 @@ datasource db {
 }
 
 model Player {
-  id         String @id @default(cuid())
-  name       String
-  whiteGames Game[] @relation("WhitePlayer")
-  blackGames Game[] @relation("BlackPlayer")
+  id   String @id @unique
+  name String
 }
 
 model Game {
-  id String @id @default(cuid())
+  id String @id @unique
 
-  whitePlayerId String
-  blackPlayerId String
-  whitePlayer   Player @relation("WhitePlayer", fields: [whitePlayerId], references: [id])
-  blackPlayer   Player @relation("BlackPlayer", fields: [blackPlayerId], references: [id])
+  whitePlayerId            String
+  blackPlayerId            String
+  whitePlayerRemainingTime Int
+  blackPlayerRemainingTime Int
 }

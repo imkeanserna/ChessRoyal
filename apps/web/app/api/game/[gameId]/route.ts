@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import db from "@repo/db/client";
 
 export async function GET(req: NextRequest, { params }: {
   params: { gameId: string }
@@ -6,8 +7,15 @@ export async function GET(req: NextRequest, { params }: {
   const gameId: string = params.gameId;
   // Do authentication here
   // Get the data through database
-  console.log(gameId);
+  const game = await db.game.findUnique({
+    where: {
+      id: gameId
+    }
+  });
+
+  console.log(game);
+
   return NextResponse.json({
-    started: true
+    game
   })
 }

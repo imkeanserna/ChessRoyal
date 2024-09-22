@@ -29,31 +29,45 @@ export const remoteGameIdAtom = atom<string | null>({
   default: null
 });
 
-export const gameMetadataSelector = selector<Players>({
+export const gameMetadataSelector = selector<Players | null>({
   key: 'gameMetadataSelector',
   get: async ({ get }) => {
-    // Helper function to add a 3-second delay
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    const gameId = get(remoteGameIdAtom);
+
+    if (!gameId) {
+      console.error("No game id found");
+      return null;
+    }
 
     try {
-      // Wait for 3 seconds before returning the data
-      await delay(3000);
+      const response = await fetch(`/api/game/${gameId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
 
-      return {
-        // get the data from the server
-        blackPlayer: {
-          id: "",
-          name: "",
-          isGuest: true,
-          remainingTime: 12312312312121
-        },
-        whitePlayer: {
-          id: "",
-          name: "",
-          isGuest: true,
-          remainingTime: 12312312312123
-        }
-      };
+      console.log("NARUTO")
+
+      if (response.ok) {
+        const { game } = await response.json();
+
+        console.log(game)
+        return {
+          // get the data from the server
+          blackPlayer: {
+            id: game.blackPlayerId || "",
+            name: "",
+            isGuest: true,
+            remainingTime: game.blackPlayerRemainingTime || 0
+          },
+          whitePlayer: {
+            id: game.whitePlayerId || "",
+            name: "",
+            isGuest: true,
+            remainingTime: game.whitePlayerRemainingTime || 0
+          }
+        };
+      }
     } catch (error) {
       console.error("Error fetching game data:", error);
       return null;

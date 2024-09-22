@@ -4,18 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push --skip-generate"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "prisma": "^5.19.1"
+    "@types/node": "^20",
+    "prisma": "^5.19.1",
+    "ts-node": "^10.9.2"
   },
   "dependencies": {
     "@prisma/client": "^5.19.1"
   },
-  "export": {
+  "exports": {
     "./client": "./src/index.ts"
   }
 }
