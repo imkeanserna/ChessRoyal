@@ -34,14 +34,11 @@ export class GameTimer {
 
     if (this.currentTurn === 'w') {
       this.player1RemainingTime -= elapsedTime;
-      console.log("Player 1 remaining time:", this.player1RemainingTime);
       this.currentTurn = 'b'; // Switch to player 2
     } else {
       this.player2RemainingTime -= elapsedTime;
-      console.log("Player 2 remaining time:", this.player2RemainingTime);
       this.currentTurn = 'w'; // Switch to player 1
     }
-
     this.lastTurnTime = currentTime;
   }
 
@@ -54,19 +51,15 @@ export class GameTimer {
 
     if (this.currentTurn === 'w') {
       this.player1RemainingTime -= elapsedTime;
-      console.log("Player 1 paused with time left:", this.player1RemainingTime);
     } else {
       this.player2RemainingTime -= elapsedTime;
-      console.log("Player 2 paused with time left:", this.player2RemainingTime);
     }
-
     this.lastTurnTime = null; // Reset last turn time since the game is paused
   }
 
   resume() {
     if (!this.isPaused) return; // If not paused, do nothing
     this.isPaused = false;
-
     this.lastTurnTime = Date.now();
   }
 
@@ -78,10 +71,8 @@ export class GameTimer {
   }
 
   resetTimer() {
-    console.log("Timer reset " + this.totalAbortTime);
     this.stop();
     this.totalAbortTime = 60;
-    console.log("Timer reset after " + this.totalAbortTime);
   }
 
   tickTimer(game: ChessGame, playerExitId: string) {
@@ -96,14 +87,11 @@ export class GameTimer {
       if (--this.totalAbortTime < 0) {
         if (this.timerInterval) {
           clearInterval(this.timerInterval);
-          // then notify the client by broadcasting it.
-          // the who is the winner or the one who is left
 
           game.GameEnded(
             GameStatus.PLAYER_EXIT,
             playerExitId === game.player1UserId ? GameResult.BLACK_WINS : GameResult.WHITE_WINS
           );
-
           this.stop();
         }
       }

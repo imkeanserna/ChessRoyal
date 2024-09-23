@@ -15,7 +15,6 @@ import { useRouter } from "next/navigation";
 import TimerCountDown from "./chess/TimerCountDown";
 import MovesTable from "./chess/MovesTable";
 import ModalGameOver from "./ui/ModalGameOver";
-import { Button } from "@repo/ui/components/ui/button";
 
 interface ChessGameProps {
   gameId: string;
@@ -42,6 +41,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
 
   const { blackPlayer, whitePlayer } = useRecoilValue<Players | null>(gameMetadataSelector) || {};
+  // let's wait for further coding if this thing is very important in the component.
   const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer?.remainingTime || 0);
   const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer?.remainingTime || 0);
 
@@ -58,7 +58,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
           router.push("/play/online");
           return;
         }
-        setStarted(true);
+        setStarted(game.id ? true : false);
       }
     } catch (error) {
       console.error("Error fetching game status:", error);
@@ -70,7 +70,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
     const tryJoinRoom = () => {
       if (!socket || socket.readyState !== WebSocket.OPEN) {
-        console.log('Socket not open, retrying...');
         retryTimeout = setTimeout(tryJoinRoom, 1000);
         return;
       }
@@ -163,7 +162,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   };
 
   const handleGameEnded = (payload: any) => {
-    console.log("Game ended:", payload);
     switch (payload.status) {
       case GameStatus.COMPLETED:
         setWonBy(GameStatus.COMPLETED);
@@ -224,10 +222,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         }
       </div>
       <MovesTable />
-      <Button onClick={() => {
-        console.log("asdasdasd");
-        startedGameHandler(gameId)
-      }}>asdasdasd</Button>
     </div>
   );
 }

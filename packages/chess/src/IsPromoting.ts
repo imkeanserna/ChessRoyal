@@ -1,6 +1,5 @@
 import { Chess, Square } from "chess.js";
 
-
 export function isPromoting(chess: Chess, from: Square, to: Square): boolean {
   if (!from) {
     return false;

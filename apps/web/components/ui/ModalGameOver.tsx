@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@repo/ui/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader } from "@repo/ui/components/ui/dialog";
 
 interface ModalGameOverProps {
   open: boolean;

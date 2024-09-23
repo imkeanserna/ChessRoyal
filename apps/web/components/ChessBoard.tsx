@@ -194,8 +194,6 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                     }
 
                     if (moveResult) {
-                      console.log(moveResult);
-                      console.log("moving.....................")
                       setMoves((prevMove) => [...prevMove, moveResult]);
                       setFrom(null);
 

@@ -18,7 +18,6 @@ const MovesTable: React.FC = () => {
             <span>{index / 2 + 1}.</span>
             <div className="col-span-3">
               <Button onClick={() => {
-                console.log("clicked");
                 setUserSelectedMove(index);
               }}>
                 {move.to}
@@ -29,7 +28,6 @@ const MovesTable: React.FC = () => {
           <React.Fragment key={index}>
             <div className="col-span-3">
               <Button onClick={() => {
-                console.log("clicked");
                 setUserSelectedMove(index);
               }}>
                 {move.to}

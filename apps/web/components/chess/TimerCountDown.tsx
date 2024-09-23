@@ -14,7 +14,7 @@ interface TimerCountDownProps {
 const TimerCountDown: React.FC<TimerCountDownProps> = ({ duration, isPaused }) => {
   const [remainingTime, setRemainingTime] = useState(duration);
   const timerRef = useRef<NodeJS.Timeout>();
-  const { socket, sendMessage } = useSocketContext();
+  const { sendMessage } = useSocketContext();
   const gameId = useRecoilValue(remoteGameIdAtom);
 
   useEffect(() => {

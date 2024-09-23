@@ -155,7 +155,7 @@ export class ChessGame {
       });
       console.log(response)
     } catch (error) {
-      console.error("Erorr in addSecondPlayer", error);
+      console.error("Error in addSecondPlayer", error);
       return;
     }
 
@@ -200,7 +200,6 @@ export class ChessGame {
   }
 
   public exitGame(user: User) {
-    console.log("exit game", user.id)
     this.GameEnded(GameStatus.PLAYER_EXIT, user.id === this.player1UserId ? GameResult.BLACK_WINS : GameResult.WHITE_WINS);
   }
 

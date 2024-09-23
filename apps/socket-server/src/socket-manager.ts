@@ -1,5 +1,4 @@
 import { User } from "./games/user";
-import db from "@repo/db/client";
 
 export class SocketManager {
   private static instance: SocketManager;
@@ -45,7 +44,7 @@ export class SocketManager {
     const roomId = this.userRoomMapping.get(userId);
 
     if (!roomId) {
-      console.log("User not found");
+      console.log("Room is not found");
       return null;
     }
 

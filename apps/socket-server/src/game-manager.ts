@@ -31,7 +31,6 @@ export class GameManager {
       return;
     }
 
-    console.log("user found")
     this.users = this.users.filter((user: User) => user.socket !== socket);
 
     const gameId: string | null = socketManager.removeUser(user.id);
@@ -71,11 +70,9 @@ export class GameManager {
 
           socketManager.addUser(user, game.id);
 
-          // afte the pending to fill, it needs to be assigned to null
+          // after the pending to fill, it needs to be assigned to null
           game.addSecondPlayer(user.id);
-
           this.createTimer(game.id);
-
           this.pendingGameId = null;
         } else {
           console.log("create a new game")
@@ -191,7 +188,6 @@ export class GameManager {
           game.gameTimer?.switchTurn();
           const { player1RemainingTime, player2RemainingTime } = game.gameTimer?.getPlayerTimes() || {};
 
-          console.log("Timer end 1 ", player1RemainingTime, player2RemainingTime);
           game.timerEnd(player1RemainingTime, player2RemainingTime);
         }
       }

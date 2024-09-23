@@ -15,7 +15,6 @@ export const useWebSocket = () => {
   const state = useContext(SocketContext);
   if (!state) throw new Error("useSocket must be used within a SocketProvider");
 
-  console.log(state)
   return state;
 }
 
@@ -25,10 +24,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
   const sendMessage = useCallback((event: string, data?: any) => {
-    console.log("sending msg....", data);
     if (!socket) throw new Error("socket not ready");
 
-    console.log("outsid !socket")
     socket.send(JSON.stringify({
       event: "init_game",
     }));

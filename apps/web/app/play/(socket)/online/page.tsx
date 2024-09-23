@@ -6,8 +6,8 @@ export default function Page() {
   // do authentication here
 
   return (
-    <div>
+    <>
       <ChessMenu />
-    </div>
+    </>
   )
 }

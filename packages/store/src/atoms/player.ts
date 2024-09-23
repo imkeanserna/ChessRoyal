@@ -46,12 +46,9 @@ export const gameMetadataSelector = selector<Players | null>({
         credentials: "include",
       });
 
-      console.log("NARUTO")
-
       if (response.ok) {
         const { game } = await response.json();
 
-        console.log(game)
         return {
           // get the data from the server
           blackPlayer: {

@@ -1,4 +1,3 @@
-
 export enum GameStatus {
   COMPLETED = "completed",
   IN_PROGRESS = "in_progress",
