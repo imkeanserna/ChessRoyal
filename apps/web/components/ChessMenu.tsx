@@ -22,7 +22,7 @@ const ChessMenu: React.FC = () => {
 
   const setgameMetadataAtom = useSetRecoilState<Players>(gameMetadataAtom);
   const setRemoteGameIdAtom = useSetRecoilState(remoteGameIdAtom);
-  const [user, setUser] = useRecoilState(userAtom);
+  const setUser = useSetRecoilState(userAtom);
   const [isWaiting, setIsWaiting] = useState(false);
 
   const handleGameAdded = useCallback(({ gameId }: { gameId: string }) => {
@@ -32,11 +32,22 @@ const ChessMenu: React.FC = () => {
   const handleGameInit = useCallback((payload: any) => {
     setIsWaiting(false);
 
-    if (!user || user.id !== payload.blackPlayer.id) {
+    // if (!user || user.id !== payload.blackPlayer.id) {
+    //   setUser({
+    //     id: payload.blackPlayer.id
+    //   })
+    // }
+
+    const user = localStorage.getItem("user");
+    console.log("yeah adasd" + user)
+    console.log("payload", payload)
+    if (!user) {
+      // set the second player as a black player
       setUser({
         id: payload.blackPlayer.id
       })
     }
+
     setgameMetadataAtom({
       whitePlayer: {
         id: payload.whitePlayer.id,
@@ -72,6 +83,11 @@ const ChessMenu: React.FC = () => {
           handleGameInit(payload);
           break;
         case GameMessages.GAME_ADDED:
+          // setUser({
+          //   id: payload.userId
+          // })
+          // initialize the firstPlayer which is white player
+          console.log("Added " + payload)
           setUser({
             id: payload.userId
           })

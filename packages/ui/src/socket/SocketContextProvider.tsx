@@ -2,6 +2,7 @@
 
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { SocketContext } from "@repo/ui/context/socketContext";
+import { useUser } from "@repo/store/useUser";
 
 interface EventHandlers {
   [key: string]: (data: any) => void
@@ -14,6 +15,7 @@ export const SocketContextProvider: React.FC<PropsWithChildren> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const eventHandlerRef = useRef<EventHandlers>({});
   const eventHandlers = eventHandlerRef.current;
+  const user = useUser();
 
   const closeEventListener = (event: CloseEvent) => {
     if (!event.wasClean) {
@@ -30,7 +32,7 @@ export const SocketContextProvider: React.FC<PropsWithChildren> = ({
   }
 
   useEffect(() => {
-    const newSocket = new WebSocket(process.env.NEXT_PUBLIC_BACKEND_URL!);
+    const newSocket = new WebSocket(`${process.env.NEXT_PUBLIC_BACKEND_URL!}?token=${user?.id}`);
 
     newSocket.addEventListener("close", closeEventListener);
     newSocket.addEventListener("open", openEventListener);

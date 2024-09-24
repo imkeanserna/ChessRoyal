@@ -6,7 +6,8 @@
   "exports": {
     "./gameMetadata": "./src/atoms/player.ts",
     "./chessBoard": "./src/atoms/chessBoard.ts",
-    "./user": "./src/atoms/user.ts"
+    "./user": "./src/atoms/user.ts",
+    "./useUser": "./src/hooks/useUser.ts"
   },
   "keywords": [],
   "author": "",

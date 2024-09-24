@@ -34,16 +34,25 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [open, setOpen] = useState(false);
   const [wonBy, setWonBy] = useState<GameStatus | null>(null);
   const setGameMetaDataAtom = useSetRecoilState<Players>(gameMetadataAtom);
+  const [myColor, setColor] = useState<"w" | "b">("w");
+
 
   useEffect(() => {
     setRemoteGameId(gameId);
   }, [gameId, setRemoteGameId]);
 
-
   const { blackPlayer, whitePlayer } = useRecoilValue<Players | null>(gameMetadataSelector) || {};
   // let's wait for further coding if this thing is very important in the component.
   const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer?.remainingTime || 0);
   const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer?.remainingTime || 0);
+
+  useEffect(() => {
+
+    if (!blackPlayer) return;
+
+    console.log("dasdadasd")
+    setColor(user?.id === blackPlayer.id ? "b" : "w");
+  }, []);
 
   const startedGameHandler = async (gameId: string) => {
     try {
@@ -59,6 +68,8 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
           return;
         }
         setStarted(game.id ? true : false);
+        setColor(user?.id === game.blackPlayerId ? "b" : "w");
+        console.log(game.blackPlayerId, game.whitePlayerId, user?.id);
       }
     } catch (error) {
       console.error("Error fetching game status:", error);
@@ -196,32 +207,36 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       )}
       <div>
         {blackPlayer && whitePlayer ? (
-          <div>
-            <TimerCountDown
-              duration={user?.id === blackPlayer.id ? blackPlayer.remainingTime : whitePlayer.remainingTime}
-              isPaused={chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b')}
-            />
-            <ChessBoard
-              started={started}
-              setBoard={setBoard}
-              gameId={gameId}
-              board={board}
-              chess={chess}
-              sendMessage={sendMessage}
-              myColor={user?.id === whitePlayer.id ? 'w' : 'b'}
-            />
+          <div className="grid grid-cols-12">
+            <div className="col-span-9">
+              <TimerCountDown
+                duration={user?.id === blackPlayer.id ? blackPlayer.remainingTime : whitePlayer.remainingTime}
+                isPaused={chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b')}
+              />
+              <ChessBoard
+                started={started}
+                setBoard={setBoard}
+                gameId={gameId}
+                board={board}
+                chess={chess}
+                sendMessage={sendMessage}
+                myColor={myColor}
+              />
 
-            <TimerCountDown
-              duration={user?.id === whitePlayer.id ? whitePlayer.remainingTime : blackPlayer.remainingTime}
-              isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
-            />
+              <TimerCountDown
+                duration={user?.id === whitePlayer.id ? whitePlayer.remainingTime : blackPlayer.remainingTime}
+                isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
+              />
+            </div>
+            <div className="col-span-3">
+              <MovesTable />
+            </div>
           </div>
         ) : (
           <div>Loading...</div>
         )
         }
       </div>
-      <MovesTable />
     </div>
   );
 }

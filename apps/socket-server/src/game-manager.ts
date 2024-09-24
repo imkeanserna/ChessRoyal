@@ -43,11 +43,11 @@ export class GameManager {
       gameTimer?.tickTimer(game, user.id);
 
       // then make the string of the player exited to null
-      if (user.id === game.player1UserId) {
-        game.player1UserId = "";
-      } else {
-        game.player2UserId = "";
-      }
+      // if (user.id === game.player1UserId) {
+      //   game.player1UserId = "";
+      // } else {
+      //   game.player2UserId = "";
+      // }
     }
   }
 
@@ -103,17 +103,16 @@ export class GameManager {
           return;
         }
 
-        if (game.player1UserId === "") {
-          game.player1UserId = user.id;
-        }
-
-        if (game.player2UserId === "") {
-          game.player2UserId = user.id;
-        }
+        // if (game.player1UserId === "") {
+        //   game.player1UserId = user.id;
+        // }
+        //
+        // if (game.player2UserId === "") {
+        //   game.player2UserId = user.id;
+        // }
 
         const { player1RemainingTime, player2RemainingTime } = game.gameTimer?.getPlayerTimes() || {};
 
-        socketManager.addUser(user, game.id);
         const gameTimer = this.getTimer(gameId);
         gameTimer?.resetTimer();
 
@@ -130,6 +129,7 @@ export class GameManager {
             }
           });
 
+          socketManager.addUser(user, game.id);
           // get the moves here
           socketManager.broadcast(
             gameId,

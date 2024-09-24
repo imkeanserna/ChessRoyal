@@ -12,6 +12,7 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@repo/store": "workspace:*",
     "@types/node": "^20",
     "@types/react": "^18",
     "autoprefixer": "^10.4.19",
