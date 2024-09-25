@@ -3,7 +3,7 @@
 import { GameMessages, GameResult, GameStatus, KingStatus } from "@repo/chess/gameStatus";
 import { gameMetadataAtom, gameMetadataSelector, remoteGameIdAtom } from "@repo/store/gameMetadata";
 import { useSocketContext } from "@repo/ui/context/socketContext";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { Players } from "./ChessMenu";
 import ChessBoard from "./ChessBoard";
@@ -35,7 +35,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [wonBy, setWonBy] = useState<GameStatus | null>(null);
   const setGameMetaDataAtom = useSetRecoilState<Players>(gameMetadataAtom);
   const [myColor, setColor] = useState<"w" | "b">("w");
-
 
   useEffect(() => {
     setRemoteGameId(gameId);
@@ -213,16 +212,17 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
                 duration={user?.id === blackPlayer.id ? blackPlayer.remainingTime : whitePlayer.remainingTime}
                 isPaused={chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b')}
               />
-              <ChessBoard
-                started={started}
-                setBoard={setBoard}
-                gameId={gameId}
-                board={board}
-                chess={chess}
-                sendMessage={sendMessage}
-                myColor={myColor}
-              />
-
+              <Suspense fallback={<div>Loading...</div>}>
+                <ChessBoard
+                  started={started}
+                  setBoard={setBoard}
+                  gameId={gameId}
+                  board={board}
+                  chess={chess}
+                  sendMessage={sendMessage}
+                  myColor={myColor}
+                />
+              </Suspense>
               <TimerCountDown
                 duration={user?.id === whitePlayer.id ? whitePlayer.remainingTime : blackPlayer.remainingTime}
                 isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}

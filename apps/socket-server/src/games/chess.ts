@@ -35,19 +35,13 @@ export class ChessGame {
   }
 
   async move(user: User, move: Move) {
-    // use the chess library to make move
-
-    // --TODO: make this good
     if (this.board.turn() === 'w' && (user.id !== this.player1UserId)) {
       if (user.userId !== "" && user.userId !== this.player1UserId) {
         console.log("out 1")
         return;
       }
     }
-    console.log("User making move:", user.id);
-    console.log("Player 1 ID:", this.player1UserId);
-    console.log("Player 2 ID:", this.player2UserId);
-    console.log("Current turn:", this.board.turn());
+
     if (this.board.turn() === "b" && (user.id !== this.player2UserId)) {
       if (user.userId !== "" && user.userId !== this.player2UserId) {
         console.log("out 2")

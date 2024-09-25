@@ -30,7 +30,7 @@ export const remoteGameIdAtom = atom<string | null>({
 });
 
 export const gameMetadataSelector = selector<Players | null>({
-  key: 'gameMetadataSelector',
+  key: "gameMetadataSelector",
   get: async ({ get }) => {
     const gameId = get(remoteGameIdAtom);
 
@@ -39,35 +39,43 @@ export const gameMetadataSelector = selector<Players | null>({
       return null;
     }
 
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     try {
       const response = await fetch(`/api/game/${gameId}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
+        signal: signal,  // attach the abort signal to the fetch request
       });
 
       if (response.ok) {
         const { game } = await response.json();
-
         return {
-          // get the data from the server
           blackPlayer: {
             id: game.blackPlayerId || "",
             name: "",
             isGuest: true,
-            remainingTime: game.blackPlayerRemainingTime || 0
+            remainingTime: game.blackPlayerRemainingTime || 0,
           },
           whitePlayer: {
             id: game.whitePlayerId || "",
             name: "",
             isGuest: true,
-            remainingTime: game.whitePlayerRemainingTime || 0
-          }
+            remainingTime: game.whitePlayerRemainingTime || 0,
+          },
         };
       }
     } catch (error) {
-      console.error("Error fetching game data:", error);
+      if (signal.aborted) {
+        console.log("Fetch request aborted");
+      } else {
+        console.error("Error fetching game data:", error);
+      }
       return null;
     }
-  }
+
+    return () => controller.abort();  // abort the fetch if the component unmounts
+  },
 });
