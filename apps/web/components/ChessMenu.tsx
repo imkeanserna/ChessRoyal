@@ -32,12 +32,6 @@ const ChessMenu: React.FC = () => {
   const handleGameInit = useCallback((payload: any) => {
     setIsWaiting(false);
 
-    // if (!user || user.id !== payload.blackPlayer.id) {
-    //   setUser({
-    //     id: payload.blackPlayer.id
-    //   })
-    // }
-
     const user: { id: string } | null = JSON.parse(localStorage.getItem("user") as string);
     if (!user || user.id !== payload.whitePlayer.id) {
       // set the second player as a black player

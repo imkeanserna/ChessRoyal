@@ -1,11 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { User } from './user';
-// import { GameResult, GameStatus } from '../types';
 import { GameMessages, GameResult, GameStatus, KingStatus } from "@repo/chess/gameStatus";
 import { Chess, Move, Square } from 'chess.js';
 import { socketManager } from '../socket-manager';
 import { GameTimer } from './gameTimer';
 import db from "@repo/db/client";
+import { isPromoting } from '@repo/chess/isPromoting';
 
 export class ChessGame {
   public id: string;
@@ -17,12 +17,12 @@ export class ChessGame {
   private board: Chess;
   private moves: Move[];
   private pieceValues: Record<string, number> = {
-    p: 1, //pawn
-    n: 3, //knight
-    b: 3, //bishop
-    r: 5, //rook
-    q: 9, //queen
-    k: 0 //king (not captured)
+    p: 1, // pawn
+    n: 3, // knight
+    b: 3, // bishop
+    r: 5, // rook
+    q: 9, // queen
+    k: 0  // king (not captured)
   };
 
   constructor(player1UserId: string, player2UserId?: string) {
@@ -79,7 +79,7 @@ export class ChessGame {
 
     // we can do the logic of moving the piece here
     try {
-      if (this.isPromoting(this.board, move.from, move.to)) {
+      if (isPromoting(this.board, move.from, move.to)) {
         const moveResult = this.board.move({
           from: move.from,
           to: move.to,
@@ -238,34 +238,6 @@ export class ChessGame {
 
   getMoves() {
     return this.moves;
-  }
-
-  private isPromoting(chess: Chess, from: Square, to: Square): boolean {
-    if (!from || !to) {
-      return false;
-    }
-
-    const piece: {
-      type: string;
-      color: string;
-    } | null = chess.get(from);
-
-    if (!piece) {
-      return false;
-    }
-
-    if (piece.color !== chess.turn()) {
-      return false;
-    }
-
-    if (!['1', '8'].some((it: string) => to.endsWith(it))) {
-      return false;
-    }
-
-    return chess
-      .moves({ square: from, verbose: true })
-      .map((it: { to: Square }) => it.to)
-      .includes(to);
   }
 
   public async GameEnded(status: GameStatus, result: GameResult) {

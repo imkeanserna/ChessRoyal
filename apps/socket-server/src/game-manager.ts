@@ -27,7 +27,7 @@ export class GameManager {
     const user = this.users.find((user: User) => user.socket === socket);
 
     if (!user) {
-      console.log("remove User User not found");
+      console.error("remove User User not found");
       return;
     }
 
@@ -38,16 +38,7 @@ export class GameManager {
 
     if (game) {
       const gameTimer = this.getTimer(game.id);
-
-      // let just test this for the a moment.
       gameTimer?.tickTimer(game, user.id);
-
-      // then make the string of the player exited to null
-      // if (user.id === game.player1UserId) {
-      //   game.player1UserId = "";
-      // } else {
-      //   game.player2UserId = "";
-      // }
     }
   }
 
@@ -71,11 +62,10 @@ export class GameManager {
           socketManager.addUser(user, game.id);
 
           // after the pending to fill, it needs to be assigned to null
-          game.addSecondPlayer(user.id);
+          await game.addSecondPlayer(user.id);
           this.createTimer(game.id);
           this.pendingGameId = null;
         } else {
-          console.log("create a new game")
           const game: ChessGame = new ChessGame(user.id);
           this.pendingGameId = game.id;
           this.games.push(game);
@@ -103,20 +93,15 @@ export class GameManager {
           return;
         }
 
-        // if (game.player1UserId === "") {
-        //   game.player1UserId = user.id;
-        // }
-        //
-        // if (game.player2UserId === "") {
-        //   game.player2UserId = user.id;
-        // }
-
         const { player1RemainingTime, player2RemainingTime } = game.gameTimer?.getPlayerTimes() || {};
 
         const gameTimer = this.getTimer(gameId);
         gameTimer?.resetTimer();
 
         try {
+          const updatedWhitePlayerRemainingTime = user.id === game.player1UserId ? player1RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player1RemainingTime;
+          const updatedBlackPlayerRemainingTime = user.id === game.player2UserId ? player2RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player2RemainingTime
+
           const response = await db.game.update({
             where: {
               id: gameId,
@@ -124,13 +109,13 @@ export class GameManager {
             data: {
               whitePlayerId: game.player1UserId,
               blackPlayerId: game.player2UserId,
-              whitePlayerRemainingTime: user.id === game.player1UserId ? player1RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player1RemainingTime,
-              blackPlayerRemainingTime: user.id === game.player2UserId ? player2RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player2RemainingTime
+              whitePlayerRemainingTime: updatedWhitePlayerRemainingTime,
+              blackPlayerRemainingTime: updatedBlackPlayerRemainingTime
             }
           });
 
           socketManager.addUser(user, game.id);
-          // get the moves here
+
           socketManager.broadcast(
             gameId,
             JSON.stringify({
@@ -155,9 +140,8 @@ export class GameManager {
             })
           );
         } catch (error) {
-          console.log(error);
+          console.error(error);
         }
-
       }
 
       if (event === GameMessages.MOVE) {
@@ -200,11 +184,13 @@ export class GameManager {
 
   private createTimer(gameId: string) {
     // set the 60 seconds for each player
-    this.timers.set(gameId, new GameTimer(0 * 60 & 1000, 0 * 60 & 1000));
+    const timer: number = 0 * 60 & 1000;
+    this.timers.set(gameId, new GameTimer(timer, timer));
   }
 
   private removeGame(gameId: string) {
     const game: ChessGame | undefined = this.games.find((game: ChessGame) => game.id === gameId);
+
     if (!game) {
       console.error("Game not found");
       return;
