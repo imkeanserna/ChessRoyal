@@ -148,8 +148,17 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       },
     });
 
+    if (payload.userId !== user?.id) return;
+
     payload.moves.forEach((move: Move) => {
-      chess.move(isPromoting(chess, move.from, move.to) ? { ...move, promotion: 'q' } : move);
+      const legalMoves = chess.moves({ verbose: true });
+      const isLegalMove = legalMoves.some((m: Move) => m.from === move.from && m.to === move.to);
+
+      if (isLegalMove) {
+        chess.move(isPromoting(chess, move.from, move.to) ? { ...move, promotion: 'q' } : move);
+      } else {
+        console.error("Invalid move attempted:", move);
+      }
     });
 
     setPlayer1ConsumeTimer(payload.whitePlayer.remainingTime);

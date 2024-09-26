@@ -136,7 +136,7 @@ export class GameManager {
             JSON.stringify({
               event: GameMessages.JOIN_ROOM,
               payload: {
-                userId: user.id,
+                userId: user.userId,
                 gameId,
                 moves: game.getMoves(),
                 whitePlayer: {

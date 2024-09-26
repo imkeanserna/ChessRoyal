@@ -38,10 +38,8 @@ const ChessMenu: React.FC = () => {
     //   })
     // }
 
-    const user = localStorage.getItem("user");
-    console.log("yeah adasd" + user)
-    console.log("payload", payload)
-    if (!user) {
+    const user: { id: string } | null = JSON.parse(localStorage.getItem("user") as string);
+    if (!user || user.id !== payload.whitePlayer.id) {
       // set the second player as a black player
       setUser({
         id: payload.blackPlayer.id
