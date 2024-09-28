@@ -1,6 +1,6 @@
 import { GameStatus } from "@repo/chess/gameStatus";
 import { ChessGame } from "./chess";
-import { GameResult } from "../types";
+import { GameResult } from "@repo/chess/gameStatus";
 
 export class GameTimer {
   private player1RemainingTime: number;
