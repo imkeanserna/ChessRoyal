@@ -11,11 +11,11 @@ export class SocketManager {
   }
 
   static getInstance(): SocketManager {
-    if (!SocketManager.instance) {
-      SocketManager.instance = new SocketManager();
+    if (SocketManager.instance) {
+      return SocketManager.instance;
     }
 
-    SocketManager.instance = new SocketManager;
+    SocketManager.instance = new SocketManager();
     return SocketManager.instance;
   }
 

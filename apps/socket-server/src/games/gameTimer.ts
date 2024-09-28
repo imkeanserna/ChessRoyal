@@ -87,7 +87,7 @@ export class GameTimer {
         if (this.timerInterval) {
           clearInterval(this.timerInterval);
 
-          game.GameEnded(
+          game.gameEnded(
             GameStatus.PLAYER_EXIT,
             playerExitId === game.player1UserId ? GameResult.BLACK_WINS : GameResult.WHITE_WINS
           );

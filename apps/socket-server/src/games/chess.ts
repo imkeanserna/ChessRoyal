@@ -132,7 +132,7 @@ export class ChessGame {
       } else {
         this.result = this.board.turn() === 'w' ? GameResult.BLACK_WINS : GameResult.WHITE_WINS;
       }
-      this.GameEnded(GameStatus.COMPLETED, this.result);
+      this.gameEnded(GameStatus.COMPLETED, this.result);
     }
   }
 
@@ -191,18 +191,18 @@ export class ChessGame {
       const { whiteScore, blackScore } = this.calculateMaterialDifference(this.board);
 
       if (whiteScore < blackScore) {
-        this.GameEnded(GameStatus.TIME_UP, GameResult.WHITE_WINS);
+        this.gameEnded(GameStatus.TIME_UP, GameResult.WHITE_WINS);
       } else if (blackScore < whiteScore) {
-        this.GameEnded(GameStatus.TIME_UP, GameResult.BLACK_WINS);
+        this.gameEnded(GameStatus.TIME_UP, GameResult.BLACK_WINS);
       } else {
-        this.GameEnded(GameStatus.TIME_UP, GameResult.DRAW);
+        this.gameEnded(GameStatus.TIME_UP, GameResult.DRAW);
       }
       return;
     }
   }
 
   public exitGame(user: User) {
-    this.GameEnded(GameStatus.PLAYER_EXIT, user.id === this.player1UserId ? GameResult.BLACK_WINS : GameResult.WHITE_WINS);
+    this.gameEnded(GameStatus.PLAYER_EXIT, user.id === this.player1UserId ? GameResult.BLACK_WINS : GameResult.WHITE_WINS);
   }
 
   private calculateMaterialDifference(game: Chess): {
@@ -240,7 +240,7 @@ export class ChessGame {
     return this.moves;
   }
 
-  public async GameEnded(status: GameStatus, result: GameResult) {
+  public async gameEnded(status: GameStatus, result: GameResult) {
     socketManager.broadcast(
       this.id,
       JSON.stringify({

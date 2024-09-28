@@ -3,7 +3,7 @@
 import { GameMessages, GameResult, GameStatus, KingStatus } from "@repo/chess/gameStatus";
 import { gameMetadataAtom, gameMetadataSelector, remoteGameIdAtom } from "@repo/store/gameMetadata";
 import { useSocketContext } from "@repo/ui/context/socketContext";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { Players } from "./ChessMenu";
 import ChessBoard from "./ChessBoard";
@@ -35,6 +35,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [wonBy, setWonBy] = useState<GameStatus | null>(null);
   const setGameMetaDataAtom = useSetRecoilState<Players>(gameMetadataAtom);
   const [myColor, setColor] = useState<"w" | "b">("w");
+  const setRemoteGameIdAtom = useSetRecoilState(remoteGameIdAtom);
 
   useEffect(() => {
     setRemoteGameId(gameId);
@@ -46,11 +47,19 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer?.remainingTime || 0);
 
   useEffect(() => {
-
     if (!blackPlayer) return;
-
-    console.log("dasdadasd")
     setColor(user?.id === blackPlayer.id ? "b" : "w");
+  }, []);
+
+  const handleGameInit = useCallback((payload: any) => {
+    const user: { id: string } | null = JSON.parse(localStorage.getItem("user") as string);
+    if (!user || user.id !== payload.whitePlayer.id) {
+      // set the second player as a black player
+      setUser({
+        id: payload.blackPlayer.id
+      })
+      window.location.reload();
+    }
   }, []);
 
   const startedGameHandler = async (gameId: string) => {
@@ -96,6 +105,10 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         const { event, payload } = JSON.parse(messageEvent.data);
 
         switch (event) {
+          case GameMessages.INIT_GAME:
+            setRemoteGameIdAtom(payload.gameId);
+            handleGameInit(payload);
+            break;
           case GameMessages.JOIN_ROOM:
             handleJoinRoom(payload);
             break;

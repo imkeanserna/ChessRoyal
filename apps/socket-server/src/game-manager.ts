@@ -68,6 +68,7 @@ export class GameManager {
         } else {
           const game: ChessGame = new ChessGame(user.id);
           this.pendingGameId = game.id;
+          console.log(game.id)
           this.games.push(game);
 
           socketManager.addUser(user, game.id);
@@ -93,6 +94,15 @@ export class GameManager {
           return;
         }
 
+        socketManager.addUser(user, game.id);
+
+        if (!game.player2UserId) {
+          await game.addSecondPlayer(user.id);
+          this.createTimer(gameId);
+          this.pendingGameId = null;
+          return;
+        }
+
         const { player1RemainingTime, player2RemainingTime } = game.gameTimer?.getPlayerTimes() || {};
 
         const gameTimer = this.getTimer(gameId);
@@ -114,7 +124,6 @@ export class GameManager {
             }
           });
 
-          socketManager.addUser(user, game.id);
 
           socketManager.broadcast(
             gameId,
