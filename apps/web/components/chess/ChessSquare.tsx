@@ -14,10 +14,12 @@ interface ChessSquareProps {
     type: PieceSymbol;
     color: Color;
   } | null;
+  onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
   onClick: () => any;
 }
 
 const ChessSquare: React.FC<ChessSquareProps> = ({
+  onMouseDown,
   isKingChecked,
   isCaptured,
   isHighlightedSquare,
@@ -30,9 +32,10 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
 
   return (
     <div
+      onMouseDown={(e) => onMouseDown(e)}
       onClick={onClick}
       className={`
-        ${isHighlightedSquare ? "bg-yellow-200" : ""}
+        ${isHighlightedSquare ? "bg-red-200" : ""}
         ${isHighlighted ? "bg-yellow-400" : ""}
         ${isMainBoxColor ? "bg-gray-400" : "bg-white"}
         w-16 h-16

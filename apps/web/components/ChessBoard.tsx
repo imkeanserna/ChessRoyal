@@ -2,7 +2,7 @@
 
 import { Color, PieceSymbol, Square, Move, Chess } from "chess.js";
 import ChessSquare from "./chess/ChessSquare";
-import { useEffect, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import { GameMessages } from "@repo/chess/gameStatus";
 import { isPromoting } from "@repo/chess/isPromoting";
 import { useRecoilState } from "recoil";
@@ -57,6 +57,13 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   const isKingInCheckSquare = (piece: string, color: string, chess: Chess) => {
     return piece === "k" && color === chess.turn() && chess.isCheck();
   }
+
+  const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    // Clear existing highlights
+    setLegalMoves([]);
+    setCaptureMoves([]);
+  };
 
   useEffect(() => {
     if (myColor === 'b') {
@@ -127,20 +134,22 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                   return;
                 }
 
-                if (!from && square?.color !== chess.turn() || !isMyTurn) {
+                if (!isMyTurn) {
                   console.log("not my turn");
                   return;
                 }
 
-                if (from !== squareRepresentation) {
-                  setFrom(squareRepresentation);
-                  if (!isPiece) {
-                    const moves = chess
-                      .moves({
-                        square: squareRepresentation,
-                        verbose: true
-                      })
+                if (square?.color === chess.turn()) {
+                  // If clicking on a piece that belongs to the player
+                  if (from !== squareRepresentation) {
+                    setFrom(squareRepresentation);
 
+                    const moves = chess.moves({
+                      square: squareRepresentation,
+                      verbose: true
+                    });
+
+                    // Set legal moves and capture moves
                     setLegalMoves(
                       moves
                         .filter((move: { flags: string }) => !move.flags.includes("c"))
@@ -152,39 +161,22 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                         .filter((move: { flags: string }) => move.flags.includes("c"))
                         .map((it: { to: Square }) => it.to)
                     );
+                  } else {
+                    // If clicking the same piece, reset
+                    setFrom(null);
+                    setLegalMoves([]);
+                    setCaptureMoves([]);
                   }
-                } else {
-                  setFrom(null);
-                }
-
-                if (!from) {
-                  setFrom(squareRepresentation);
-                  const moves = chess
-                    .moves({
-                      square: squareRepresentation,
-                      verbose: true
-                    })
-
-                  setLegalMoves(
-                    moves
-                      .filter((move: { flags: string }) => !move.flags.includes("c"))
-                      .map((it: { to: Square }) => it.to)
-                  );
-
-                  setCaptureMoves(
-                    moves
-                      .filter((move: { flags: string }) => move.flags.includes("c"))
-                      .map((it: { to: Square }) => it.to)
-                  );
-                } else {
+                } else if (from) {
+                  // Attempt to make a move if from is set
                   try {
                     let moveResult: Move;
+
                     if (isPromoting(chess, from, squareRepresentation)) {
-                      console.log("isPromoting")
                       moveResult = chess.move({
                         from,
                         to: squareRepresentation,
-                        promotion: 'q'
+                        promotion: 'q' // or whatever promotion you want
                       });
                     } else {
                       moveResult = chess.move({
@@ -209,14 +201,12 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                         move: moveResult
                       });
                     }
-
-                    setLegalMoves([]);
-                    setCaptureMoves([]);
                   } catch (error) {
                     console.log(error);
                   }
                 }
               }}
+              onMouseDown={(e: MouseEvent<HTMLDivElement>) => handleMouseDown(e)}
               isKingChecked={isKingInCheckSquare(square?.type!, square?.color!, chess)}
               isCaptured={captureMoves.includes(squareRepresentation)}
               isHighlightedSquare={isHighlightedSquare(squareRepresentation) || false}
