@@ -66,6 +66,13 @@ export class GameManager {
           this.createTimer(game.id);
           this.pendingGameId = null;
         } else {
+          // await db.player.create({
+          //   data: {
+          //     id: user.id,
+          //     name: "guest"
+          //   }
+          // });
+
           const game: ChessGame = new ChessGame(user.id);
           this.pendingGameId = game.id;
           console.log(game.id)

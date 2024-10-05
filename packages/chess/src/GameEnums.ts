@@ -1,6 +1,7 @@
 export enum GameStatus {
-  COMPLETED = "completed",
-  IN_PROGRESS = "in_progress",
+  NOT_STARTED = "NOT_STARTED",
+  COMPLETED = "COMPLETED",
+  IN_PROGRESS = "IN_PROGRESS",
   ABANDONED = "abandoned",
   TIME_UP = "time_up",
   PLAYER_EXIT = "player_exit",

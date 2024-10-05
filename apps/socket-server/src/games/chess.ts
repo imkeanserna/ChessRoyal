@@ -24,6 +24,8 @@ export class ChessGame {
     q: 9, // queen
     k: 0  // king (not captured)
   };
+  private status: GameStatus;
+  private turn: string;
 
   constructor(player1UserId: string, player2UserId?: string) {
     this.player1UserId = player1UserId;
@@ -32,9 +34,12 @@ export class ChessGame {
     this.id = uuidv4();
     this.board = new Chess();
     this.moves = [];
+    this.status = GameStatus.NOT_STARTED;
+    this.turn = player1UserId;
   }
 
   async move(user: User, move: Move) {
+    console.log("nmove")
     if (this.board.turn() === 'w' && (user.id !== this.player1UserId)) {
       if (user.userId !== "" && user.userId !== this.player1UserId) {
         console.log("out 1")
@@ -59,17 +64,17 @@ export class ChessGame {
     const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
 
     try {
-      const response = await db.game.update({
-        where: {
-          id: this.id,
-        },
-        data: {
-          whitePlayerId: this.player1UserId,
-          blackPlayerId: this.player2UserId,
-          whitePlayerRemainingTime: player1RemainingTime,
-          blackPlayerRemainingTime: player2RemainingTime
-        }
-      });
+      // const response = await db.game.update({
+      //   where: {
+      //     id: this.id,
+      //   },
+      //   data: {
+      //     whitePlayerId: this.player1UserId,
+      //     blackPlayerId: this.player2UserId,
+      //     whitePlayerRemainingTime: player1RemainingTime,
+      //     blackPlayerRemainingTime: player2RemainingTime
+      //   }
+      // });
     } catch (error) {
       console.log(error);
     }
@@ -137,22 +142,56 @@ export class ChessGame {
   }
 
   async addSecondPlayer(player2UserId: string) {
-    this.player2UserId = player2UserId;
+    if (this.player2UserId !== "") {
+      throw new Error("Game already has two players.");
+    }
 
-    // if the applications get bigger then we need a database to store the players
+    this.player2UserId = player2UserId;
+    this.status = GameStatus.IN_PROGRESS;
 
     // after the initialization the whitePlayer should start the time (let test the 10mins)
     this.gameTimer = new GameTimer(10 * 60 * 1000, 10 * 60 * 1000);
     const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
 
     try {
-      const response = await db.game.create({
+      // let player2 = await db.player.findUnique({
+      //   where: {
+      //     id: player2UserId
+      //   }
+      // });
+      //
+      // if (!player2) {
+      //   player2 = await db.player.create({
+      //     data: {
+      //       id: player2UserId,
+      //       name: "Guest"
+      //     }
+      //   });
+      // }
+
+      const response = await db.chessGame.create({
         data: {
-          id: this.id,
-          whitePlayerId: this.player1UserId,
-          blackPlayerId: this.player2UserId,
+          id: this.id, // Use the generated game ID
+          status: this.status,
+          moves: { create: [] },
+          currentBoard: this.board.fen(),
+          turn: this.turn,
           whitePlayerRemainingTime: player1RemainingTime || 0,
           blackPlayerRemainingTime: player2RemainingTime || 0,
+          players: {
+            create: [
+              {
+                id: this.player1UserId, // Player 1's user ID
+                name: "Player 1", // You can customize this
+                // chessGameId: this.id // Correctly associate with the game ID
+              },
+              {
+                id: this.player2UserId, // Player 2's user ID
+                name: "Player 2", // You can customize this
+                // chessGameId: this.id // Correctly associate with the game ID
+              }
+            ]
+          }
         }
       });
       console.log(response)
