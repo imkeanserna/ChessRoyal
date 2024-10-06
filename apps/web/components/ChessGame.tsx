@@ -75,9 +75,9 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
           router.push("/play/online");
           return;
         }
-        setStarted(game.id ? true : false);
-        setColor(user?.id === game.blackPlayerId ? "b" : "w");
-        console.log(game.blackPlayerId, game.whitePlayerId, user?.id);
+        setStarted(!!game.id);
+        const whitePlayer = game.players[0].id;
+        setColor(user?.id === whitePlayer ? "w" : "b");
       }
     } catch (error) {
       console.error("Error fetching game status:", error);

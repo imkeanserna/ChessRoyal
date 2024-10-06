@@ -143,7 +143,8 @@ export class ChessGame {
 
   async addSecondPlayer(player2UserId: string) {
     if (this.player2UserId !== "") {
-      throw new Error("Game already has two players.");
+      console.error("Game already has two players.");
+      return;
     }
 
     this.player2UserId = player2UserId;
@@ -154,21 +155,6 @@ export class ChessGame {
     const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
 
     try {
-      // let player2 = await db.player.findUnique({
-      //   where: {
-      //     id: player2UserId
-      //   }
-      // });
-      //
-      // if (!player2) {
-      //   player2 = await db.player.create({
-      //     data: {
-      //       id: player2UserId,
-      //       name: "Guest"
-      //     }
-      //   });
-      // }
-
       const response = await db.chessGame.create({
         data: {
           id: this.id, // Use the generated game ID

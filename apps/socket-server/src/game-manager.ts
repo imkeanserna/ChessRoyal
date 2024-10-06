@@ -66,13 +66,6 @@ export class GameManager {
           this.createTimer(game.id);
           this.pendingGameId = null;
         } else {
-          // await db.player.create({
-          //   data: {
-          //     id: user.id,
-          //     name: "guest"
-          //   }
-          // });
-
           const game: ChessGame = new ChessGame(user.id);
           this.pendingGameId = game.id;
           console.log(game.id)
@@ -119,13 +112,11 @@ export class GameManager {
           const updatedWhitePlayerRemainingTime = user.id === game.player1UserId ? player1RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player1RemainingTime;
           const updatedBlackPlayerRemainingTime = user.id === game.player2UserId ? player2RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player2RemainingTime
 
-          const response = await db.game.update({
+          const response = await db.chessGame.update({
             where: {
               id: gameId,
             },
             data: {
-              whitePlayerId: game.player1UserId,
-              blackPlayerId: game.player2UserId,
               whitePlayerRemainingTime: updatedWhitePlayerRemainingTime,
               blackPlayerRemainingTime: updatedBlackPlayerRemainingTime
             }
