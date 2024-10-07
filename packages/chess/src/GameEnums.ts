@@ -2,31 +2,33 @@ export enum GameStatus {
   NOT_STARTED = "NOT_STARTED",
   COMPLETED = "COMPLETED",
   IN_PROGRESS = "IN_PROGRESS",
-  ABANDONED = "abandoned",
-  TIME_UP = "time_up",
-  PLAYER_EXIT = "player_exit",
-  DRAW = "draw"
 }
 
 export enum KingStatus {
-  SAFE = "safe",
-  CHECKED = "checked",
-  CHECKMATE = "checkmate"
+  SAFE = "SAFE",
+  CHECKED = "CHECKED",
+  CHECKMATE = "CHECKMATE"
 }
 
 export enum GameMessages {
-  GAME_ADDED = "game_added",
-  GAME_ENDED = "game_ended",
-  INIT_GAME = "init_game",
-  JOIN_ROOM = "join_room",
-  WAITING = "waiting",
-  MOVE = "move",
-  KING_STATUS = "king_status",
-  TIMER = "timer"
+  GAME_ADDED = "GAME_ADDED",
+  GAME_ENDED = "GAME_ENDED",
+  INIT_GAME = "INIT_GAME",
+  JOIN_ROOM = "JOIN_ROOM",
+  WAITING = "WAITING",
+  MOVE = "MOVE",
+  KING_STATUS = "KING_STATUS",
+  TIMER = "TIMER"
 }
 
-export enum GameResult {
-  WHITE_WINS = "white_wins",
-  BLACK_WINS = "black_wins",
-  DRAW = "draw"
+export enum PlayerWon {
+  WHITE_WINS = "WHITE_WINS",
+  BLACK_WINS = "BLACK_WINS",
+}
+
+export enum GameResultType {
+  WIN = "WIN",
+  DRAW = "DRAW",
+  RESIGNATION = "RESIGNATION",
+  TIMEOUT = "TIMEOUT"
 }

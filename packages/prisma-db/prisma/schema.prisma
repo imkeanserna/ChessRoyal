@@ -54,7 +54,7 @@ model ChessResult {
   game       ChessGame      @relation(fields: [gameId], references: [id])
   gameId     String         @unique
   winner     Player?        @relation(fields: [winnerId], references: [id])
-  winnerId   String
+  winnerId   String?
   resultType GameResultType
   finishedAt DateTime       @default(now())
 }

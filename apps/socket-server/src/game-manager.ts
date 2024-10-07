@@ -122,7 +122,6 @@ export class GameManager {
             }
           });
 
-
           socketManager.broadcast(
             gameId,
             JSON.stringify({

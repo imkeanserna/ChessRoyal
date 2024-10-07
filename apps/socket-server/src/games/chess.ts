@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { User } from './user';
-import { GameMessages, GameResult, GameStatus, KingStatus } from "@repo/chess/gameStatus";
-import { Chess, Move, Square } from 'chess.js';
+import { GameMessages, PlayerWon, GameStatus, KingStatus, GameResultType } from "@repo/chess/gameStatus";
+import { Chess, Move } from 'chess.js';
 import { socketManager } from '../socket-manager';
 import { GameTimer } from './gameTimer';
 import db from "@repo/db/client";
@@ -9,7 +9,8 @@ import { isPromoting } from '@repo/chess/isPromoting';
 
 export class ChessGame {
   public id: string;
-  public result: GameResult | null = null;
+  public result: GameResultType | null = null;
+  public playerWon: PlayerWon | null = null;
   public player1UserId: string;
   public player2UserId: string;
   public initializeTime: number;
@@ -64,17 +65,15 @@ export class ChessGame {
     const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
 
     try {
-      // const response = await db.game.update({
-      //   where: {
-      //     id: this.id,
-      //   },
-      //   data: {
-      //     whitePlayerId: this.player1UserId,
-      //     blackPlayerId: this.player2UserId,
-      //     whitePlayerRemainingTime: player1RemainingTime,
-      //     blackPlayerRemainingTime: player2RemainingTime
-      //   }
-      // });
+      const response = await db.chessGame.update({
+        where: {
+          id: this.id,
+        },
+        data: {
+          whitePlayerRemainingTime: player1RemainingTime,
+          blackPlayerRemainingTime: player2RemainingTime
+        }
+      });
     } catch (error) {
       console.log(error);
     }
@@ -103,6 +102,14 @@ export class ChessGame {
 
     // add the move to the database
     this.moves.push(move);
+
+    await db.chessMove.create({
+      data: {
+        gameId: this.id,
+        playerId: user.id,
+        move: JSON.stringify(move)
+      }
+    });
 
     if (this.board.isCheck()) {
       socketManager.broadcast(
@@ -133,11 +140,12 @@ export class ChessGame {
     if (this.board.isGameOver()) {
       const result: boolean = this.board.isDraw();
       if (result) {
-        this.result = GameResult.DRAW;
+        this.result = GameResultType.DRAW;
       } else {
-        this.result = this.board.turn() === 'w' ? GameResult.BLACK_WINS : GameResult.WHITE_WINS;
+        this.result = GameResultType.WIN;
+        this.playerWon = this.board.turn() === "w" ? PlayerWon.BLACK_WINS : PlayerWon.WHITE_WINS;
       }
-      this.gameEnded(GameStatus.COMPLETED, this.result);
+      this.gameEnded(this.result, this.playerWon);
     }
   }
 
@@ -151,13 +159,13 @@ export class ChessGame {
     this.status = GameStatus.IN_PROGRESS;
 
     // after the initialization the whitePlayer should start the time (let test the 10mins)
-    this.gameTimer = new GameTimer(10 * 60 * 1000, 10 * 60 * 1000);
+    this.gameTimer = new GameTimer(1 * 60 * 1000, 1 * 60 * 1000);
     const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
 
     try {
       const response = await db.chessGame.create({
         data: {
-          id: this.id, // Use the generated game ID
+          id: this.id,
           status: this.status,
           moves: { create: [] },
           currentBoard: this.board.fen(),
@@ -167,20 +175,19 @@ export class ChessGame {
           players: {
             create: [
               {
-                id: this.player1UserId, // Player 1's user ID
-                name: "Player 1", // You can customize this
-                // chessGameId: this.id // Correctly associate with the game ID
+                id: this.player1UserId,
+                name: "Player 1",
+                // chessGameId: this.id
               },
               {
-                id: this.player2UserId, // Player 2's user ID
-                name: "Player 2", // You can customize this
-                // chessGameId: this.id // Correctly associate with the game ID
+                id: this.player2UserId,
+                name: "Player 2",
+                // chessGameId: this.id
               }
             ]
           }
         }
       });
-      console.log(response)
     } catch (error) {
       console.error("Error in addSecondPlayer", error);
       return;
@@ -216,18 +223,18 @@ export class ChessGame {
       const { whiteScore, blackScore } = this.calculateMaterialDifference(this.board);
 
       if (whiteScore < blackScore) {
-        this.gameEnded(GameStatus.TIME_UP, GameResult.WHITE_WINS);
+        this.gameEnded(GameResultType.TIMEOUT, PlayerWon.WHITE_WINS);
       } else if (blackScore < whiteScore) {
-        this.gameEnded(GameStatus.TIME_UP, GameResult.BLACK_WINS);
+        this.gameEnded(GameResultType.TIMEOUT, PlayerWon.BLACK_WINS);
       } else {
-        this.gameEnded(GameStatus.TIME_UP, GameResult.DRAW);
+        this.gameEnded(GameResultType.DRAW, null);
       }
       return;
     }
   }
 
   public exitGame(user: User) {
-    this.gameEnded(GameStatus.PLAYER_EXIT, user.id === this.player1UserId ? GameResult.BLACK_WINS : GameResult.WHITE_WINS);
+    this.gameEnded(GameResultType.RESIGNATION, user.id === this.player1UserId ? PlayerWon.BLACK_WINS : PlayerWon.WHITE_WINS);
   }
 
   private calculateMaterialDifference(game: Chess): {
@@ -265,7 +272,36 @@ export class ChessGame {
     return this.moves;
   }
 
-  public async gameEnded(status: GameStatus, result: GameResult) {
+  public async gameEnded(status: GameResultType, result: PlayerWon | null) {
+    // add the result of the game to the database
+    try {
+      const response = await db.chessResult.upsert({
+        where: {
+          gameId: this.id,
+        },
+        update: {
+          winnerId: result === PlayerWon.WHITE_WINS
+            ? this.player1UserId
+            : result === PlayerWon.BLACK_WINS
+              ? this.player2UserId
+              : null,
+          resultType: status,
+        },
+        create: {
+          gameId: this.id,
+          winnerId: result === PlayerWon.WHITE_WINS
+            ? this.player1UserId
+            : result === PlayerWon.BLACK_WINS
+              ? this.player2UserId
+              : null,
+          resultType: status,
+        },
+      });
+    } catch (error) {
+      console.error("Error in gameEnded", error);
+      return;
+    }
+
     socketManager.broadcast(
       this.id,
       JSON.stringify({

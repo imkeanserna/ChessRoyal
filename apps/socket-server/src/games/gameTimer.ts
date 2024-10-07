@@ -1,6 +1,5 @@
-import { GameStatus } from "@repo/chess/gameStatus";
+import { GameResultType, PlayerWon } from "@repo/chess/gameStatus";
 import { ChessGame } from "./chess";
-import { GameResult } from "@repo/chess/gameStatus";
 
 export class GameTimer {
   private player1RemainingTime: number;
@@ -88,8 +87,8 @@ export class GameTimer {
           clearInterval(this.timerInterval);
 
           game.gameEnded(
-            GameStatus.PLAYER_EXIT,
-            playerExitId === game.player1UserId ? GameResult.BLACK_WINS : GameResult.WHITE_WINS
+            GameResultType.RESIGNATION,
+            playerExitId === game.player1UserId ? PlayerWon.BLACK_WINS : PlayerWon.WHITE_WINS
           );
           this.stop();
         }
