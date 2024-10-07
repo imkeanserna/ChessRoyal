@@ -1,6 +1,6 @@
 "use client";
 
-import { GameMessages, GameResult, GameStatus, KingStatus } from "@repo/chess/gameStatus";
+import { GameMessages, GameResultType, KingStatus } from "@repo/chess/gameStatus";
 import { gameMetadataAtom, gameMetadataSelector, remoteGameIdAtom } from "@repo/store/gameMetadata";
 import { useSocketContext } from "@repo/ui/context/socketContext";
 import React, { Suspense, useCallback, useEffect, useState } from "react";
@@ -32,7 +32,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [isCheck, setIsCheck] = useRecoilState(isCheckAtom);
   const [isGameOver, setIsGameOver] = useRecoilState(isGameOverAtom);
   const [open, setOpen] = useState(false);
-  const [wonBy, setWonBy] = useState<GameStatus | null>(null);
+  const [wonBy, setWonBy] = useState<GameResultType | null>(null);
   const setGameMetaDataAtom = useSetRecoilState<Players>(gameMetadataAtom);
   const [myColor, setColor] = useState<"w" | "b">("w");
   const setRemoteGameIdAtom = useSetRecoilState(remoteGameIdAtom);
@@ -195,20 +195,22 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
   const handleGameEnded = (payload: any) => {
     switch (payload.status) {
-      case GameStatus.COMPLETED:
-        setWonBy(GameStatus.COMPLETED);
+      case GameResultType.WIN:
+        setWonBy(GameResultType.WIN);
         setIsGameOver({ isGameOver: true, playerWon: payload.result });
         setOpen(true);
         break;
-      case GameStatus.DRAW:
-        alert("DRAW");
+      case GameResultType.DRAW:
+        setWonBy(GameResultType.DRAW);
+        setIsGameOver({ isGameOver: true, playerWon: GameResultType.DRAW });
+        setOpen(true);
         break;
-      case GameStatus.TIME_UP:
-        setWonBy(GameStatus.TIME_UP);
+      case GameResultType.TIMEOUT:
+        setWonBy(GameResultType.TIMEOUT);
         setIsGameOver({ isGameOver: true, playerWon: payload.result });
         setOpen(true);
         break;
-      case GameStatus.PLAYER_EXIT:
+      case GameResultType.RESIGNATION:
         alert("A player has exited the game.");
         break;
       default:
@@ -220,8 +222,8 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
     <div className="w-full h-full">
       {isGameOver.playerWon && wonBy && (
         <ModalGameOver
-          playerWon={isGameOver.playerWon === GameResult.DRAW ? GameResult.DRAW : isGameOver.playerWon}
-          wonBy={wonBy === GameStatus.COMPLETED ? "checkmate" : wonBy}
+          playerWon={isGameOver.playerWon === GameResultType.DRAW ? GameResultType.DRAW : isGameOver.playerWon}
+          wonBy={wonBy === GameResultType.WIN ? "checkmate" : wonBy}
           open={open}
           setOpen={setOpen}
         />

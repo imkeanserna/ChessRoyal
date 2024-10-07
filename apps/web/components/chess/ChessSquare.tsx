@@ -68,11 +68,11 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
             className={`w-12 pointer-events-none`}
             src={`/cardinal/${square?.color}/${piece}.svg`}
           />
-          {piece === "k" && gameOver.isGameOver && gameOver.playerWon![0]?.toLowerCase() === square?.color ? (
+          {piece === "k" && gameOver.isGameOver && gameOver.playerWon?.[0]?.toLowerCase() === square?.color ? (
             <img className="w-6 absolute top-1 right-1" src={`/crown.svg`} alt="" />
           ) : null}
-          {gameOver.isGameOver && piece === "k" && gameOver.playerWon![0]?.toLowerCase() !== square?.color && (
-            gameOver.playerWon![0]?.toLowerCase() !== "w" ? (
+          {gameOver.isGameOver && piece === "k" && gameOver.playerWon?.[0]?.toLowerCase() !== square?.color && (
+            gameOver.playerWon?.[0]?.toLowerCase() !== "w" ? (
               <img className="w-6 absolute top-1 right-1" src={`/black-mate.svg`} alt="" />
             ) : (
               <img className="w-6 absolute top-1 right-1" src={`/white-mate.svg`} alt="" />
