@@ -5,6 +5,7 @@ import { socketManager } from "./socket-manager";
 import { GameMessages } from "@repo/chess/gameStatus";
 import { GameTimer } from "./games/gameTimer";
 import db from "@repo/db/client";
+import { deleteGameIfBothPlayersAreGuests } from "./services/gameService";
 
 export class GameManager {
   private games: ChessGame[];
@@ -194,13 +195,14 @@ export class GameManager {
     this.timers.set(gameId, new GameTimer(timer, timer));
   }
 
-  private removeGame(gameId: string) {
+  private async removeGame(gameId: string) {
     const game: ChessGame | undefined = this.games.find((game: ChessGame) => game.id === gameId);
 
     if (!game) {
       console.error("Game not found");
       return;
     } else {
+      await deleteGameIfBothPlayersAreGuests(game.id, game.player1UserId, game.player2UserId);
       this.games = this.games.filter((game: ChessGame) => game.id !== gameId);
     }
   }

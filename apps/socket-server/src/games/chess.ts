@@ -6,6 +6,7 @@ import { socketManager } from '../socket-manager';
 import { GameTimer } from './gameTimer';
 import db from "@repo/db/client";
 import { isPromoting } from '@repo/chess/isPromoting';
+import { deleteGameIfBothPlayersAreGuests } from '../services/gameService';
 
 export class ChessGame {
   public id: string;
@@ -187,11 +188,13 @@ export class ChessGame {
               {
                 id: this.player1UserId,
                 name: "Player 1",
+                isGuest: true,
                 // chessGameId: this.id
               },
               {
                 id: this.player2UserId,
                 name: "Player 2",
+                isGuest: true,
                 // chessGameId: this.id
               }
             ]
@@ -321,6 +324,8 @@ export class ChessGame {
           status: this.status
         }
       });
+
+      await deleteGameIfBothPlayersAreGuests(this.id, this.player1UserId, this.player2UserId);
     } catch (error) {
       console.error("Error in gameEnded", error);
       return;

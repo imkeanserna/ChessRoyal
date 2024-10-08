@@ -1,5 +1,6 @@
 import { GameResultType, PlayerWon } from "@repo/chess/gameStatus";
 import { ChessGame } from "./chess";
+import { deleteGameIfBothPlayersAreGuests } from "../services/gameService";
 
 export class GameTimer {
   private player1RemainingTime: number;
@@ -79,7 +80,7 @@ export class GameTimer {
     }
 
     let seconds = 0;
-    this.timerInterval = setInterval(() => {
+    this.timerInterval = setInterval(async () => {
       seconds = this.totalAbortTime % 60;
 
       if (--this.totalAbortTime < 0) {

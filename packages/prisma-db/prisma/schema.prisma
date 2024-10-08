@@ -16,6 +16,7 @@ datasource db {
 model Player {
   id          String        @id @unique
   name        String
+  isGuest     Boolean       @default(false)
   joinedAt    DateTime      @default(now())
   ChessGame   ChessGame?    @relation(fields: [chessGameId], references: [id])
   chessGameId String?
