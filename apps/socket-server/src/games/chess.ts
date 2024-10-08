@@ -41,6 +41,11 @@ export class ChessGame {
 
   async move(user: User, move: Move) {
     console.log("nmove")
+    if (this.status !== GameStatus.IN_PROGRESS) {
+      console.error(`Cannot move. Game ${this.id} is not in progress`);
+      return;
+    }
+
     if (this.board.turn() === 'w' && (user.id !== this.player1UserId)) {
       if (user.userId !== "" && user.userId !== this.player1UserId) {
         console.log("out 1")
@@ -150,6 +155,11 @@ export class ChessGame {
   }
 
   async addSecondPlayer(player2UserId: string) {
+    if (this.status !== GameStatus.NOT_STARTED) {
+      console.error(`Cannot add second player. Game ${this.id} is not completed`);
+      return;
+    }
+
     if (this.player2UserId !== "") {
       console.error("Game already has two players.");
       return;
@@ -159,7 +169,7 @@ export class ChessGame {
     this.status = GameStatus.IN_PROGRESS;
 
     // after the initialization the whitePlayer should start the time (let test the 10mins)
-    this.gameTimer = new GameTimer(1 * 60 * 1000, 1 * 60 * 1000);
+    this.gameTimer = new GameTimer(10 * 60 * 1000, 10 * 60 * 1000);
     const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
 
     try {
@@ -273,7 +283,12 @@ export class ChessGame {
   }
 
   public async gameEnded(status: GameResultType, result: PlayerWon | null) {
-    // add the result of the game to the database
+    if (this.status !== GameStatus.IN_PROGRESS) {
+      console.error(`Cannot end game. Game ${this.id} is not in progress.`);
+      return;
+    }
+    this.status = GameStatus.COMPLETED;
+
     try {
       const response = await db.chessResult.upsert({
         where: {
@@ -296,6 +311,15 @@ export class ChessGame {
               : null,
           resultType: status,
         },
+      });
+
+      await db.chessGame.update({
+        where: {
+          id: this.id
+        },
+        data: {
+          status: this.status
+        }
       });
     } catch (error) {
       console.error("Error in gameEnded", error);
