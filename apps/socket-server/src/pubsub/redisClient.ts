@@ -1,51 +1,39 @@
-import { GameResultType, GameStatus } from "@repo/chess/gameStatus";
-import { v4 as uuidv4 } from 'uuid';
-import { Redis } from "ioredis";
+import { User } from "../games/user";
+import { WebSocket } from "ws";
+import Redis from "ioredis";
 
 export class RedisPubSubManager {
   private static instance: RedisPubSubManager;
   private subscriber: Redis;
   private publisher: Redis;
+
   private subscriptions: Map<
     string,
-    {
-      [room: string]: {
-        id: string;
-        status: GameStatus;
-        moves: string[];
-        players: string[];
-        result?: GameResultType | null;
-        currentBoard: string;
-        turn: string;
-        whitePlayerRemainingTime: number;
-        blackPlayerRemainingTime: number;
-      }
-    }
+    { [room: string]: { room: string; user: User[] } }
   >;
+
   private reverseSubscriptions: Map<
     string,
-    {
-      [userId: string]: {
-        userId: string;
-        ws: WebSocket;
-      }
-    }
+    { [userId: string]: { userId: string; ws: WebSocket } }
   >;
 
   private constructor() {
     this.subscriber = new Redis();
     this.publisher = new Redis();
-    this.subscriptions = new Map();
-    this.reverseSubscriptions = new Map();
+
+    this.subscriptions = new Map<
+      string,
+      { [room: string]: { room: string; user: User[] } }
+    >();
+    this.reverseSubscriptions = new Map<
+      string,
+      { [userId: string]: { userId: string; ws: WebSocket } }
+    >();
 
     this.subscriber.on("message", (channel, message) => {
       console.log(`Received ${message} from ${channel}`);
-
       const subscribers = this.reverseSubscriptions.get(channel) || {};
-
-      Object.values(subscribers).forEach(({ ws }: { ws: WebSocket }) => {
-        ws.send(message);
-      })
+      Object.values(subscribers).forEach(({ ws }) => ws.send(message));
     });
   }
 
@@ -55,34 +43,22 @@ export class RedisPubSubManager {
     return this.instance;
   }
 
-  subscribe(userId: string, room: string, ws: WebSocket) {
-    // Addd room to user's subscriptions
+  subscribe(userId: string, room: string, ws: any) {
+    // Add room to user's subscriptions
     this.subscriptions.set(userId, {
       ...(this.subscriptions.get(userId) || {}),
-      [room]: {
-        id: uuidv4(),
-        status: GameStatus.IN_PROGRESS,
-        moves: [],
-        players: [],
-        currentBoard: "",
-        turn: "",
-        whitePlayerRemainingTime: 0,
-        blackPlayerRemainingTime: 0
-      }
+      [room]: { room, user: [] },
     });
 
     // Add user to room's subscribers
     this.reverseSubscriptions.set(room, {
       ...(this.reverseSubscriptions.get(room) || {}),
-      [userId]: {
-        userId,
-        ws
-      }
+      [userId]: { userId, ws },
     });
 
     // If this is the 1st subscriber to this room, subscribe to the room
-    if (Object.keys(this.reverseSubscriptions.get(room) || {}).length === 1) {
-      console.log(`subscribing to ${room}`);
+    if (Object.keys(this.reverseSubscriptions.get(room) || {})?.length === 1) {
+      console.log(`subscribing messages from ${room}`);
 
       this.subscriber.subscribe(room, (err, count) => {
         if (err) {
@@ -94,8 +70,15 @@ export class RedisPubSubManager {
         }
       });
     }
-  }
 
+    // --TODO: This is it
+    // this.publish(room, {
+    //   payload: {
+    //     event: "userJoined",
+    //     payload: { userId },
+    //   },
+    // });
+  }
 
   unsubscribe(userId: string, room: string) {
     if (!userId || !room || !this.subscriptions.get(userId)) return;
@@ -105,44 +88,41 @@ export class RedisPubSubManager {
     if (userSubscriptions) {
       delete userSubscriptions[room];
 
-      // if no more subscriptions, remove user from subscriptions
+      // If user has no more subscriptions, remove user from subscriptions
       if (Object.keys(userSubscriptions).length === 0) {
         this.subscriptions.delete(userId);
       }
     }
 
-    //Remove user from room's subscribers
-    const roomSubscribers = this.reverseSubscriptions.get(room);
-    if (roomSubscribers) {
-      delete roomSubscribers[userId];
-    }
+    // Remove user from room's subscribers
+    delete this.reverseSubscriptions.get(room)?.[userId];
 
-    if (!this.reverseSubscriptions.get(room) || Object.keys(this.reverseSubscriptions.get(room) || {}).length === 0) {
-      console.log(`unsubscribing from ${room}`);
+    // If room has no more subscribers, unsubscribe from it
+    if (
+      !this.reverseSubscriptions.get(room) ||
+      Object.keys(this.reverseSubscriptions.get(room) || {}).length === 0
+    ) {
+      console.log("unsubscribing from " + room);
       this.subscriber.unsubscribe(room);
       this.reverseSubscriptions.delete(room);
     }
 
     console.log({
       subs: this.subscriptions,
-      revSubs: this.reverseSubscriptions
+      revSubs: this.reverseSubscriptions,
     });
   }
 
-  async sendMessage(room: string, message: string, sender: string) {
-    this.publish(room, JSON.stringify({
-      type: "message",
+  async sendMessage(room: string, message: any) {
+    this.publish(room, {
       payload: {
-        id: uuidv4(),
-        sender,
         message
-      }
-    })
-    );
+      },
+    });
   }
 
-  publish(room: string, message: string) {
+  publish(room: string, message: any) {
     console.log(`publishing message to ${room}`);
-    this.publisher.publish(room, message);
+    this.publisher.publish(room, JSON.stringify(message));
   }
 }
