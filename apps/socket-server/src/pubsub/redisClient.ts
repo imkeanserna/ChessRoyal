@@ -2,127 +2,122 @@ import { User } from "../games/user";
 import { WebSocket } from "ws";
 import Redis from "ioredis";
 
+interface Subscription {
+  room: string;
+  users: User[];
+}
+
+interface ReverseSubscription {
+  userId: string;
+  ws: WebSocket;
+}
+
 export class RedisPubSubManager {
   private static instance: RedisPubSubManager;
   private subscriber: Redis;
   private publisher: Redis;
-
-  private subscriptions: Map<
-    string,
-    { [room: string]: { room: string; user: User[] } }
-  >;
-
-  private reverseSubscriptions: Map<
-    string,
-    { [userId: string]: { userId: string; ws: WebSocket } }
-  >;
+  private subscriptions: Map<string, Map<string, Subscription>>;
+  private reverseSubscriptions: Map<string, Map<string, ReverseSubscription>>;
+  private userRoomMapping: Map<string, string>;
 
   private constructor() {
     this.subscriber = new Redis();
     this.publisher = new Redis();
+    this.subscriptions = new Map();
+    this.reverseSubscriptions = new Map();
+    this.userRoomMapping = new Map();
 
-    this.subscriptions = new Map<
-      string,
-      { [room: string]: { room: string; user: User[] } }
-    >();
-    this.reverseSubscriptions = new Map<
-      string,
-      { [userId: string]: { userId: string; ws: WebSocket } }
-    >();
-
-    this.subscriber.on("message", (channel, message) => {
+    this.subscriber.on("message", (channel: string, message: string) => {
       console.log(`Received ${message} from ${channel}`);
-      const subscribers = this.reverseSubscriptions.get(channel) || {};
-      Object.values(subscribers).forEach(({ ws }) => ws.send(message));
+      const subscribers = this.reverseSubscriptions.get(channel);
+      subscribers?.forEach(({ ws }) => ws.send(message));
     });
   }
 
-  static getInstance() {
-    if (!this.instance) this.instance = new RedisPubSubManager();
-
-    return this.instance;
+  static getInstance(): RedisPubSubManager {
+    if (!RedisPubSubManager.instance) {
+      RedisPubSubManager.instance = new RedisPubSubManager();
+    }
+    return RedisPubSubManager.instance;
   }
 
-  subscribe(userId: string, room: string, ws: any) {
+  subscribe(userId: string, room: string, ws: WebSocket): void {
     // Add room to user's subscriptions
-    this.subscriptions.set(userId, {
-      ...(this.subscriptions.get(userId) || {}),
-      [room]: { room, user: [] },
-    });
+    if (!this.subscriptions.has(userId)) {
+      this.subscriptions.set(userId, new Map());
+    }
+    const userSubscriptions = this.subscriptions.get(userId)!;
+    userSubscriptions.set(room, { room, users: [] });
 
     // Add user to room's subscribers
-    this.reverseSubscriptions.set(room, {
-      ...(this.reverseSubscriptions.get(room) || {}),
-      [userId]: { userId, ws },
-    });
+    if (!this.reverseSubscriptions.has(room)) {
+      this.reverseSubscriptions.set(room, new Map());
+    }
+    const roomSubscribers = this.reverseSubscriptions.get(room)!;
+    roomSubscribers.set(userId, { userId, ws });
+
+    // Add user to userRoomMapping
+    if (!this.userRoomMapping.has(userId)) {
+      this.userRoomMapping.set(userId, room);
+    }
 
     // If this is the 1st subscriber to this room, subscribe to the room
-    if (Object.keys(this.reverseSubscriptions.get(room) || {})?.length === 1) {
-      console.log(`subscribing messages from ${room}`);
-
+    if (roomSubscribers.size === 1) {
+      console.log(`Subscribing to messages from ${room}`);
       this.subscriber.subscribe(room, (err, count) => {
         if (err) {
           console.error("Failed to subscribe: %s", err.message);
         } else {
-          console.log(
-            `Subscribed successfully! This client is currently subscribed to ${count} channels.`,
-          );
+          console.log(`Subscribed successfully! This client is currently subscribed to ${count} channels.`);
         }
       });
     }
-
-    // --TODO: This is it
-    // this.publish(room, {
-    //   payload: {
-    //     event: "userJoined",
-    //     payload: { userId },
-    //   },
-    // });
   }
 
-  unsubscribe(userId: string, room: string) {
-    if (!userId || !room || !this.subscriptions.get(userId)) return;
+  unsubscribe(userId: string): void {
+    if (!userId) return;
+
+    const room = this.userRoomMapping.get(userId);
+    if (!room) {
+      console.error("Room not found");
+      return;
+    };
 
     // Remove room from user's subscriptions
     const userSubscriptions = this.subscriptions.get(userId);
     if (userSubscriptions) {
-      delete userSubscriptions[room];
-
-      // If user has no more subscriptions, remove user from subscriptions
-      if (Object.keys(userSubscriptions).length === 0) {
+      userSubscriptions.delete(room);
+      if (userSubscriptions.size === 0) {
         this.subscriptions.delete(userId);
       }
     }
 
     // Remove user from room's subscribers
-    delete this.reverseSubscriptions.get(room)?.[userId];
-
-    // If room has no more subscribers, unsubscribe from it
-    if (
-      !this.reverseSubscriptions.get(room) ||
-      Object.keys(this.reverseSubscriptions.get(room) || {}).length === 0
-    ) {
-      console.log("unsubscribing from " + room);
-      this.subscriber.unsubscribe(room);
-      this.reverseSubscriptions.delete(room);
+    const roomSubscribers = this.reverseSubscriptions.get(room);
+    if (roomSubscribers) {
+      roomSubscribers.delete(userId);
+      if (roomSubscribers.size === 0) {
+        console.log(`Unsubscribing from ${room}`);
+        this.subscriber.unsubscribe(room);
+        this.reverseSubscriptions.delete(room);
+      }
     }
 
+    this.userRoomMapping.delete(userId);
+
     console.log({
-      subs: this.subscriptions,
-      revSubs: this.reverseSubscriptions,
+      userRoomMapping: this.userRoomMapping,
+      subscriptions: this.subscriptions,
+      reverseSubscriptions: this.reverseSubscriptions,
     });
   }
 
-  async sendMessage(room: string, message: any) {
-    this.publish(room, {
-      payload: {
-        message
-      },
-    });
+  async sendMessage(room: string, payload: string): Promise<void> {
+    await this.publish(room, payload);
   }
 
-  publish(room: string, message: any) {
-    console.log(`publishing message to ${room}`);
-    this.publisher.publish(room, JSON.stringify(message));
+  private async publish(room: string, message: string): Promise<void> {
+    console.log(`Publishing message to ${room}`);
+    await this.publisher.publish(room, message);
   }
 }
