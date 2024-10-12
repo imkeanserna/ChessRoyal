@@ -7,6 +7,7 @@ import { GameTimer } from './gameTimer';
 import db from "@repo/db/client";
 import { isPromoting } from '@repo/chess/isPromoting';
 import { deleteGameIfBothPlayersAreGuests } from '../services/gameService';
+import { RedisPubSubManager } from '../pubsub/redisClient';
 
 export class ChessGame {
   public id: string;
@@ -206,7 +207,7 @@ export class ChessGame {
       return;
     }
 
-    socketManager.broadcast(
+    RedisPubSubManager.getInstance().sendMessage(
       this.id,
       JSON.stringify({
         event: GameMessages.INIT_GAME,
@@ -228,7 +229,30 @@ export class ChessGame {
           moves: [],
         },
       })
-    );
+    )
+    // socketManager.broadcast(
+    //   this.id,
+    //   JSON.stringify({
+    //     event: GameMessages.INIT_GAME,
+    //     payload: {
+    //       gameId: this.id,
+    //       whitePlayer: {
+    //         id: this.player1UserId,
+    //         name: "Guest",
+    //         isGuest: true,
+    //         remainingTime: player1RemainingTime
+    //       },
+    //       blackPlayer: {
+    //         id: this.player2UserId,
+    //         name: "Guest",
+    //         isGuest: true,
+    //         remainingTime: player2RemainingTime
+    //       },
+    //       fen: this.board.fen(),
+    //       moves: [],
+    //     },
+    //   })
+    // );
   }
 
   public timerEnd(player1RemainingTime?: number, player2RemainingTime?: number) {
