@@ -79,7 +79,6 @@ const ChessMenu: React.FC = () => {
           //   id: payload.userId
           // })
           // initialize the firstPlayer which is white player
-          console.log("Added " + payload)
           setUser({
             id: payload.userId
           })
