@@ -151,8 +151,8 @@ export class GameManager {
     try {
       const { player1RemainingTime, player2RemainingTime } = gameTimer?.getPlayerTimes() || {};
 
-      const updatedWhitePlayerRemainingTime = user.id === game.player1UserId ? player1RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player1RemainingTime;
-      const updatedBlackPlayerRemainingTime = user.id === game.player2UserId ? player2RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player2RemainingTime;
+      const updatedWhitePlayerRemainingTime = user.userId === game.player1UserId ? player1RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player1RemainingTime;
+      const updatedBlackPlayerRemainingTime = user.userId === game.player2UserId ? player2RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player2RemainingTime;
 
       const response = await db.chessGame.update({
         where: { id: gameId },
@@ -162,10 +162,28 @@ export class GameManager {
         }
       });
 
+      console.log({
+        userId: user.userId,
+        gameId,
+        moves: game.getMoves(),
+        whitePlayer: {
+          id: game.player1UserId,
+          name: "Guest",
+          isGuest: true,
+          remainingTime: response.whitePlayerRemainingTime
+        },
+        blackPlayer: {
+          id: game.player2UserId,
+          name: "Guest",
+          isGuest: true,
+          remainingTime: response.blackPlayerRemainingTime
+        }
+      });
+
       this.redisPubSub.sendMessage(gameId, JSON.stringify({
         event: GameMessages.JOIN_ROOM,
         payload: {
-          userId: user.id,
+          userId: user.userId,
           gameId,
           moves: game.getMoves(),
           whitePlayer: {
