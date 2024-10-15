@@ -82,20 +82,27 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   }, [userSelectedMoveIndex]);
 
   useEffect(() => {
-    if (userSelectedMoveIndex !== null) {
-      chess.reset();
-      moves.forEach((move: Move) => {
-        chess.move({
-          from: move.from,
-          to: move.to
+    if (moves.length > 0) {
+      const lastMove = moves[moves.length - 1];
+      if (lastMove.color !== myColor) {
+        // Opponent made a move, reset to the latest position
+        chess.reset();
+        moves.forEach((move: Move) => {
+          chess.move({
+            from: move.from,
+            to: move.to,
+            promotion: move.promotion
+          });
         });
-      });
-      setBoard(chess.board());
-      setUserSelectedMoveIndex(null);
-    } else {
-      setBoard(chess.board());
+        setBoard(chess.board());
+        setLastMove({
+          from: lastMove.from,
+          to: lastMove.to
+        });
+        setUserSelectedMoveIndex(null);
+      }
     }
-  }, [moves]);
+  }, [moves, myColor]);
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, from: Square, piece: { type: PieceSymbol; color: Color }) => {
     resetToOngoingGame();
