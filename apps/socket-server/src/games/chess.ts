@@ -2,11 +2,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { User } from './user';
 import { GameMessages, PlayerWon, GameStatus, KingStatus, GameResultType } from "@repo/chess/gameStatus";
 import { Chess, Move } from 'chess.js';
-import { socketManager } from '../socket-manager';
 import { GameTimer } from './gameTimer';
 import db from "@repo/db/client";
 import { isPromoting } from '@repo/chess/isPromoting';
 import { deleteGameIfBothPlayersAreGuests } from '../services/gameService';
+import { RedisPubSubManager } from '../pubsub/redisClient';
 
 export class ChessGame {
   public id: string;
@@ -118,30 +118,23 @@ export class ChessGame {
     });
 
     if (this.board.isCheck()) {
-      socketManager.broadcast(
-        this.id,
-        JSON.stringify({
-          event: GameMessages.KING_STATUS,
-          payload: {
-            kingStatus: this.board.inCheck() ? KingStatus.CHECKED : this.board.isCheckmate() ? KingStatus.CHECKMATE : KingStatus.SAFE,
-            player: this.board.turn()
-          }
-        })
-      );
+      RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
+        event: GameMessages.KING_STATUS,
+        payload: {
+          kingStatus: this.board.inCheck() ? KingStatus.CHECKED : this.board.isCheckmate() ? KingStatus.CHECKMATE : KingStatus.SAFE,
+          player: this.board.turn()
+        }
+      }));
     }
 
-    // send the move to the other player
-    socketManager.broadcast(
-      this.id,
-      JSON.stringify({
-        event: GameMessages.MOVE,
-        payload: {
-          move,
-          player1RemainingTime,
-          player2RemainingTime
-        }
-      })
-    );
+    RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
+      event: GameMessages.MOVE,
+      payload: {
+        move,
+        player1RemainingTime,
+        player2RemainingTime
+      }
+    }));
 
     if (this.board.isGameOver()) {
       const result: boolean = this.board.isDraw();
@@ -206,7 +199,7 @@ export class ChessGame {
       return;
     }
 
-    socketManager.broadcast(
+    RedisPubSubManager.getInstance().sendMessage(
       this.id,
       JSON.stringify({
         event: GameMessages.INIT_GAME,
@@ -228,7 +221,7 @@ export class ChessGame {
           moves: [],
         },
       })
-    );
+    )
   }
 
   public timerEnd(player1RemainingTime?: number, player2RemainingTime?: number) {
@@ -247,7 +240,7 @@ export class ChessGame {
   }
 
   public exitGame(user: User) {
-    this.gameEnded(GameResultType.RESIGNATION, user.id === this.player1UserId ? PlayerWon.BLACK_WINS : PlayerWon.WHITE_WINS);
+    this.gameEnded(GameResultType.RESIGNATION, user.userId === this.player1UserId ? PlayerWon.BLACK_WINS : PlayerWon.WHITE_WINS);
   }
 
   private calculateMaterialDifference(game: Chess): {
@@ -331,25 +324,22 @@ export class ChessGame {
       return;
     }
 
-    socketManager.broadcast(
-      this.id,
-      JSON.stringify({
-        event: GameMessages.GAME_ENDED,
-        payload: {
-          result,
-          status,
-          whitePlayer: {
-            id: this.player1UserId,
-            name: "Guest",
-            isGuest: true
-          },
-          blackPlayer: {
-            id: this.player2UserId,
-            name: "Guest",
-            isGuest: true
-          }
+    RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
+      event: GameMessages.GAME_ENDED,
+      payload: {
+        result,
+        status,
+        whitePlayer: {
+          id: this.player1UserId,
+          name: "Guest",
+          isGuest: true
+        },
+        blackPlayer: {
+          id: this.player2UserId,
+          name: "Guest",
+          isGuest: true
         }
-      })
-    );
+      }
+    }));
   }
 }

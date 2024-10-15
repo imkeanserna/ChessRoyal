@@ -44,13 +44,15 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     };
   } | null>(null);
   const [moves, setMoves] = useRecoilState(movesAtom);
-  const isMyTurn: boolean = chess.turn() === myColor;
   const [gameOver, setGameOver] = useRecoilState(isGameOverAtom);
   const [isFlipped, setIsFlipped] = useState(false);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [captureMoves, setCaptureMoves] = useState<Square[]>([]);
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(userSelectedMoveIndexAtom);
-  const [lastMove, setLastMove] = useState<{ from: Square, to: Square } | null>(null);
+  const [lastMove, setLastMove] = useState<{ from: Square; to: Square } | null>(null);
+  const [history, setHistory] = useState<Move[][]>([[]]);
+  const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
+  const isMyTurn: boolean = chess.turn() === myColor;
 
   const isHighlightedSquare = (square: Square) => {
     return lastMove && (lastMove.from === square || lastMove.to === square);
@@ -80,22 +82,30 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   }, [userSelectedMoveIndex]);
 
   useEffect(() => {
-    if (userSelectedMoveIndex !== null) {
-      chess.reset();
-      moves.forEach((move: Move) => {
-        chess.move({
-          from: move.from,
-          to: move.to
+    if (moves.length > 0) {
+      const lastMove = moves[moves.length - 1];
+      if (lastMove.color !== myColor) {
+        // Opponent made a move, reset to the latest position
+        chess.reset();
+        moves.forEach((move: Move) => {
+          chess.move({
+            from: move.from,
+            to: move.to,
+            promotion: move.promotion
+          });
         });
-      });
-      setBoard(chess.board());
-      setUserSelectedMoveIndex(null);
-    } else {
-      setBoard(chess.board());
+        setBoard(chess.board());
+        setLastMove({
+          from: lastMove.from,
+          to: lastMove.to
+        });
+        setUserSelectedMoveIndex(null);
+      }
     }
-  }, [moves]);
+  }, [moves, myColor]);
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, from: Square, piece: { type: PieceSymbol; color: Color }) => {
+    resetToOngoingGame();
     if (!isMyTurn || !started || piece.color !== myColor) {
       e.preventDefault();
       return;
@@ -123,7 +133,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
         moveResult = chess.move({
           from,
           to,
-          promotion: 'q' // or whatever promotion you want
+          promotion: 'q'
         });
       } else {
         moveResult = chess.move({
@@ -133,7 +143,12 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
       }
 
       if (moveResult) {
-        setMoves((prevMove) => [...prevMove, moveResult]);
+        // Save the new history
+        const newHistory = [...history.slice(0, currentMoveIndex + 1), [...moves, moveResult]];
+        setHistory(newHistory);
+        setCurrentMoveIndex(newHistory.length - 1);
+
+        setMoves([...moves, moveResult]);
         setLastMove({ from, to });
 
         if (moveResult.san.includes('#')) {
@@ -165,9 +180,22 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     setCaptureMoves([]);
   };
 
+  const resetToOngoingGame = () => {
+    chess.reset();
+    moves.forEach((move: Move) => {
+      chess.move({
+        from: move.from,
+        to: move.to
+      });
+    });
+    setBoard(chess.board());
+    setUserSelectedMoveIndex(null);
+  };
+
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center">
-      Chess Board
+    <div className="w-full h-full flex flex-col justify-center items-center"
+      onClick={resetToOngoingGame}
+    >
       {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
         i = isFlipped ? i + 1 : 8 - i;
         row = isFlipped ? row.slice().reverse() : row;
