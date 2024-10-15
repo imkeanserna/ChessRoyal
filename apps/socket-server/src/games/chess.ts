@@ -113,7 +113,7 @@ export class ChessGame {
     await db.chessMove.create({
       data: {
         gameId: this.id,
-        playerId: user.userId,
+        playerId: user.id,
         move: JSON.stringify(move)
       }
     });

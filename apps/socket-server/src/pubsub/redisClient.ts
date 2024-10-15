@@ -42,6 +42,10 @@ export class RedisPubSubManager {
   }
 
   subscribe(userId: string, room: string, ws: WebSocket): void {
+    if (!userId || !room) {
+      console.error("User ID and room must be provided.");
+      return;
+    }
     // Add room to user's subscriptions
     if (!this.subscriptions.has(userId)) {
       this.subscriptions.set(userId, new Map());
