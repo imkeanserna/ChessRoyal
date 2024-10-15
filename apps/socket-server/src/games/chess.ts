@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { User } from './user';
 import { GameMessages, PlayerWon, GameStatus, KingStatus, GameResultType } from "@repo/chess/gameStatus";
 import { Chess, Move } from 'chess.js';
-import { socketManager } from '../socket-manager';
 import { GameTimer } from './gameTimer';
 import db from "@repo/db/client";
 import { isPromoting } from '@repo/chess/isPromoting';
@@ -119,17 +118,6 @@ export class ChessGame {
     });
 
     if (this.board.isCheck()) {
-      // socketManager.broadcast(
-      //   this.id,
-      //   JSON.stringify({
-      //     event: GameMessages.KING_STATUS,
-      //     payload: {
-      //       kingStatus: this.board.inCheck() ? KingStatus.CHECKED : this.board.isCheckmate() ? KingStatus.CHECKMATE : KingStatus.SAFE,
-      //       player: this.board.turn()
-      //     }
-      //   })
-      // );
-
       RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
         event: GameMessages.KING_STATUS,
         payload: {
@@ -139,18 +127,6 @@ export class ChessGame {
       }));
     }
 
-    // send the move to the other player
-    // socketManager.broadcast(
-    //   this.id,
-    //   JSON.stringify({
-    //     event: GameMessages.MOVE,
-    //     payload: {
-    //       move,
-    //       player1RemainingTime,
-    //       player2RemainingTime
-    //     }
-    //   })
-    // );
     RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
       event: GameMessages.MOVE,
       payload: {
@@ -246,29 +222,6 @@ export class ChessGame {
         },
       })
     )
-    // socketManager.broadcast(
-    //   this.id,
-    //   JSON.stringify({
-    //     event: GameMessages.INIT_GAME,
-    //     payload: {
-    //       gameId: this.id,
-    //       whitePlayer: {
-    //         id: this.player1UserId,
-    //         name: "Guest",
-    //         isGuest: true,
-    //         remainingTime: player1RemainingTime
-    //       },
-    //       blackPlayer: {
-    //         id: this.player2UserId,
-    //         name: "Guest",
-    //         isGuest: true,
-    //         remainingTime: player2RemainingTime
-    //       },
-    //       fen: this.board.fen(),
-    //       moves: [],
-    //     },
-    //   })
-    // );
   }
 
   public timerEnd(player1RemainingTime?: number, player2RemainingTime?: number) {
@@ -371,26 +324,6 @@ export class ChessGame {
       return;
     }
 
-    // socketManager.broadcast(
-    //   this.id,
-    //   JSON.stringify({
-    //     event: GameMessages.GAME_ENDED,
-    //     payload: {
-    //       result,
-    //       status,
-    //       whitePlayer: {
-    //         id: this.player1UserId,
-    //         name: "Guest",
-    //         isGuest: true
-    //       },
-    //       blackPlayer: {
-    //         id: this.player2UserId,
-    //         name: "Guest",
-    //         isGuest: true
-    //       }
-    //     }
-    //   })
-    // );
     RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
       event: GameMessages.GAME_ENDED,
       payload: {

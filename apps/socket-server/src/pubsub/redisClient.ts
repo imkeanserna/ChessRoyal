@@ -1,6 +1,7 @@
 import { User } from "../games/user";
 import { WebSocket } from "ws";
 import Redis from "ioredis";
+import { REDIS_CONFIG } from "../config/config";
 
 interface Subscription {
   room: string;
@@ -21,8 +22,8 @@ export class RedisPubSubManager {
   private userRoomMapping: Map<string, string>;
 
   private constructor() {
-    this.subscriber = new Redis();
-    this.publisher = new Redis();
+    this.subscriber = new Redis(REDIS_CONFIG);
+    this.publisher = new Redis(REDIS_CONFIG);
     this.subscriptions = new Map();
     this.reverseSubscriptions = new Map();
     this.userRoomMapping = new Map();
