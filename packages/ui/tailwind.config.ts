@@ -54,6 +54,10 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        blackPlayer: "#BB9979", // Background color for black player
+        whitePlayer: "#E9E9DF", // Background color for white player
+        customBorder: "#634833", // Custom border color
+        boardBackground: "#3A1A0C", // Board background color
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -73,6 +77,11 @@ const config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      borderWidth: {
+        '12': '12px',
+        '16': '16px',
+        '20': '20px',
       },
     },
   },

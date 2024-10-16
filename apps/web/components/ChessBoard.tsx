@@ -196,41 +196,43 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     <div className="w-full h-full flex flex-col justify-center items-center"
       onClick={resetToOngoingGame}
     >
-      {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
-        i = isFlipped ? i + 1 : 8 - i;
-        row = isFlipped ? row.slice().reverse() : row;
-        return (
-          <div key={i} className="flex">
-            {row.map((square, j) => {
-              j = isFlipped ? 7 - (j % 8) : j % 8;
-              const isMainBoxColor: boolean = (i + j) % 2 !== 0;
-              const squareRepresentation = (String.fromCharCode(97 + j) + '' + i) as Square;
-              const piece = square && square.type;
+      <div className="border-16 border-customBorder">
+        {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
+          i = isFlipped ? i + 1 : 8 - i;
+          row = isFlipped ? row.slice().reverse() : row;
+          return (
+            <div key={i} className="flex">
+              {row.map((square, j) => {
+                j = isFlipped ? 7 - (j % 8) : j % 8;
+                const isMainBoxColor: boolean = (i + j) % 2 !== 0;
+                const squareRepresentation = (String.fromCharCode(97 + j) + '' + i) as Square;
+                const piece = square && square.type;
 
-              return (
-                <ChessSquare
-                  key={j}
-                  onDragStart={(e) => handleDragStart(e, squareRepresentation, square!)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, squareRepresentation)}
-                  onDragEnd={handleDragEnd}
-                  isKingChecked={isKingInCheckSquare(square?.type!, square?.color!, chess)}
-                  isCaptured={captureMoves.includes(squareRepresentation)}
-                  isHighlightedSquare={isHighlightedSquare(squareRepresentation) || false}
-                  isHighlighted={legalMoves.includes(squareRepresentation)}
-                  isMainBoxColor={isMainBoxColor}
-                  piece={piece!}
-                  square={square}
-                  isDragging={draggedPiece?.from === squareRepresentation}
-                  row={i}
-                  col={j}
-                  isFlipped={isFlipped}
-                />
-              );
-            })}
-          </div>
-        );
-      })}
+                return (
+                  <ChessSquare
+                    key={j}
+                    onDragStart={(e) => handleDragStart(e, squareRepresentation, square!)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, squareRepresentation)}
+                    onDragEnd={handleDragEnd}
+                    isKingChecked={isKingInCheckSquare(square?.type!, square?.color!, chess)}
+                    isCaptured={captureMoves.includes(squareRepresentation)}
+                    isHighlightedSquare={isHighlightedSquare(squareRepresentation) || false}
+                    isHighlighted={legalMoves.includes(squareRepresentation)}
+                    isMainBoxColor={isMainBoxColor}
+                    piece={piece!}
+                    square={square}
+                    isDragging={draggedPiece?.from === squareRepresentation}
+                    row={i}
+                    col={j}
+                    isFlipped={isFlipped}
+                  />
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

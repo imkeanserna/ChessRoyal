@@ -55,6 +55,10 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
     return row;
   };
 
+  const woodTexture = isMainBoxColor
+    ? 'bg-blackPlayer' // Background color for black player
+    : 'bg-whitePlayer'; // Background color for white player
+
   return (
     <div
       onDragStart={onDragStart}
@@ -62,22 +66,22 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
       onDrop={onDrop}
       onDragEnd={onDragEnd}
       className={`
+        ${woodTexture}
         ${isHighlightedSquare ? "bg-yellow-200" : ""}
         ${isHighlighted ? "bg-yellow-400" : ""}
-        ${isMainBoxColor ? "bg-gray-400" : "bg-white"}
-        w-16 h-16 relative
+        w-24 h-24 relative
       `}
     >
       {/* Column label (bottom row if white, top row if flipped for black) */}
       {(isFlipped ? row === 8 : row === 1) && (
-        <div className="absolute bottom-0 right-0 text-xs opacity-50 p-1">
+        <div className="absolute bottom-0 right-0 text-lg text-boardBackground font-semibold opacity-50 p-1">
           {getColumnLabel()}
         </div>
       )}
 
       {/* Row label (leftmost column if white, rightmost column if flipped for black) */}
       {(isFlipped ? col === 7 : col === 0) && (
-        <div className="absolute top-0 left-0 text-xs opacity-50 p-1">
+        <div className="absolute top-0 left-0 text-lg text-boardBackground font-semibold opacity-50 p-1">
           {getRowLabel()}
         </div>
       )}
@@ -95,18 +99,18 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
           `}
         >
           <img
-            className={`w-12 pointer-events-none`}
+            className={`w-20 pointer-events-none`}
             src={`/cardinal/${square?.color}/${piece}.svg`}
             alt={`${square?.color} ${piece}`}
           />
           {piece === "k" && gameOver.isGameOver && gameOver.playerWon?.[0]?.toLowerCase() === square?.color ? (
-            <img className="w-6 absolute top-1 right-1" src={`/crown.svg`} alt="Crown" />
+            <img className="w-6 absolute top-1 right-1" src={`/crown.svg`} alt="" />
           ) : null}
           {gameOver.isGameOver && piece === "k" && gameOver.playerWon?.[0]?.toLowerCase() !== square?.color && (
             gameOver.playerWon?.[0]?.toLowerCase() !== "w" ? (
-              <img className="w-6 absolute top-1 right-1" src={`/black-mate.svg`} alt="Black Mate" />
+              <img className="w-6 absolute top-1 right-1" src={`/black-mate.svg`} alt="" />
             ) : (
-              <img className="w-6 absolute top-1 right-1" src={`/white-mate.svg`} alt="White Mate" />
+              <img className="w-6 absolute top-1 right-1" src={`/white-mate.svg`} alt="" />
             )
           )}
         </div>

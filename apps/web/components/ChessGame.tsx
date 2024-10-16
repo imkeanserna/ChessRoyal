@@ -219,7 +219,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-screen bg-boardBackground">
       {isGameOver.playerWon && wonBy && (
         <ModalGameOver
           playerWon={isGameOver.playerWon === GameResultType.DRAW ? GameResultType.DRAW : isGameOver.playerWon}
