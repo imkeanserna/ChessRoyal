@@ -222,6 +222,9 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                   piece={piece!}
                   square={square}
                   isDragging={draggedPiece?.from === squareRepresentation}
+                  row={i}
+                  col={j}
+                  isFlipped={isFlipped}
                 />
               );
             })}

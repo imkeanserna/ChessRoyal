@@ -21,6 +21,9 @@ interface ChessSquareProps {
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragEnd: () => void;
   isDragging: boolean;
+  row: number;
+  col: number;
+  isFlipped: boolean;
 }
 
 const ChessSquare: React.FC<ChessSquareProps> = ({
@@ -35,9 +38,22 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
   isMainBoxColor,
   piece,
   square,
-  isDragging
+  isDragging,
+  row,
+  col,
+  isFlipped
 }) => {
   const gameOver = useRecoilValue(isGameOverAtom);
+
+  // Determine the column label based on whether the board is flipped
+  const getColumnLabel = () => {
+    return String.fromCharCode(97 + col);
+  };
+
+  // Determine the row label based on whether the board is flipped
+  const getRowLabel = () => {
+    return row;
+  };
 
   return (
     <div
@@ -49,9 +65,23 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
         ${isHighlightedSquare ? "bg-yellow-200" : ""}
         ${isHighlighted ? "bg-yellow-400" : ""}
         ${isMainBoxColor ? "bg-gray-400" : "bg-white"}
-        w-16 h-16
+        w-16 h-16 relative
       `}
     >
+      {/* Column label (bottom row if white, top row if flipped for black) */}
+      {(isFlipped ? row === 8 : row === 1) && (
+        <div className="absolute bottom-0 right-0 text-xs opacity-50 p-1">
+          {getColumnLabel()}
+        </div>
+      )}
+
+      {/* Row label (leftmost column if white, rightmost column if flipped for black) */}
+      {(isFlipped ? col === 7 : col === 0) && (
+        <div className="absolute top-0 left-0 text-xs opacity-50 p-1">
+          {getRowLabel()}
+        </div>
+      )}
+
       {square ? (
         <div
           draggable
@@ -67,15 +97,16 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
           <img
             className={`w-12 pointer-events-none`}
             src={`/cardinal/${square?.color}/${piece}.svg`}
+            alt={`${square?.color} ${piece}`}
           />
           {piece === "k" && gameOver.isGameOver && gameOver.playerWon?.[0]?.toLowerCase() === square?.color ? (
-            <img className="w-6 absolute top-1 right-1" src={`/crown.svg`} alt="" />
+            <img className="w-6 absolute top-1 right-1" src={`/crown.svg`} alt="Crown" />
           ) : null}
           {gameOver.isGameOver && piece === "k" && gameOver.playerWon?.[0]?.toLowerCase() !== square?.color && (
             gameOver.playerWon?.[0]?.toLowerCase() !== "w" ? (
-              <img className="w-6 absolute top-1 right-1" src={`/black-mate.svg`} alt="" />
+              <img className="w-6 absolute top-1 right-1" src={`/black-mate.svg`} alt="Black Mate" />
             ) : (
-              <img className="w-6 absolute top-1 right-1" src={`/white-mate.svg`} alt="" />
+              <img className="w-6 absolute top-1 right-1" src={`/white-mate.svg`} alt="White Mate" />
             )
           )}
         </div>
