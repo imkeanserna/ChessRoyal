@@ -67,11 +67,14 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
       onDragEnd={onDragEnd}
       className={`
         ${woodTexture}
-        ${isHighlightedSquare ? "bg-yellow-200" : ""}
-        ${isHighlighted ? "bg-yellow-400" : ""}
+        ${isHighlightedSquare ? "bg-yellow-500" : ""}
         w-24 h-24 relative
       `}
     >
+      {isHighlighted && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-gray-950 shadow-md rounded-full opacity-40" />
+      )}
+
       {/* Column label (bottom row if white, top row if flipped for black) */}
       {(isFlipped ? row === 8 : row === 1) && (
         <div className="absolute bottom-0 right-0 text-lg text-boardBackground font-semibold opacity-50 p-1">
@@ -91,13 +94,17 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
           draggable
           className={`
             cursor-grab active:cursor-grabbing
-            ${isCaptured ? "bg-red-400" : ""}
-            ${isKingChecked ? "bg-red-200" : ""}
+            ${isKingChecked ? "bg-red-600" : ""}
             w-full h-full relative flex justify-center items-center
             ${isDragging ? 'opacity-0' : 'opacity-100'}
             transition-opacity duration-200
           `}
         >
+          {isCaptured && (
+            <div className="absolute inset-0 flex justify-center items-center">
+              <div className="w-8 h-8 bg-red-400 rounded-full shadow-md animate-pulse opacity-70" />
+            </div>
+          )}
           <img
             className={`w-20 pointer-events-none`}
             src={`/cardinal/${square?.color}/${piece}.svg`}
