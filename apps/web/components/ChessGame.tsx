@@ -211,7 +211,9 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         setOpen(true);
         break;
       case GameResultType.RESIGNATION:
-        alert("A player has exited the game.");
+        setWonBy(GameResultType.TIMEOUT);
+        setIsGameOver({ isGameOver: true, playerWon: payload.result });
+        setOpen(true);
         break;
       default:
         console.warn("Unhandled game end status:", payload.status);

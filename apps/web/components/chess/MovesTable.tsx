@@ -27,13 +27,13 @@ const MovesTable: React.FC = () => {
         {moves.map((move, index) =>
           index % 2 === 0 ? (
             <div className="flex flex-col sm:flex-row items-center" key={index}>
-              <span className="font-semibold mb-2 sm:mb-0 sm:mr-4 md:mr-8 lg:mr-16 w-full sm:w-auto text-center sm:text-left">
+              <span className="text-lg font-semibold mb-2 sm:mb-0 sm:mr-4 md:mr-8 lg:mr-16 w-full sm:w-auto text-center sm:text-left">
                 {Math.floor(index / 2) + 1}.
               </span>
               <div className="flex-1 w-full sm:w-auto mb-2 sm:mb-0 sm:mr-4 md:mr-8 lg:mr-28">
                 <Button
                   onClick={() => handleMoveClick(index)}
-                  className={`sm:w-full p-4 sm:p-6 rounded-md ${selectedMove === index
+                  className={`text-lg sm:w-full p-4 sm:p-6 rounded-md ${selectedMove === index
                     ? 'bg-white text-black hover:bg-gray-200 hover:text-black'
                     : 'bg-transparent text-white hover:bg-gray-200 hover:text-black'
                     }`}
@@ -45,7 +45,7 @@ const MovesTable: React.FC = () => {
                 <div className="flex-1 w-full sm:w-auto">
                   <Button
                     onClick={() => handleMoveClick(index + 1)}
-                    className={`sm:w-full p-4 sm:p-6 rounded-md ${selectedMove === index + 1
+                    className={`text-lg sm:w-full p-4 sm:p-6 rounded-md ${selectedMove === index + 1
                       ? 'bg-white text-black hover:bg-gray-200 hover:text-black'
                       : 'bg-transparent text-white hover:bg-gray-200 hover:text-black'
                       }`}

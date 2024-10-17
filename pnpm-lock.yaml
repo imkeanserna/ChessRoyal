@@ -87,6 +87,9 @@ importers:
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
+      lucide-react:
+        specifier: ^0.395.0
+        version: 0.395.0(react@18.2.0)
       next:
         specifier: 14.2.4
         version: 14.2.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
