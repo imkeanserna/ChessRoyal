@@ -193,10 +193,10 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center"
+    <div className="my-4 flex flex-col justify-center items-center"
       onClick={resetToOngoingGame}
     >
-      <div className="border-16 border-customBorder">
+      <div className="border-16 border-customBorder rounded-lg shadow-[5px_5px_15px_rgba(128,128,128,0.4)]">
         {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
           i = isFlipped ? i + 1 : 8 - i;
           row = isFlipped ? row.slice().reverse() : row;
