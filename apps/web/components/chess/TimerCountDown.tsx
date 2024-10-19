@@ -41,11 +41,19 @@ const TimerCountDown: React.FC<TimerCountDownProps> = ({ duration, isPaused }) =
   }, [remainingTime, isPaused]);
 
   const minutes: number = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds: number = Math.floor((remainingTime % (1000 * 60)) / 1000);
+  const seconds: string = String(Math.floor((remainingTime % (1000 * 60)) / 1000)).padStart(2, '0');
 
-  return <div>
-    {minutes}m :{seconds}s
-  </div>
+  return (
+    <div className="px-6 py-2 rounded-md border border-gray-300 space-x-2 text-white mx-auto inline-block">
+      <span className="text-2xl">
+        {minutes}
+      </span>
+      <span className="text-2xl">:</span>
+      <span className="text-2xl">
+        {seconds}
+      </span>
+    </div>
+  );
 }
 
 export default TimerCountDown;

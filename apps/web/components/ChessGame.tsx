@@ -211,7 +211,9 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         setOpen(true);
         break;
       case GameResultType.RESIGNATION:
-        alert("A player has exited the game.");
+        setWonBy(GameResultType.TIMEOUT);
+        setIsGameOver({ isGameOver: true, playerWon: payload.result });
+        setOpen(true);
         break;
       default:
         console.warn("Unhandled game end status:", payload.status);
@@ -219,7 +221,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full min-h-screen bg-boardBackground flex items-center justify-center py-4">
       {isGameOver.playerWon && wonBy && (
         <ModalGameOver
           playerWon={isGameOver.playerWon === GameResultType.DRAW ? GameResultType.DRAW : isGameOver.playerWon}
@@ -230,8 +232,8 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       )}
       <div>
         {blackPlayer && whitePlayer ? (
-          <div className="grid grid-cols-12">
-            <div className="col-span-9">
+          <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-8 lg:gap-10">
+            <div className="text-end">
               <TimerCountDown
                 duration={user?.id === blackPlayer.id ? blackPlayer.remainingTime : whitePlayer.remainingTime}
                 isPaused={chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b')}
@@ -252,9 +254,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
                 isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
               />
             </div>
-            <div className="col-span-3">
-              <MovesTable />
-            </div>
+            <MovesTable />
           </div>
         ) : (
           <div>Loading...</div>
