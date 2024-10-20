@@ -57,7 +57,33 @@ class WebSocketGameServer {
     console.error("WebSocket error:", error);
   }
 
+  private validateDatabaseURL(databaseURL: string | undefined): void {
+    if (!databaseURL) {
+      throw new Error("DATABASE_URL is not defined");
+    }
+
+    // Check if the URL is for a third-party database
+    const isThirdParty = databaseURL.includes("aivencloud.com");
+
+    if (!isThirdParty) {
+      console.log("Using a local PostgreSQL database.");
+      // Ensure the database URL points to localhost
+      if (!databaseURL.includes("localhost")) {
+        throw new Error("Invalid DATABASE_URL: Must point to localhost for local setup.");
+      }
+    } else {
+      console.log("Using an Aiven Cloud PostgreSQL database.");
+    }
+  }
+
   public start(): void {
+    try {
+      this.validateDatabaseURL(process.env.DATABASE_URL);
+    } catch (error: any) {
+      console.error(error.message);
+      process.exit(1);
+    }
+
     this.wss.on("connection", (ws: WebSocket, req: IncomingMessage) => this.handleConnection(ws, req));
 
     this.server.listen(PORT, () => {
