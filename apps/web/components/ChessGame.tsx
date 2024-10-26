@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import TimerCountDown from "./chess/TimerCountDown";
 import MovesTable from "./chess/MovesTable";
 import ModalGameOver from "./ui/ModalGameOver";
+import ThemeToggle from "@repo/ui/components/ui/themeToggle";
 
 interface ChessGameProps {
   gameId: string;
@@ -221,7 +222,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-boardBackground flex items-center justify-center py-4">
+    <div className="w-full min-h-screen  flex items-center justify-center py-4">
       {isGameOver.playerWon && wonBy && (
         <ModalGameOver
           playerWon={isGameOver.playerWon === GameResultType.DRAW ? GameResultType.DRAW : isGameOver.playerWon}
@@ -230,6 +231,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
           setOpen={setOpen}
         />
       )}
+      <ThemeToggle />
       <div>
         {blackPlayer && whitePlayer ? (
           <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-8 lg:gap-10">
