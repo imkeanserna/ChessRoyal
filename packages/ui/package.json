@@ -40,6 +40,9 @@
       "./src/components/*.ts"
     ],
     "./socket/*": "./src/socket/*.tsx",
-    "./context/*": "./src/context/*.ts"
+    "./context/*": [
+      "./src/context/*.ts",
+      "./src/context/*.tsx"
+    ]
   }
 }

@@ -20,7 +20,7 @@ model Player {
   joinedAt    DateTime      @default(now())
   ChessGame   ChessGame?    @relation(fields: [chessGameId], references: [id])
   chessGameId String?
-  chessMove   ChessMove[]
+  // chessMove   ChessMove[]
   chessResult ChessResult[]
 }
 
@@ -44,7 +44,7 @@ model ChessMove {
   id        String    @id @default(cuid())
   game      ChessGame @relation(fields: [gameId], references: [id])
   gameId    String
-  player    Player    @relation(fields: [playerId], references: [id])
+  // player    Player    @relation(fields: [playerId], references: [id])
   playerId  String
   move      String
   createdAt DateTime  @default(now())
