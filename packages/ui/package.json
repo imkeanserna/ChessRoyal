@@ -11,8 +11,8 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
     "@repo/store": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/node": "^20",
     "@types/react": "^18",
     "autoprefixer": "^10.4.19",
@@ -22,13 +22,20 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-dialog": "^1.1.1",
+    "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.395.0",
+    "next": "14.2.4",
+    "next-auth": "^4.24.10",
+    "react-hook-form": "^7.53.1",
+    "react-icons": "^5.3.0",
     "tailwind-merge": "^2.3.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.23.8"
   },
   "exports": {
     "./globals.css": "./src/globals.css",
@@ -43,6 +50,7 @@
     "./context/*": [
       "./src/context/*.ts",
       "./src/context/*.tsx"
-    ]
+    ],
+    "./schema": "./src/schema/index.ts"
   }
 }

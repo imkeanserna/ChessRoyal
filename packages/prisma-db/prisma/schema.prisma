@@ -13,6 +13,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id          String   @id @default(cuid())
+  displayName String
+  email       String
+  password    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+}
+
 model Player {
   id          String        @id @unique
   name        String

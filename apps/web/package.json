@@ -13,10 +13,13 @@
     "@repo/db": "workspace:*",
     "@repo/store": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@types/bcrypt": "^5.0.2",
+    "bcrypt": "^5.1.1",
     "chess.js": "1.0.0-beta.8",
     "dotenv": "^16.4.5",
     "lucide-react": "^0.395.0",
     "next": "14.2.4",
+    "next-auth": "^4.24.10",
     "react": "^18",
     "react-dom": "^18",
     "recoil": "^0.7.7"
