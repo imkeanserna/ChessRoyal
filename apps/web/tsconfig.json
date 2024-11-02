@@ -12,6 +12,8 @@
   },
   "include": [
     "next-env.d.ts",
+    "next.config.js",
+    "types/next-auth.d.ts",
     "next.config.mjs",
     "postcss.config.mjs",
     "**/*.ts",
