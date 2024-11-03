@@ -85,18 +85,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async signIn({ user, account }) {
-      const email = user.email;
 
-      if (!email) {
+      const email = user.email;
+      const profileName = user.name;
+
+      if (!email || !profileName) {
         return false;
       }
 
       const existingUser = await getUserByEmail(email);
 
       if (!existingUser) {
-        await addUser({ email });
+        // For OAuth providers (Google/GitHub)
+        if (account && account.provider !== "credentials") {
+          try {
+            await addUser({
+              email: email,
+              displayName: user.name || profileName || email.split('@')[0], // Fallback to email username if no name
+            });
+            return true;
+          } catch (error) {
+            console.error("Error creating user:", error);
+            return false;
+          }
+        }
+        // For credentials provider
+        await addUser({
+          email: email
+        });
       } else {
-        if (existingUser.password && account?.provider != "credentials") {
+        // Prevent OAuth sign-in if user exists with password
+        if (existingUser.password && account?.provider !== "credentials") {
           return false;
         }
       }
