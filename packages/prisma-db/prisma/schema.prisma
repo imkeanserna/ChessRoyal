@@ -15,9 +15,9 @@ datasource db {
 
 model User {
   id          String   @id @default(cuid())
-  displayName String
-  email       String
-  password    String
+  displayName String?
+  email       String   @unique
+  password    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
 }

@@ -7,8 +7,9 @@ interface IAddUser {
 }
 
 export const getUserByEmail = async (email: string) => {
-  const result = await db.user.findUnique({ where: { email } });
-
+  const result = await db.user.findUnique({
+    where: { email }
+  });
   return result ?? null;
 };
 
@@ -17,11 +18,17 @@ export const addUser = async ({
   displayName,
   password
 }: IAddUser) => {
-  await db.user.create({
-    data: {
-      email,
-      password,
-      displayName,
-    },
-  });
+  try {
+    const user = await db.user.create({
+      data: {
+        email,
+        displayName: displayName || email.split('@')[0], // Fallback to email username if no display name
+        password,
+      },
+    });
+    return user;
+  } catch (error) {
+    console.error("Error in addUser:", error);
+    throw error;
+  }
 };
