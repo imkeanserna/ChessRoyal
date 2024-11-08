@@ -6,13 +6,13 @@ export class User {
   public userId: string;
   public id: string;
   public name: string;
-  public isGuest?: boolean;
+  public isGuest: boolean;
 
-  constructor(socket: WebSocket, token?: string) {
+  constructor(socket: WebSocket, token?: string, isGuest: boolean) {
     this.socket = socket;
     this.userId = token || "";
     this.id = uuidv4();
     this.name = "Guest";
-    this.isGuest = true;
+    this.isGuest = isGuest;
   }
 }

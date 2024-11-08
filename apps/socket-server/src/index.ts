@@ -1,5 +1,6 @@
 import { createServer, IncomingMessage } from "http";
 import { WebSocket, WebSocketServer } from "ws";
+import { GameMessages } from "@repo/chess/gameStatus";
 import { GameManager } from "./game-manager";
 import { User } from "./games/user";
 import url from "url";
@@ -32,20 +33,43 @@ class WebSocketGameServer {
   }
 
   private handleConnection(ws: WebSocket, req: IncomingMessage): void {
+    let user: User | undefined;
     console.log("Client connected");
 
-    const token = this.getTokenFromRequest(req);
-    if (!token) {
-      console.error("No token provided");
-      ws.close(1008, "Token required");
-      return;
-    }
+    ws.on("message", async (payload) => {
+      const { event, data } = JSON.parse(payload.toString())
 
-    const user = new User(ws, token);
-    this.gameManager.addUser(user);
+      if (event == "auth") {
+        console.log("Auth event received");
+        user = new User(ws, data.id, data.isGuest);
+        this.gameManager.addUser(user);
+        return;
+      } else if (user) {
+        // Ensure user is defined before using
+        console.log("CHECKPOINTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTt");
+        console.log(user);
+        if (this.isGameEvent(event)) {
+          // Delegate game events to GameManager
+          await this.gameManager.handleGameEvent(user, { event, payload: data });
+        } else {
+          console.warn("Unhandled event type:", event);
+        }
+      } else {
+        console.log("User not authenticated, cannot add to game");
+      }
+    });
 
     ws.on("error", this.handleError);
-    ws.on("close", () => this.handleDisconnection(user));
+    ws.on("close", () => {
+      if (user) {
+        this.handleDisconnection(user);
+      }
+    });
+  }
+
+  private isGameEvent(event: string): boolean {
+    // Define which events are game-related
+    return Object.values(GameMessages).includes(event as GameMessages);
   }
 
   private handleDisconnection(user: User): void {

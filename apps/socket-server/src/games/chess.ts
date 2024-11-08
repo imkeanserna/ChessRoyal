@@ -148,6 +148,28 @@ export class ChessGame {
     }
   }
 
+  async addFirstPlayer(player1UserId: string) {
+    try {
+      // Upsert player to avoid duplication
+      const player1 = await db.player.upsert({
+        where: { id: player1UserId },
+        update: {}, // If player already exists, do nothing
+        create: {
+          id: player1UserId,
+          name: "Player 1",
+          isGuest: true,
+        },
+      });
+
+      // Update the game to set player1UserId and status if game is new
+      if (!this.player1UserId) {
+        this.player1UserId = player1UserId;
+      }
+    } catch (error) {
+      console.error("Error adding first player:", error);
+    }
+  }
+
   async addSecondPlayer(player2UserId: string) {
     if (this.status !== GameStatus.NOT_STARTED) {
       console.error(`Cannot add second player. Game ${this.id} is not completed`);
@@ -159,14 +181,27 @@ export class ChessGame {
       return;
     }
 
+
     this.player2UserId = player2UserId;
     this.status = GameStatus.IN_PROGRESS;
 
     // after the initialization the whitePlayer should start the time (let test the 10mins)
     this.gameTimer = new GameTimer(10 * 60 * 1000, 10 * 60 * 1000);
+
     const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
 
     try {
+      // Upsert second player to avoid duplication
+      const player2 = await db.player.upsert({
+        where: { id: player2UserId },
+        update: {}, // If player already exists, do nothing
+        create: {
+          id: player2UserId,
+          name: "Player 2",
+          isGuest: true,
+        },
+      });
+
       const response = await db.chessGame.create({
         data: {
           id: this.id,
@@ -177,19 +212,9 @@ export class ChessGame {
           whitePlayerRemainingTime: player1RemainingTime || 0,
           blackPlayerRemainingTime: player2RemainingTime || 0,
           players: {
-            create: [
-              {
-                id: this.player1UserId,
-                name: "Player 1",
-                isGuest: true,
-                // chessGameId: this.id
-              },
-              {
-                id: this.player2UserId,
-                name: "Player 2",
-                isGuest: true,
-                // chessGameId: this.id
-              }
+            connect: [
+              { id: this.player1UserId }, // Connect existing Player 1
+              { id: this.player2UserId }  // Connect existing Player 2
             ]
           }
         }
