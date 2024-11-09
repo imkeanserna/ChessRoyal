@@ -41,7 +41,6 @@ export class ChessGame {
   }
 
   async move(user: User, move: Move) {
-    console.log("nmove")
     if (this.status !== GameStatus.IN_PROGRESS) {
       console.error(`Cannot move. Game ${this.id} is not in progress`);
       return;
@@ -71,7 +70,7 @@ export class ChessGame {
     const { player1RemainingTime, player2RemainingTime } = this.gameTimer?.getPlayerTimes() || {};
 
     try {
-      const response = await db.chessGame.update({
+      await db.chessGame.update({
         where: {
           id: this.id,
         },
@@ -148,29 +147,28 @@ export class ChessGame {
     }
   }
 
-  async addFirstPlayer(player1UserId: string) {
+  async addFirstPlayer(user: User) {
     try {
-      // Upsert player to avoid duplication
-      const player1 = await db.player.upsert({
-        where: { id: player1UserId },
-        update: {}, // If player already exists, do nothing
+      await db.player.upsert({
+        where: { id: user.userId },
+        update: {},
         create: {
-          id: player1UserId,
-          name: "Player 1",
-          isGuest: true,
+          id: user.userId,
+          name: user.name,
+          isGuest: user.isGuest,
         },
       });
 
       // Update the game to set player1UserId and status if game is new
       if (!this.player1UserId) {
-        this.player1UserId = player1UserId;
+        this.player1UserId = user.userId;
       }
     } catch (error) {
       console.error("Error adding first player:", error);
     }
   }
 
-  async addSecondPlayer(player2UserId: string) {
+  async addSecondPlayer(user: User) {
     if (this.status !== GameStatus.NOT_STARTED) {
       console.error(`Cannot add second player. Game ${this.id} is not completed`);
       return;
@@ -182,7 +180,7 @@ export class ChessGame {
     }
 
 
-    this.player2UserId = player2UserId;
+    this.player2UserId = user.userId;
     this.status = GameStatus.IN_PROGRESS;
 
     // after the initialization the whitePlayer should start the time (let test the 10mins)
@@ -193,16 +191,16 @@ export class ChessGame {
     try {
       // Upsert second player to avoid duplication
       const player2 = await db.player.upsert({
-        where: { id: player2UserId },
-        update: {}, // If player already exists, do nothing
+        where: { id: user.userId },
+        update: {},
         create: {
-          id: player2UserId,
-          name: "Player 2",
-          isGuest: true,
+          id: user.userId,
+          name: user.name,
+          isGuest: user.isGuest,
         },
       });
 
-      const response = await db.chessGame.create({
+      const gameCreated = await db.chessGame.create({
         data: {
           id: this.id,
           status: this.status,
@@ -213,40 +211,49 @@ export class ChessGame {
           blackPlayerRemainingTime: player2RemainingTime || 0,
           players: {
             connect: [
-              { id: this.player1UserId }, // Connect existing Player 1
-              { id: this.player2UserId }  // Connect existing Player 2
+              { id: this.player1UserId },
+              { id: this.player2UserId }
             ]
           }
+        },
+        include: {
+          players: true
         }
       });
+      console.log("Game createeeeeeeeeeeeeeeeeeeeeeeeeed")
+      console.log(gameCreated)
+
+      // Find players by their IDs
+      const whitePlayer = gameCreated.players.find(player => player.id === this.player1UserId);
+      const blackPlayer = gameCreated.players.find(player => player.id === this.player2UserId);
+
+      RedisPubSubManager.getInstance().sendMessage(
+        this.id,
+        JSON.stringify({
+          event: GameMessages.INIT_GAME,
+          payload: {
+            gameId: this.id,
+            whitePlayer: {
+              id: whitePlayer?.id,
+              name: whitePlayer?.name,
+              isGuest: whitePlayer?.isGuest,
+              remainingTime: player1RemainingTime
+            },
+            blackPlayer: {
+              id: blackPlayer?.id,
+              name: blackPlayer?.name,
+              isGuest: blackPlayer?.isGuest,
+              remainingTime: player2RemainingTime
+            },
+            fen: this.board.fen(),
+            moves: [],
+          },
+        })
+      );
     } catch (error) {
       console.error("Error in addSecondPlayer", error);
       return;
     }
-
-    RedisPubSubManager.getInstance().sendMessage(
-      this.id,
-      JSON.stringify({
-        event: GameMessages.INIT_GAME,
-        payload: {
-          gameId: this.id,
-          whitePlayer: {
-            id: this.player1UserId,
-            name: "Guest",
-            isGuest: true,
-            remainingTime: player1RemainingTime
-          },
-          blackPlayer: {
-            id: this.player2UserId,
-            name: "Guest",
-            isGuest: true,
-            remainingTime: player2RemainingTime
-          },
-          fen: this.board.fen(),
-          moves: [],
-        },
-      })
-    )
   }
 
   public timerEnd(player1RemainingTime?: number, player2RemainingTime?: number) {
@@ -311,7 +318,7 @@ export class ChessGame {
     this.status = GameStatus.COMPLETED;
 
     try {
-      const response = await db.chessResult.upsert({
+      await db.chessResult.upsert({
         where: {
           gameId: this.id,
         },

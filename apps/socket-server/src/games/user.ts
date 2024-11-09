@@ -8,11 +8,11 @@ export class User {
   public name: string;
   public isGuest: boolean;
 
-  constructor(socket: WebSocket, token?: string, isGuest: boolean) {
+  constructor(socket: WebSocket, userId: string, name: string, isGuest: boolean) {
     this.socket = socket;
-    this.userId = token || "";
+    this.userId = userId;
     this.id = uuidv4();
-    this.name = "Guest";
+    this.name = name;
     this.isGuest = isGuest;
   }
 }

@@ -35,6 +35,7 @@ export const SocketContextProvider: React.FC<SocketContextProviderProps> = ({
           event: "auth",
           data: {
             id: user.id!,
+            name: user.name,
             isGuest: false,
           },
         }),
@@ -53,6 +54,7 @@ export const SocketContextProvider: React.FC<SocketContextProviderProps> = ({
           event: "auth",
           data: {
             id: guestId,
+            name: "Guest",
             isGuest: true,
           },
         }),

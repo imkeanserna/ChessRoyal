@@ -22,15 +22,15 @@ class WebSocketGameServer {
     this.gameManager = new GameManager();
   }
 
-  private getTokenFromRequest(req: IncomingMessage): string | undefined {
-    const parsedUrl = url.parse(req.url || '', true);
-    const tokenQuery = parsedUrl.query.token;
-
-    if (Array.isArray(tokenQuery)) {
-      return tokenQuery[0];
-    }
-    return typeof tokenQuery === 'string' ? tokenQuery : undefined;
-  }
+  // private getTokenFromRequest(req: IncomingMessage): string | undefined {
+  //   const parsedUrl = url.parse(req.url || '', true);
+  //   const tokenQuery = parsedUrl.query.token;
+  //
+  //   if (Array.isArray(tokenQuery)) {
+  //     return tokenQuery[0];
+  //   }
+  //   return typeof tokenQuery === 'string' ? tokenQuery : undefined;
+  // }
 
   private handleConnection(ws: WebSocket, req: IncomingMessage): void {
     let user: User | undefined;
@@ -40,16 +40,11 @@ class WebSocketGameServer {
       const { event, data } = JSON.parse(payload.toString())
 
       if (event == "auth") {
-        console.log("Auth event received");
-        user = new User(ws, data.id, data.isGuest);
+        user = new User(ws, data.id, data.name, data.isGuest);
         this.gameManager.addUser(user);
         return;
       } else if (user) {
-        // Ensure user is defined before using
-        console.log("CHECKPOINTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTt");
-        console.log(user);
         if (this.isGameEvent(event)) {
-          // Delegate game events to GameManager
           await this.gameManager.handleGameEvent(user, { event, payload: data });
         } else {
           console.warn("Unhandled event type:", event);
@@ -68,7 +63,6 @@ class WebSocketGameServer {
   }
 
   private isGameEvent(event: string): boolean {
-    // Define which events are game-related
     return Object.values(GameMessages).includes(event as GameMessages);
   }
 

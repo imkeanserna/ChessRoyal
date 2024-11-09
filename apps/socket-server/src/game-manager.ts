@@ -28,7 +28,6 @@ export class GameManager {
   }
 
   addUser(user: User) {
-    console.log("Adding user: ", user.id);
     this.users.set(user.id, user);
     this.addHandler(user);
   }
@@ -54,17 +53,11 @@ export class GameManager {
   }
 
   private addHandler(user: User): void {
-    // Subscribe the user to the 'games' channel
-    // this.redisPubSub.subscribe(user.id, 'games', user.socket);
-
     // Set up WebSocket message handler
-    console.log("Adding handler 2: ", user.id);
     user.socket.on('message', (data: WebSocket) => {
-      console.log("Adding handler 3: ", user.id);
       try {
         const message = data.toString();
         const gameEvent: any = JSON.parse(message);
-        console.log("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
         this.handleGameEvent(user, gameEvent);
       } catch (error) {
         console.error('Error processing WebSocket message:', error);
@@ -74,7 +67,6 @@ export class GameManager {
 
   public async handleGameEvent(user: User, gameEvent: GameEvent): Promise<void> {
     const { event, payload } = gameEvent;
-    console.log("event: ", event, "payload: ", payload);
 
     switch (event) {
       case GameMessages.INIT_GAME:
@@ -109,9 +101,9 @@ export class GameManager {
       }
 
       // Subscribe the second player to the game channel
-      this.redisPubSub.subscribe(user.userId, game.id, user.socket);
+      this.redisPubSub.subscribe(user.id, game.id, user.socket);
 
-      await game.addSecondPlayer(user.userId);
+      await game.addSecondPlayer(user);
       this.createTimer(game.id);
       this.pendingGameId = null;
     } else {
@@ -120,10 +112,10 @@ export class GameManager {
       this.games.set(game.id, game);
 
       // Subscribe the first player to the game channel
-      this.redisPubSub.subscribe(user.userId, game.id, user.socket);
+      this.redisPubSub.subscribe(user.id, game.id, user.socket);
 
       // add first player
-      await game.addFirstPlayer(user.userId);
+      await game.addFirstPlayer(user);
 
       this.redisPubSub.sendMessage(game.id, JSON.stringify({
         event: GameMessages.GAME_ADDED,
@@ -157,7 +149,7 @@ export class GameManager {
     this.redisPubSub.subscribe(user.id, game.id, user.socket);
 
     if (!game.player2UserId) {
-      await game.addSecondPlayer(user.id);
+      await game.addSecondPlayer(user);
       this.createTimer(gameId);
       this.pendingGameId = null;
       return;
