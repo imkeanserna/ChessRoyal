@@ -44,13 +44,13 @@ const ChessMenu: React.FC = () => {
       whitePlayer: {
         id: payload.whitePlayer.id,
         name: payload.whitePlayer.name,
-        isGuest: true,
+        isGuest: payload.whitePlayer.isGuest,
         remainingTime: payload.whitePlayer.remainingTime
       },
       blackPlayer: {
         id: payload.blackPlayer.id,
         name: payload.blackPlayer.name,
-        isGuest: true,
+        isGuest: payload.whitePlayer.isGuest,
         remainingTime: payload.blackPlayer.remainingTime
       }
     });

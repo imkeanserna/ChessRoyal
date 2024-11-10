@@ -16,6 +16,7 @@ import TimerCountDown from "./chess/TimerCountDown";
 import MovesTable from "./chess/MovesTable";
 import ModalGameOver from "./ui/ModalGameOver";
 import ThemeToggle from "@repo/ui/components/ui/themeToggle";
+import PlayerTimer from "./ui/PlayerTimer";
 
 interface ChessGameProps {
   gameId: string;
@@ -221,6 +222,34 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
     }
   };
 
+  // Determine if the current user is playing as black
+  const isPlayingAsBlack = user?.id === blackPlayer?.id;
+
+  // Helper function to determine if a timer should be paused
+  const isTimerPaused = (playerColor: string) => {
+    const isWhite = playerColor === 'white';
+    return chess.turn() !== (isWhite ? 'w' : 'b');
+  };
+
+  // Get opponent and current player info based on user's color
+  const getCurrentPlayerInfo = () => {
+    const player: any = isPlayingAsBlack ? blackPlayer : whitePlayer;
+    return {
+      name: player.name,
+      remainingTime: player.remainingTime,
+      isPaused: isTimerPaused(isPlayingAsBlack ? 'black' : 'white')
+    };
+  };
+
+  const getOpponentInfo = () => {
+    const player: any = isPlayingAsBlack ? whitePlayer : blackPlayer;
+    return {
+      name: player.name,
+      remainingTime: player.remainingTime,
+      isPaused: isTimerPaused(isPlayingAsBlack ? 'white' : 'black')
+    };
+  };
+
   return (
     <div className="w-full min-h-screen  flex items-center justify-center py-4">
       {isGameOver.playerWon && wonBy && (
@@ -236,10 +265,15 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         {blackPlayer && whitePlayer ? (
           <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-8 lg:gap-10">
             <div className="text-end">
-              <TimerCountDown
-                duration={user?.id === blackPlayer.id ? blackPlayer.remainingTime : whitePlayer.remainingTime}
-                isPaused={chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b')}
+              <PlayerTimer
+                playerName={getOpponentInfo().name}
+                duration={getOpponentInfo().remainingTime}
+                isPaused={getOpponentInfo().isPaused}
               />
+              {/* <TimerCountDown */}
+              {/*   duration={user?.id === blackPlayer.id ? blackPlayer.remainingTime : whitePlayer.remainingTime} */}
+              {/*   isPaused={chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b')} */}
+              {/* /> */}
               <Suspense fallback={<div>Loading...</div>}>
                 <ChessBoard
                   started={started}
@@ -251,10 +285,15 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
                   myColor={myColor}
                 />
               </Suspense>
-              <TimerCountDown
-                duration={user?.id === whitePlayer.id ? whitePlayer.remainingTime : blackPlayer.remainingTime}
-                isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
+              <PlayerTimer
+                playerName={getCurrentPlayerInfo().name}
+                duration={getCurrentPlayerInfo().remainingTime}
+                isPaused={getCurrentPlayerInfo().isPaused}
               />
+              {/* <TimerCountDown */}
+              {/*   duration={user?.id === whitePlayer.id ? whitePlayer.remainingTime : blackPlayer.remainingTime} */}
+              {/*   isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))} */}
+              {/* /> */}
             </div>
             <MovesTable />
           </div>
