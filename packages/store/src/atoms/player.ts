@@ -54,15 +54,15 @@ export const gameMetadataSelector = selector<Players | null>({
         const { game } = await response.json();
         return {
           blackPlayer: {
-            id: game.players[1].id || "",
-            name: "",
-            isGuest: true,
+            id: game.players[1].id,
+            name: game.players[1].name,
+            isGuest: game.players[1].isGuest,
             remainingTime: game.blackPlayerRemainingTime || 0,
           },
           whitePlayer: {
-            id: game.players[0].id || "",
-            name: "",
-            isGuest: true,
+            id: game.players[0].id,
+            name: game.players[0].name,
+            isGuest: game.players[0].isGuest,
             remainingTime: game.whitePlayerRemainingTime || 0,
           },
         };

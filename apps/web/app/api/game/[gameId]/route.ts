@@ -24,7 +24,8 @@ export async function GET(req: NextRequest, { params }: {
       players: {
         select: {
           id: true,
-          name: true
+          name: true,
+          isGuest: true,
         }
       }
     }

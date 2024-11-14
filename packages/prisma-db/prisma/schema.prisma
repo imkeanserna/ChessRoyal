@@ -39,7 +39,7 @@ model Player {
 }
 
 model ChessGame {
-  id String @id @unique
+  id String @id
 
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @default(now())

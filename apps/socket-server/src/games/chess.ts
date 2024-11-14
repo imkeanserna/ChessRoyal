@@ -151,7 +151,9 @@ export class ChessGame {
     try {
       await db.player.upsert({
         where: { id: user.userId },
-        update: {},
+        update: {
+          id: user.userId
+        },
         create: {
           id: user.userId,
           name: user.name,
@@ -192,7 +194,9 @@ export class ChessGame {
       // Upsert second player to avoid duplication
       const player2 = await db.player.upsert({
         where: { id: user.userId },
-        update: {},
+        update: {
+          id: user.userId
+        },
         create: {
           id: user.userId,
           name: user.name,
