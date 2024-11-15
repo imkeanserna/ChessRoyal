@@ -12,7 +12,7 @@ import { isPromoting } from "@repo/chess/isPromoting";
 import { isCheckAtom, isGameOverAtom, movesAtom } from "@repo/store/chessBoard";
 import { userAtom } from "@repo/store/user";
 import { useRouter } from "next/navigation";
-import TimerCountDown from "./chess/TimerCountDown";
+import { gameResignedAtom } from "@repo/store/gameMetadata";
 import MovesTable from "./chess/MovesTable";
 import ModalGameOver from "./ui/ModalGameOver";
 import ThemeToggle from "@repo/ui/components/ui/themeToggle";
@@ -38,6 +38,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const setGameMetaDataAtom = useSetRecoilState<Players>(gameMetadataAtom);
   const [myColor, setColor] = useState<"w" | "b">("w");
   const setRemoteGameIdAtom = useSetRecoilState(remoteGameIdAtom);
+  const setIsResigned = useSetRecoilState(gameResignedAtom);
 
   useEffect(() => {
     setRemoteGameId(gameId);
@@ -216,6 +217,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         setWonBy(GameResultType.TIMEOUT);
         setIsGameOver({ isGameOver: true, playerWon: payload.result });
         setOpen(true);
+        setIsResigned(true);
         break;
       default:
         console.warn("Unhandled game end status:", payload.status);
@@ -270,10 +272,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
                 duration={getOpponentInfo().remainingTime}
                 isPaused={getOpponentInfo().isPaused}
               />
-              {/* <TimerCountDown */}
-              {/*   duration={user?.id === blackPlayer.id ? blackPlayer.remainingTime : whitePlayer.remainingTime} */}
-              {/*   isPaused={chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b')} */}
-              {/* /> */}
               <Suspense fallback={<div>Loading...</div>}>
                 <ChessBoard
                   started={started}
@@ -290,12 +288,11 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
                 duration={getCurrentPlayerInfo().remainingTime}
                 isPaused={getCurrentPlayerInfo().isPaused}
               />
-              {/* <TimerCountDown */}
-              {/*   duration={user?.id === whitePlayer.id ? whitePlayer.remainingTime : blackPlayer.remainingTime} */}
-              {/*   isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))} */}
-              {/* /> */}
             </div>
-            <MovesTable />
+            <MovesTable
+              sendMessage={sendMessage}
+              gameId={gameId}
+            />
           </div>
         ) : (
           <div>Loading...</div>

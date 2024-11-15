@@ -79,3 +79,8 @@ export const gameMetadataSelector = selector<Players | null>({
     return () => controller.abort();  // abort the fetch if the component unmounts
   },
 });
+
+export const gameResignedAtom = atom<boolean>({
+  key: "gameResigned",
+  default: false
+});
