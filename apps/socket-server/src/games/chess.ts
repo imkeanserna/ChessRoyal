@@ -275,6 +275,52 @@ export class ChessGame {
     }
   }
 
+  public async processResignation(user: User): Promise<void> {
+    if (!this.isValidPlayer(user)) {
+      throw new Error('Invalid player attempting to resign');
+    }
+
+    if (this.status !== GameStatus.IN_PROGRESS) {
+      console.error(`Cannot end game. Game ${this.id} is not in progress.`);
+      return;
+    }
+
+    try {
+      await this.updateGameStatus(GameStatus.RESIGNED);
+
+      this.gameEnded(GameResultType.RESIGNATION, user.userId === this.player1UserId ? PlayerWon.BLACK_WINS : PlayerWon.WHITE_WINS);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  private isValidPlayer(user: User): boolean {
+    return user.userId === this.player1UserId || user.userId === this.player2UserId;
+  }
+
+  private async updateGameStatus(newStatus: GameStatus): Promise<void> {
+    try {
+      const game = await db.chessGame.findUnique({
+        where: { id: this.id },
+        include: { players: true }
+      });
+
+      if (!game) {
+        throw new Error('Game not found in database');
+      }
+
+      await db.chessGame.update({
+        where: { id: this.id },
+        data: { status: newStatus }
+      });
+
+      this.status = newStatus;
+    } catch (error) {
+      console.error('Failed to update game status:', error);
+      throw error;
+    }
+  }
+
   public exitGame(user: User) {
     this.gameEnded(GameResultType.RESIGNATION, user.userId === this.player1UserId ? PlayerWon.BLACK_WINS : PlayerWon.WHITE_WINS);
   }
@@ -315,67 +361,60 @@ export class ChessGame {
   }
 
   public async gameEnded(status: GameResultType, result: PlayerWon | null) {
-    if (this.status !== GameStatus.IN_PROGRESS) {
+    if (![GameStatus.IN_PROGRESS, GameStatus.RESIGNED].includes(this.status)) {
       console.error(`Cannot end game. Game ${this.id} is not in progress.`);
       return;
     }
     this.status = GameStatus.COMPLETED;
 
     try {
-      await db.chessResult.upsert({
-        where: {
-          gameId: this.id,
-        },
-        update: {
-          winnerId: result === PlayerWon.WHITE_WINS
-            ? this.player1UserId
-            : result === PlayerWon.BLACK_WINS
-              ? this.player2UserId
-              : null,
-          resultType: status,
-        },
-        create: {
-          gameId: this.id,
-          winnerId: result === PlayerWon.WHITE_WINS
-            ? this.player1UserId
-            : result === PlayerWon.BLACK_WINS
-              ? this.player2UserId
-              : null,
-          resultType: status,
-        },
+      const winner = result === PlayerWon.WHITE_WINS
+        ? this.player1UserId
+        : result === PlayerWon.BLACK_WINS
+          ? this.player2UserId
+          : null;
+
+      await db.$transaction(async (tx) => {
+        await tx.chessGame.update({
+          where: { id: this.id },
+          data: {
+            status: GameStatus.COMPLETED,
+            updatedAt: new Date(),
+            currentBoard: this.board.fen(),
+            turn: this.turn,
+          },
+        });
+
+        await tx.chessResult.upsert({
+          where: { gameId: this.id },
+          update: { winnerId: winner, resultType: status },
+          create: { gameId: this.id, winnerId: winner, resultType: status },
+        });
       });
 
-      await db.chessGame.update({
-        where: {
-          id: this.id
-        },
-        data: {
-          status: this.status
-        }
-      });
-
+      // remove if the they are guest
       await deleteGameIfBothPlayersAreGuests(this.id, this.player1UserId, this.player2UserId);
+
+      RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
+        event: GameMessages.GAME_ENDED,
+        payload: {
+          result,
+          status,
+          whitePlayer: {
+            id: this.player1UserId,
+            name: "Guest",
+            isGuest: true
+          },
+          blackPlayer: {
+            id: this.player2UserId,
+            name: "Guest",
+            isGuest: true
+          }
+        }
+      }));
     } catch (error) {
       console.error("Error in gameEnded", error);
       return;
     }
-
-    RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
-      event: GameMessages.GAME_ENDED,
-      payload: {
-        result,
-        status,
-        whitePlayer: {
-          id: this.player1UserId,
-          name: "Guest",
-          isGuest: true
-        },
-        blackPlayer: {
-          id: this.player2UserId,
-          name: "Guest",
-          isGuest: true
-        }
-      }
-    }));
   }
 }

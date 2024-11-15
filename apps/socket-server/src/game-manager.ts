@@ -83,6 +83,9 @@ export class GameManager {
       case GameMessages.TIMER:
         await this.handleTimer(payload);
         break;
+      case GameMessages.USER_RESIGNED:
+        await this.handleResign(user, payload);
+        break;
       default:
         console.warn(`Unhandled game event: ${event}`);
     }
@@ -236,6 +239,32 @@ export class GameManager {
     game.move(user, move);
     if (game.result) {
       await this.removeGame(game.id);
+    }
+  }
+
+  private async handleResign(user: User, payload: any): Promise<void> {
+    // Validate payload and ensure gameId is present
+    if (!payload || !payload.gameId) {
+      console.error("Invalid payload or missing gameId:", payload);
+      return;
+    }
+
+    const game = this.games.get(payload.gameId);
+    if (!game) {
+      console.error(`Game not found for gameId: ${payload.gameId}`);
+      return;
+    }
+
+    try {
+      await game.processResignation(user);
+
+      // If the game has a result, remove it from the games collection
+      if (game.result) {
+        await this.removeGame(game.id);
+        console.log(`Game ${game.id} has been removed after resignation.`);
+      }
+    } catch (error) {
+      console.error("An error occurred while processing resignation:", error);
     }
   }
 
