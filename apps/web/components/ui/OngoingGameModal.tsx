@@ -35,18 +35,31 @@ export const OngoingGameModal: React.FC<OngoingGameModalProps> = ({
         aria-labelledby="ongoing-game-title"
         aria-describedby="ongoing-game-description"
       >
+        <DialogTitle
+          id="ongoing-game-title"
+          className="flex items-center gap-2 text-yellow-400 text-xl sr-only"
+        >
+          <Crown className="h-6 w-6 text-yellow-400" />
+          Game in Progress
+        </DialogTitle>
+
+        <DialogDescription
+          id="ongoing-game-description"
+          className="sr-only"
+        >
+          You have an unfinished chess game. What would you like to do?
+        </DialogDescription>
+
         <DialogHeader>
-          <DialogTitle
-            id="ongoing-game-title"
-            className="flex items-center gap-2 text-yellow-400 text-xl"
-          >
+          <DialogTitle className="flex items-center gap-2 text-yellow-400 text-xl">
             <Crown className="h-6 w-6 text-yellow-400" />
             Game in Progress
           </DialogTitle>
-          <DialogDescription id="ongoing-game-description" className="text-gray-300">
+          <DialogDescription className="text-gray-300">
             You have an unfinished chess game. What would you like to do?
           </DialogDescription>
         </DialogHeader>
+
         <DialogFooter className="flex flex-col sm:flex-row sm:justify-start space-y-3 sm:space-y-0 sm:space-x-3">
           <Button
             variant="destructive"

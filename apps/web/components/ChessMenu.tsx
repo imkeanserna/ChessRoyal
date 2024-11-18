@@ -85,15 +85,10 @@ const ChessMenu: React.FC = () => {
 
       switch (event) {
         case GameMessages.INIT_GAME:
-          // an id and initialize those store/atoms
           setRemoteGameIdAtom(payload.gameId);
           handleGameInit(payload);
           break;
         case GameMessages.GAME_ADDED:
-          // setUser({
-          //   id: payload.userId
-          // })
-          // initialize the firstPlayer which is white player
           setUser({
             id: payload.userId
           })

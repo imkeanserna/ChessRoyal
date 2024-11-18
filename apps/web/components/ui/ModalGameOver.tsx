@@ -1,5 +1,5 @@
 import { Button } from "@repo/ui/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogOverlay } from "@repo/ui/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogOverlay, DialogTitle } from "@repo/ui/components/ui/dialog";
 import { Crown, RotateCw, Scale, X } from "lucide-react";
 
 interface ModalGameOverProps {
@@ -43,12 +43,15 @@ const ModalGameOver: React.FC<ModalGameOverProps> = ({
               <Crown size={80} className="text-amber-400 animate-bounce" />
             )}
           </div>
-          <h2 className="text-4xl font-bold text-gray-950">
+
+          <DialogTitle className="text-4xl font-bold text-gray-950">
             {playerWon}
-          </h2>
-          <p className="text-xl text-gray-950">
-            by {wonBy}
-          </p>
+          </DialogTitle>
+
+          {/* DialogDescription for additional context */}
+          <DialogDescription className="text-xl text-gray-950">
+            {playerWon === 'Draw' ? 'The game ended in a draw.' : `The game was won by ${wonBy}.`}
+          </DialogDescription>
 
           <div className="flex gap-4 mt-8">
             <Button

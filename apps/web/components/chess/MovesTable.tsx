@@ -7,6 +7,7 @@ import { gameResignedAtom } from "@repo/store/gameMetadata";
 import { Button } from "@repo/ui/components/ui/button";
 import { GameMessages } from "@repo/chess/gameStatus";
 import { Flag, FlagOff } from 'lucide-react';
+import { Tooltip } from "@repo/ui/components/ui/tooltip";
 
 interface MovesTableProps {
   sendMessage: (event: string, data?: any) => void;
@@ -37,11 +38,13 @@ const MovesTable: React.FC<MovesTableProps> = ({
     <div className="rounded-lg text-white border border-gray-300 flex flex-col items-center w-full min-h-[810px] max-w-4xl mx-auto">
       <div className="border-b border-gray-300 w-full">
         <div className="flex flex-col sm:flex-row justify-between p-4 sm:p-8">
-          {isResigned ? (
-            <FlagOff className="cursor-not-allowed text-gray-500" />
-          ) : (
-            <Flag onClick={handleResign} className="cursor-pointer hover:text-white transition-colors" />
-          )}
+          <Tooltip content="Resign Game">
+            {isResigned ? (
+              <FlagOff className="cursor-not-allowed text-gray-500" />
+            ) : (
+              <Flag onClick={handleResign} className="cursor-pointer hover:text-white transition-colors" />
+            )}
+          </Tooltip>
         </div>
       </div>
       <div className="space-y-4 p-4 sm:p-8 md:w-full">
