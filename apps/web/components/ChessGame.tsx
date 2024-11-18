@@ -35,7 +35,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [isGameOver, setIsGameOver] = useRecoilState(isGameOverAtom);
   const [open, setOpen] = useState(false);
   const [wonBy, setWonBy] = useState<GameResultType | null>(null);
-  const setGameMetaDataAtom = useSetRecoilState<Players>(gameMetadataAtom);
+  const [gameMetadataState, setGameMetaDataAtom] = useRecoilState<Players>(gameMetadataAtom);
   const [myColor, setColor] = useState<"w" | "b">("w");
   const setRemoteGameIdAtom = useSetRecoilState(remoteGameIdAtom);
   const setIsResigned = useSetRecoilState(gameResignedAtom);
@@ -45,14 +45,10 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   }, [gameId, setRemoteGameId]);
 
   const { blackPlayer, whitePlayer } = useRecoilValue<Players | null>(gameMetadataSelector) || {};
+
   // let's wait for further coding if this thing is very important in the component.
   const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer?.remainingTime || 0);
   const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer?.remainingTime || 0);
-
-  useEffect(() => {
-    if (!blackPlayer) return;
-    setColor(user?.id === blackPlayer.id ? "b" : "w");
-  }, []);
 
   const handleGameInit = useCallback((payload: any) => {
     const user: { id: string } | null = JSON.parse(localStorage.getItem("user") as string);
@@ -79,13 +75,28 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
           return;
         }
         setStarted(!!game.id);
-        const whitePlayer = game.players[0].id;
+        const whitePlayer = gameMetadataState.whitePlayer.id;
         setColor(user?.id === whitePlayer ? "w" : "b");
       }
     } catch (error) {
       console.error("Error fetching game status:", error);
     }
   };
+
+  const resetGameState = useCallback(() => {
+    setChess(new Chess());
+    setIsCheck({ king_status: KingStatus.SAFE, player: "" });
+    setIsGameOver({ isGameOver: false, playerWon: null });
+    setWonBy(null);
+    setOpen(false);
+    setPlayer1ConsumeTimer(blackPlayer?.remainingTime || 0);
+    setPlayer2ConsumeTimer(whitePlayer?.remainingTime || 0);
+  }, [setMoves, setIsCheck, setIsGameOver]);
+
+  const handleNewGame = useCallback(() => {
+    resetGameState();
+    router.push('/play/online');
+  }, [router, resetGameState]);
 
   useEffect(() => {
     let retryTimeout: NodeJS.Timeout;
@@ -259,6 +270,8 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
           playerWon={isGameOver.playerWon === GameResultType.DRAW ? GameResultType.DRAW : isGameOver.playerWon}
           wonBy={wonBy === GameResultType.WIN ? "checkmate" : wonBy}
           open={open}
+          onNewGame={handleNewGame}
+          onClose={() => setOpen(false)}
           setOpen={setOpen}
         />
       )}

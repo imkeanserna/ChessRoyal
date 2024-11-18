@@ -1,6 +1,6 @@
 import { atom } from "recoil";
 import { Move } from "chess.js";
-import { KingStatus } from "@repo/chess/gameStatus";
+import { KingStatus } from "../../../chess/src/GameEnums";
 
 export const movesAtom = atom<Move[]>({
   key: "moves",

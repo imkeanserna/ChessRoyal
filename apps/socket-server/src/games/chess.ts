@@ -224,8 +224,6 @@ export class ChessGame {
           players: true
         }
       });
-      console.log("Game createeeeeeeeeeeeeeeeeeeeeeeeeed")
-      console.log(gameCreated)
 
       // Find players by their IDs
       const whitePlayer = gameCreated.players.find(player => player.id === this.player1UserId);

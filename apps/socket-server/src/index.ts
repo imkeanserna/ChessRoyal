@@ -3,7 +3,6 @@ import { WebSocket, WebSocketServer } from "ws";
 import { GameMessages } from "@repo/chess/gameStatus";
 import { GameManager } from "./game-manager";
 import { User } from "./games/user";
-import url from "url";
 import dotenv from "dotenv";
 
 // Load environment variables
@@ -21,16 +20,6 @@ class WebSocketGameServer {
     this.wss = new WebSocketServer({ server: this.server });
     this.gameManager = new GameManager();
   }
-
-  // private getTokenFromRequest(req: IncomingMessage): string | undefined {
-  //   const parsedUrl = url.parse(req.url || '', true);
-  //   const tokenQuery = parsedUrl.query.token;
-  //
-  //   if (Array.isArray(tokenQuery)) {
-  //     return tokenQuery[0];
-  //   }
-  //   return typeof tokenQuery === 'string' ? tokenQuery : undefined;
-  // }
 
   private handleConnection(ws: WebSocket, req: IncomingMessage): void {
     let user: User | undefined;
@@ -68,7 +57,7 @@ class WebSocketGameServer {
 
   private handleDisconnection(user: User): void {
     console.log("Client disconnected");
-    this.gameManager.removeUser(user.id);
+    this.gameManager.removeUser(user.id, user.userId);
   }
 
   private handleError(error: Error): void {

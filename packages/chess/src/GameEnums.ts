@@ -21,6 +21,7 @@ export enum GameMessages {
   KING_STATUS = "KING_STATUS",
   TIMER = "TIMER",
   USER_RESIGNED = "USER_RESIGNED",
+  ERROR = "ERROR"
 }
 
 export enum PlayerWon {

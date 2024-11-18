@@ -8,8 +8,10 @@ import { useCallback, useEffect, useState } from "react";
 import WaitingForOpponent from "./WaitingForOpponent";
 import { Player } from "@repo/chess/playerTypes";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { gameMetadataAtom, remoteGameIdAtom } from "@repo/store/gameMetadata";
+import { gameMetadataAtom, gameResignedAtom, remoteGameIdAtom } from "@repo/store/gameMetadata";
 import { userAtom } from "@repo/store/user";
+import { OngoingGameModal } from "./ui/OngoingGameModal";
+import { isGameOverAtom, movesAtom } from "@repo/store/chessBoard";
 
 export interface Players {
   blackPlayer: Player;
@@ -23,7 +25,13 @@ const ChessMenu: React.FC = () => {
   const setgameMetadataAtom = useSetRecoilState<Players>(gameMetadataAtom);
   const setRemoteGameIdAtom = useSetRecoilState(remoteGameIdAtom);
   const setUser = useSetRecoilState(userAtom);
+  const setMoves = useSetRecoilState(movesAtom);
+  const setIsResigned = useSetRecoilState(gameResignedAtom);
+  const gameOver = useSetRecoilState(isGameOverAtom);
+
   const [isWaiting, setIsWaiting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [ongoingGameId, setOngoingGameId] = useState<string | null>(null);
 
   const handleGameAdded = useCallback(({ gameId }: { gameId: string }) => {
     setRemoteGameIdAtom(gameId);
@@ -53,6 +61,13 @@ const ChessMenu: React.FC = () => {
         isGuest: payload.whitePlayer.isGuest,
         remainingTime: payload.blackPlayer.remainingTime
       }
+    });
+
+    setMoves([]);
+    setIsResigned(false);
+    gameOver({
+      isGameOver: false,
+      playerWon: null
     });
 
     // let say they initialize it into 10 minutes
@@ -85,11 +100,15 @@ const ChessMenu: React.FC = () => {
           setIsWaiting(true);
           handleGameAdded({ gameId: payload.gameId });
           break;
+        case GameMessages.ERROR:
+          setOngoingGameId(payload?.gameId || null);
+          setIsModalOpen(true);
+          break;
         default:
           break;
       }
     }
-  }, [socket]);
+  }, [socket, handleGameInit]);
 
   const handleFindGame = () => {
     if (!socket) {
@@ -98,6 +117,20 @@ const ChessMenu: React.FC = () => {
     }
     sendMessage(GameMessages.INIT_GAME);
   }
+
+  const handleQuitGame = () => {
+    setIsModalOpen(false);
+    sendMessage(GameMessages.USER_RESIGNED, {
+      gameId: ongoingGameId,
+    });
+  };
+
+  const handleResumeGame = () => {
+    if (ongoingGameId) {
+      router.push(`/play/${ongoingGameId}`);
+    }
+    setIsModalOpen(false);
+  };
 
   return (
     <div>
@@ -108,6 +141,12 @@ const ChessMenu: React.FC = () => {
       <Button disabled={isWaiting} onClick={handleFindGame}>
         Play as Guest
       </Button>
+      <OngoingGameModal
+        open={isModalOpen}
+        setOpen={setIsModalOpen}
+        onQuit={handleQuitGame}
+        onResume={handleResumeGame}
+      />
     </div>
   )
 }

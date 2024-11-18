@@ -1,7 +1,7 @@
 import { WebSocket } from "ws"
 import { ChessGame } from "./games/chess";
 import { User } from "./games/user";
-import { GameMessages } from "@repo/chess/gameStatus";
+import { GameMessages, GameStatus } from "@repo/chess/gameStatus";
 import { GameTimer } from "./games/gameTimer";
 import db from "@repo/db/client";
 import { deleteGameIfBothPlayersAreGuests } from "./services/gameService";
@@ -32,16 +32,16 @@ export class GameManager {
     this.addHandler(user);
   }
 
-  removeUser(userId: string): void {
-    const user = this.users.get(userId);
+  removeUser(id: string, userId: string): void {
+    const user = this.users.get(id);
 
     if (!user) {
       console.error("Remove User: User not found");
       return;
     }
 
-    this.users.delete(userId);
-    this.redisPubSub.unsubscribe(userId);
+    this.users.delete(id);
+    this.redisPubSub.unsubscribe(id);
 
     for (const [gameId, game] of this.games) {
       if (game.player1UserId === userId || game.player2UserId === userId) {
@@ -92,6 +92,24 @@ export class GameManager {
   }
 
   private async handleInitGame(user: User): Promise<void> {
+    const ongoingGame = await db.chessGame.findFirst({
+      where: {
+        status: GameStatus.IN_PROGRESS,
+        players: { some: { id: user.userId } }
+      },
+    });
+
+    if (ongoingGame) {
+      console.error(`User ${user.userId} already has an ongoing game (${ongoingGame.id}).`);
+      user.socket.send(JSON.stringify({
+        event: GameMessages.ERROR,
+        payload: {
+          gameId: ongoingGame.id
+        }
+      }))
+      return;
+    }
+
     if (this.pendingGameId) {
       const game = this.games.get(this.pendingGameId);
       if (!game) {
@@ -131,13 +149,8 @@ export class GameManager {
   }
 
   private async handleJoinRoom(user: User, payload: any): Promise<void> {
-    console.log("handleJoinRoommmmmmmmmmmmmmm")
-    console.log("payload: ", payload);
-
     if (!payload || !payload.gameId) {
       console.error("Invalid payload: gameId is missing");
-      console.log(payload);
-      console.log("ERORRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR 1")
       return;
     }
 
@@ -161,7 +174,6 @@ export class GameManager {
     const gameTimer = this.timers.get(gameId);
     gameTimer?.resetTimer();
 
-    console.log("CHEEEEEEEEEEEEEEEEEEEEEEKKKKKKKKPOINTTTTTTTTTT")
     try {
       const { player1RemainingTime, player2RemainingTime } = gameTimer?.getPlayerTimes() || {};
 
@@ -169,31 +181,11 @@ export class GameManager {
       const updatedBlackPlayerRemainingTime = user.userId === game.player2UserId ? player2RemainingTime! - (Date.now() - game.gameTimer?.getLastTurnTime()!) : player2RemainingTime;
 
 
-      console.log("CHEEEEEEEEEEEEEEEEEEEEEEKKKKKKKKPOINTTTTTTTTTT 2")
       const response = await db.chessGame.update({
         where: { id: gameId },
         data: {
           whitePlayerRemainingTime: updatedWhitePlayerRemainingTime,
           blackPlayerRemainingTime: updatedBlackPlayerRemainingTime
-        }
-      });
-
-      console.log("CHEEEEEEEEEEEEEEEEEEEEEEKKKKKKKKPOINTTTTTTTTTT 3")
-      console.log({
-        userId: user.userId,
-        gameId,
-        moves: game.getMoves(),
-        whitePlayer: {
-          id: game.player1UserId,
-          name: "Guest",
-          isGuest: true,
-          remainingTime: response.whitePlayerRemainingTime
-        },
-        blackPlayer: {
-          id: game.player2UserId,
-          name: "Guest",
-          isGuest: true,
-          remainingTime: response.blackPlayerRemainingTime
         }
       });
 

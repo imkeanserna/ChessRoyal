@@ -90,6 +90,9 @@ importers:
       chess.js:
         specifier: 1.0.0-beta.8
         version: 1.0.0-beta.8
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -194,6 +197,12 @@ importers:
 
   packages/store:
     dependencies:
+      '@repo/chess':
+        specifier: workspace:*
+        version: link:../chess
+      chess.js:
+        specifier: 1.0.0-beta.8
+        version: 1.0.0-beta.8
       recoil:
         specifier: ^0.7.7
         version: 0.7.7(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
