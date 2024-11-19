@@ -1,12 +1,13 @@
 "use server";
 
 import bcrypt from "bcrypt";
-import { auth, signIn } from "@/auth";
 import { redirect } from "next/navigation";
 import { addUser } from "@repo/db/user";
+import { getServerSession } from "next-auth";
+import { authOptions } from "./auth";
 
 export const currentUser = async () => {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
 
   return session?.user;
 };
