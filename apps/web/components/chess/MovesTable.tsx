@@ -8,6 +8,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import { GameMessages } from "@repo/chess/gameStatus";
 import { Flag, FlagOff } from 'lucide-react';
 import { Tooltip } from "@repo/ui/components/ui/tooltip";
+import { ConfirmResignModal } from "../ui/ConfirmResignModal";
 
 interface MovesTableProps {
   sendMessage: (event: string, data?: any) => void;
@@ -20,6 +21,7 @@ const MovesTable: React.FC<MovesTableProps> = ({
 }) => {
   const moves = useRecoilValue<Move[]>(movesAtom);
   const [selectedMove, setSelectedMove] = useState<number | null>(null);
+  const [isModalOpen, setModalOpen] = useState(false);
   const setUserSelectedMove = useSetRecoilState(userSelectedMoveIndexAtom);
   const isResigned = useRecoilValue(gameResignedAtom);
 
@@ -28,10 +30,8 @@ const MovesTable: React.FC<MovesTableProps> = ({
     setUserSelectedMove(index);
   };
 
-  const handleResign = () => {
-    sendMessage(GameMessages.USER_RESIGNED, {
-      gameId
-    });
+  const handleConfirmResign = () => {
+    sendMessage(GameMessages.USER_RESIGNED, { gameId });
   };
 
   return (
@@ -42,7 +42,10 @@ const MovesTable: React.FC<MovesTableProps> = ({
             {isResigned ? (
               <FlagOff className="cursor-not-allowed text-gray-500" />
             ) : (
-              <Flag onClick={handleResign} className="cursor-pointer hover:text-white transition-colors" />
+              <Flag
+                onClick={() => setModalOpen(true)}
+                className="cursor-pointer hover:text-white transition-colors"
+              />
             )}
           </Tooltip>
         </div>
@@ -86,6 +89,11 @@ const MovesTable: React.FC<MovesTableProps> = ({
           ) : null
         )}
       </div>
+      <ConfirmResignModal
+        open={isModalOpen}
+        setOpen={setModalOpen}
+        onConfirm={handleConfirmResign}
+      />
     </div>
   );
 };
