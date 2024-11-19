@@ -5,10 +5,6 @@ export async function GET(req: NextRequest, { params }: {
   params: { gameId: string }
 }) {
   const gameId: string = params.gameId;
-  console.log(gameId)
-  // Do authentication here
-  // Get the data through database
-  // make this have a type so that we know what we are getting back
   const game = await db.chessGame.findUnique({
     where: {
       id: gameId
@@ -24,11 +20,16 @@ export async function GET(req: NextRequest, { params }: {
       players: {
         select: {
           id: true,
-          name: true
+          name: true,
+          isGuest: true,
         }
       }
     }
   });
+
+  if (!game) {
+    return NextResponse.json({ error: "Game not found or unauthorized" }, { status: 403 });
+  }
 
   return NextResponse.json({
     game

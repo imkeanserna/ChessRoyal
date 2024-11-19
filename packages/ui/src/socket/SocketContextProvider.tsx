@@ -2,20 +2,25 @@
 
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { SocketContext } from "@repo/ui/context/socketContext";
-import { useUser } from "@repo/store/useUser";
+import { v4 as uuidv4 } from 'uuid';
+import type { User } from "next-auth";
 
 interface EventHandlers {
   [key: string]: (data: any) => void
 }
 
-export const SocketContextProvider: React.FC<PropsWithChildren> = ({
+interface SocketContextProviderProps extends PropsWithChildren {
+  user?: User;
+}
+
+export const SocketContextProvider: React.FC<SocketContextProviderProps> = ({
   children,
+  user
 }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const eventHandlerRef = useRef<EventHandlers>({});
   const eventHandlers = eventHandlerRef.current;
-  const user = useUser();
 
   const closeEventListener = (event: CloseEvent) => {
     if (!event.wasClean) {
@@ -23,16 +28,42 @@ export const SocketContextProvider: React.FC<PropsWithChildren> = ({
     }
   }
 
-  function openEventListener() {
-    if (!socket) {
-      return
+  function openEventListener(this: WebSocket) {
+    if (user) {
+      this.send(
+        JSON.stringify({
+          event: "auth",
+          data: {
+            id: user.id!,
+            name: user.name,
+            isGuest: false,
+          },
+        }),
+      );
+    } else {
+      let guestId = localStorage.getItem("id");
+      if (!guestId) {
+        guestId = uuidv4();
+        if (!guestId) {
+          return;
+        }
+        localStorage.setItem("id", guestId);
+      }
+      this.send(
+        JSON.stringify({
+          event: "auth",
+          data: {
+            id: guestId,
+            name: "Guest",
+            isGuest: true,
+          },
+        }),
+      );
     }
-    // you must authentication here
-    // socket.send(JSON.stringify({ event: "init_game" }));
   }
 
   useEffect(() => {
-    const newSocket = new WebSocket(`${process.env.NEXT_PUBLIC_BACKEND_URL!}?token=${user?.id}`);
+    const newSocket = new WebSocket(process.env.NEXT_PUBLIC_BACKEND_URL!);
 
     newSocket.addEventListener("close", closeEventListener);
     newSocket.addEventListener("open", openEventListener);

@@ -70,7 +70,10 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
 
   useEffect(() => {
     if (userSelectedMoveIndex !== null) {
-      const move: Move = moves[userSelectedMoveIndex];
+      const move: Move | undefined = moves[userSelectedMoveIndex];
+      if (!move) {
+        return;
+      }
       chess.load(move.after);
       setLastMove({
         from: move.from,
@@ -84,6 +87,9 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   useEffect(() => {
     if (moves.length > 0) {
       const lastMove = moves[moves.length - 1];
+      if (!lastMove) {
+        return;
+      }
       if (lastMove.color !== myColor) {
         // Opponent made a move, reset to the latest position
         chess.reset();

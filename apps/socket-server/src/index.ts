@@ -1,8 +1,8 @@
 import { createServer, IncomingMessage } from "http";
 import { WebSocket, WebSocketServer } from "ws";
+import { GameMessages } from "@repo/chess/gameStatus";
 import { GameManager } from "./game-manager";
 import { User } from "./games/user";
-import url from "url";
 import dotenv from "dotenv";
 
 // Load environment variables
@@ -21,36 +21,43 @@ class WebSocketGameServer {
     this.gameManager = new GameManager();
   }
 
-  private getTokenFromRequest(req: IncomingMessage): string | undefined {
-    const parsedUrl = url.parse(req.url || '', true);
-    const tokenQuery = parsedUrl.query.token;
-
-    if (Array.isArray(tokenQuery)) {
-      return tokenQuery[0];
-    }
-    return typeof tokenQuery === 'string' ? tokenQuery : undefined;
-  }
-
   private handleConnection(ws: WebSocket, req: IncomingMessage): void {
+    let user: User | undefined;
     console.log("Client connected");
 
-    const token = this.getTokenFromRequest(req);
-    if (!token) {
-      console.error("No token provided");
-      ws.close(1008, "Token required");
-      return;
-    }
+    ws.on("message", async (payload) => {
+      const { event, data } = JSON.parse(payload.toString())
 
-    const user = new User(ws, token);
-    this.gameManager.addUser(user);
+      if (event == "auth") {
+        user = new User(ws, data.id, data.name, data.isGuest);
+        this.gameManager.addUser(user);
+        return;
+      } else if (user) {
+        if (this.isGameEvent(event)) {
+          await this.gameManager.handleGameEvent(user, { event, payload: data });
+        } else {
+          console.warn("Unhandled event type:", event);
+        }
+      } else {
+        console.log("User not authenticated, cannot add to game");
+      }
+    });
 
     ws.on("error", this.handleError);
-    ws.on("close", () => this.handleDisconnection(user));
+    ws.on("close", () => {
+      if (user) {
+        this.handleDisconnection(user);
+      }
+    });
+  }
+
+  private isGameEvent(event: string): boolean {
+    return Object.values(GameMessages).includes(event as GameMessages);
   }
 
   private handleDisconnection(user: User): void {
     console.log("Client disconnected");
-    this.gameManager.removeUser(user.id);
+    this.gameManager.removeUser(user.id, user.userId);
   }
 
   private handleError(error: Error): void {

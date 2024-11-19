@@ -12,10 +12,11 @@ import { isPromoting } from "@repo/chess/isPromoting";
 import { isCheckAtom, isGameOverAtom, movesAtom } from "@repo/store/chessBoard";
 import { userAtom } from "@repo/store/user";
 import { useRouter } from "next/navigation";
-import TimerCountDown from "./chess/TimerCountDown";
+import { gameResignedAtom } from "@repo/store/gameMetadata";
 import MovesTable from "./chess/MovesTable";
 import ModalGameOver from "./ui/ModalGameOver";
 import ThemeToggle from "@repo/ui/components/ui/themeToggle";
+import PlayerTimer from "./ui/PlayerTimer";
 
 interface ChessGameProps {
   gameId: string;
@@ -34,23 +35,20 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [isGameOver, setIsGameOver] = useRecoilState(isGameOverAtom);
   const [open, setOpen] = useState(false);
   const [wonBy, setWonBy] = useState<GameResultType | null>(null);
-  const setGameMetaDataAtom = useSetRecoilState<Players>(gameMetadataAtom);
+  const [gameMetadataState, setGameMetaDataAtom] = useRecoilState<Players>(gameMetadataAtom);
   const [myColor, setColor] = useState<"w" | "b">("w");
   const setRemoteGameIdAtom = useSetRecoilState(remoteGameIdAtom);
+  const setIsResigned = useSetRecoilState(gameResignedAtom);
 
   useEffect(() => {
     setRemoteGameId(gameId);
   }, [gameId, setRemoteGameId]);
 
   const { blackPlayer, whitePlayer } = useRecoilValue<Players | null>(gameMetadataSelector) || {};
+
   // let's wait for further coding if this thing is very important in the component.
   const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer?.remainingTime || 0);
   const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer?.remainingTime || 0);
-
-  useEffect(() => {
-    if (!blackPlayer) return;
-    setColor(user?.id === blackPlayer.id ? "b" : "w");
-  }, []);
 
   const handleGameInit = useCallback((payload: any) => {
     const user: { id: string } | null = JSON.parse(localStorage.getItem("user") as string);
@@ -77,13 +75,28 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
           return;
         }
         setStarted(!!game.id);
-        const whitePlayer = game.players[0].id;
+        const whitePlayer = gameMetadataState.whitePlayer.id;
         setColor(user?.id === whitePlayer ? "w" : "b");
       }
     } catch (error) {
       console.error("Error fetching game status:", error);
     }
   };
+
+  const resetGameState = useCallback(() => {
+    setChess(new Chess());
+    setIsCheck({ king_status: KingStatus.SAFE, player: "" });
+    setIsGameOver({ isGameOver: false, playerWon: null });
+    setWonBy(null);
+    setOpen(false);
+    setPlayer1ConsumeTimer(blackPlayer?.remainingTime || 0);
+    setPlayer2ConsumeTimer(whitePlayer?.remainingTime || 0);
+  }, [setMoves, setIsCheck, setIsGameOver]);
+
+  const handleNewGame = useCallback(() => {
+    resetGameState();
+    router.push('/play/online');
+  }, [router, resetGameState]);
 
   useEffect(() => {
     let retryTimeout: NodeJS.Timeout;
@@ -215,10 +228,39 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         setWonBy(GameResultType.TIMEOUT);
         setIsGameOver({ isGameOver: true, playerWon: payload.result });
         setOpen(true);
+        setIsResigned(true);
         break;
       default:
         console.warn("Unhandled game end status:", payload.status);
     }
+  };
+
+  // Determine if the current user is playing as black
+  const isPlayingAsBlack = user?.id === blackPlayer?.id;
+
+  // Helper function to determine if a timer should be paused
+  const isTimerPaused = (playerColor: string) => {
+    const isWhite = playerColor === 'white';
+    return chess.turn() !== (isWhite ? 'w' : 'b');
+  };
+
+  // Get opponent and current player info based on user's color
+  const getCurrentPlayerInfo = () => {
+    const player: any = isPlayingAsBlack ? blackPlayer : whitePlayer;
+    return {
+      name: player.name,
+      remainingTime: player.remainingTime,
+      isPaused: isTimerPaused(isPlayingAsBlack ? 'black' : 'white')
+    };
+  };
+
+  const getOpponentInfo = () => {
+    const player: any = isPlayingAsBlack ? whitePlayer : blackPlayer;
+    return {
+      name: player.name,
+      remainingTime: player.remainingTime,
+      isPaused: isTimerPaused(isPlayingAsBlack ? 'white' : 'black')
+    };
   };
 
   return (
@@ -228,6 +270,8 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
           playerWon={isGameOver.playerWon === GameResultType.DRAW ? GameResultType.DRAW : isGameOver.playerWon}
           wonBy={wonBy === GameResultType.WIN ? "checkmate" : wonBy}
           open={open}
+          onNewGame={handleNewGame}
+          onClose={() => setOpen(false)}
           setOpen={setOpen}
         />
       )}
@@ -236,9 +280,10 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         {blackPlayer && whitePlayer ? (
           <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-8 lg:gap-10">
             <div className="text-end">
-              <TimerCountDown
-                duration={user?.id === blackPlayer.id ? blackPlayer.remainingTime : whitePlayer.remainingTime}
-                isPaused={chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b')}
+              <PlayerTimer
+                playerName={getOpponentInfo().name}
+                duration={getOpponentInfo().remainingTime}
+                isPaused={getOpponentInfo().isPaused}
               />
               <Suspense fallback={<div>Loading...</div>}>
                 <ChessBoard
@@ -251,12 +296,16 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
                   myColor={myColor}
                 />
               </Suspense>
-              <TimerCountDown
-                duration={user?.id === whitePlayer.id ? whitePlayer.remainingTime : blackPlayer.remainingTime}
-                isPaused={!(chess.turn() === (user?.id === whitePlayer.id ? 'w' : 'b'))}
+              <PlayerTimer
+                playerName={getCurrentPlayerInfo().name}
+                duration={getCurrentPlayerInfo().remainingTime}
+                isPaused={getCurrentPlayerInfo().isPaused}
               />
             </div>
-            <MovesTable />
+            <MovesTable
+              sendMessage={sendMessage}
+              gameId={gameId}
+            />
           </div>
         ) : (
           <div>Loading...</div>

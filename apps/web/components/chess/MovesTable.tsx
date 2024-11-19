@@ -3,24 +3,48 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import React, { useState } from "react";
 import { Move } from "chess.js";
 import { userSelectedMoveIndexAtom } from "@repo/store/user";
+import { gameResignedAtom } from "@repo/store/gameMetadata";
 import { Button } from "@repo/ui/components/ui/button";
+import { GameMessages } from "@repo/chess/gameStatus";
+import { Flag, FlagOff } from 'lucide-react';
+import { Tooltip } from "@repo/ui/components/ui/tooltip";
 
-const MovesTable: React.FC = () => {
+interface MovesTableProps {
+  sendMessage: (event: string, data?: any) => void;
+  gameId: string;
+}
+
+const MovesTable: React.FC<MovesTableProps> = ({
+  sendMessage,
+  gameId
+}) => {
   const moves = useRecoilValue<Move[]>(movesAtom);
   const [selectedMove, setSelectedMove] = useState<number | null>(null);
   const setUserSelectedMove = useSetRecoilState(userSelectedMoveIndexAtom);
+  const isResigned = useRecoilValue(gameResignedAtom);
 
   const handleMoveClick = (index: number) => {
     setSelectedMove(index);
     setUserSelectedMove(index);
   };
 
+  const handleResign = () => {
+    sendMessage(GameMessages.USER_RESIGNED, {
+      gameId
+    });
+  };
+
   return (
     <div className="rounded-lg text-white border border-gray-300 flex flex-col items-center w-full min-h-[810px] max-w-4xl mx-auto">
       <div className="border-b border-gray-300 w-full">
         <div className="flex flex-col sm:flex-row justify-between p-4 sm:p-8">
-          <p className="mb-2 sm:mb-0">asdadasdasdasdasdas dasd</p>
-          <p>asdadasdasdasdasdas</p>
+          <Tooltip content="Resign Game">
+            {isResigned ? (
+              <FlagOff className="cursor-not-allowed text-gray-500" />
+            ) : (
+              <Flag onClick={handleResign} className="cursor-pointer hover:text-white transition-colors" />
+            )}
+          </Tooltip>
         </div>
       </div>
       <div className="space-y-4 p-4 sm:p-8 md:w-full">

@@ -2,6 +2,7 @@ export enum GameStatus {
   NOT_STARTED = "NOT_STARTED",
   COMPLETED = "COMPLETED",
   IN_PROGRESS = "IN_PROGRESS",
+  RESIGNED = "RESIGNED"
 }
 
 export enum KingStatus {
@@ -18,7 +19,9 @@ export enum GameMessages {
   WAITING = "WAITING",
   MOVE = "MOVE",
   KING_STATUS = "KING_STATUS",
-  TIMER = "TIMER"
+  TIMER = "TIMER",
+  USER_RESIGNED = "USER_RESIGNED",
+  ERROR = "ERROR"
 }
 
 export enum PlayerWon {

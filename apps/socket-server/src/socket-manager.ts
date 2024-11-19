@@ -24,7 +24,7 @@ export class SocketManager {
       ...this.interestedSockets.get(roomId) || [],
       user
     ]);
-    this.userRoomMapping.set(user.id, roomId);
+    this.userRoomMapping.set(user.userId, roomId);
   }
 
   broadcast(roomId: string, message: string) {
