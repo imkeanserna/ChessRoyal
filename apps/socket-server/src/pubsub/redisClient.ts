@@ -20,6 +20,7 @@ export class RedisPubSubManager {
   private subscriptions: Map<string, Map<string, Subscription>>;
   private reverseSubscriptions: Map<string, Map<string, ReverseSubscription>>;
   private userRoomMapping: Map<string, string>;
+  private userChannels: Map<string, WebSocket>;
 
   private constructor() {
     this.subscriber = new Redis(REDIS_CONFIG);
@@ -27,11 +28,22 @@ export class RedisPubSubManager {
     this.subscriptions = new Map();
     this.reverseSubscriptions = new Map();
     this.userRoomMapping = new Map();
+    this.userChannels = new Map();
 
     this.subscriber.on("message", (channel: string, message: string) => {
       console.log(`Received ${message} from ${channel}`);
-      const subscribers = this.reverseSubscriptions.get(channel);
-      subscribers?.forEach(({ ws }) => ws.send(message));
+      if (channel.startsWith("user:")) {
+        const userId = channel.split(':')[1];
+        if (userId) {
+          const userWs = this.userChannels.get(userId);
+          if (userWs) {
+            userWs.send(message);
+          }
+        }
+      } else {
+        const subscribers = this.reverseSubscriptions.get(channel);
+        subscribers?.forEach(({ ws }) => ws.send(message));
+      }
     });
   }
 
@@ -47,26 +59,29 @@ export class RedisPubSubManager {
       console.error("User ID and room must be provided.");
       return;
     }
-    // Add room to user's subscriptions
+
+    // Subscribe to user's personal channel if not already subscribed
+    if (!this.userChannels.has(userId)) {
+      this.subscribeUser(userId, ws);
+    }
+
+    // Rest of the original subscribe method remains the same
     if (!this.subscriptions.has(userId)) {
       this.subscriptions.set(userId, new Map());
     }
     const userSubscriptions = this.subscriptions.get(userId)!;
     userSubscriptions.set(room, { room, users: [] });
 
-    // Add user to room's subscribers
     if (!this.reverseSubscriptions.has(room)) {
       this.reverseSubscriptions.set(room, new Map());
     }
     const roomSubscribers = this.reverseSubscriptions.get(room)!;
     roomSubscribers.set(userId, { userId, ws });
 
-    // Add user to userRoomMapping
     if (!this.userRoomMapping.has(userId)) {
       this.userRoomMapping.set(userId, room);
     }
 
-    // If this is the 1st subscriber to this room, subscribe to the room
     if (roomSubscribers.size === 1) {
       console.log(`Subscribing to messages from ${room}`);
       this.subscriber.subscribe(room, (err, count) => {
@@ -81,6 +96,9 @@ export class RedisPubSubManager {
 
   unsubscribe(userId: string): void {
     if (!userId) return;
+
+    // Unsubscribe from user's personal channel
+    this.unsubscribeUser(userId);
 
     const room = this.userRoomMapping.get(userId);
     if (!room) {
@@ -109,12 +127,38 @@ export class RedisPubSubManager {
     }
 
     this.userRoomMapping.delete(userId);
+  }
 
-    console.log({
-      userRoomMapping: this.userRoomMapping,
-      subscriptions: this.subscriptions,
-      reverseSubscriptions: this.reverseSubscriptions,
+  subscribeUser(userId: string, ws: WebSocket): void {
+    if (!userId) {
+      console.error("User ID must be provided.");
+      return;
+    }
+
+    const userChannel = `user:${userId}`;
+    this.userChannels.set(userId, ws);
+
+    // Subscribe to user's personal channel
+    this.subscriber.subscribe(userChannel, (err, count) => {
+      if (err) {
+        console.error(`Failed to subscribe to user channel: ${err.message}`);
+      } else {
+        console.log(`Subscribed to user channel ${userChannel}. Total subscriptions: ${count}`);
+      }
     });
+  }
+
+  unsubscribeUser(userId: string): void {
+    if (!userId) return;
+
+    const userChannel = `user:${userId}`;
+    this.userChannels.delete(userId);
+    this.subscriber.unsubscribe(userChannel);
+  }
+
+  async sendToUser(userId: string, payload: string): Promise<void> {
+    const userChannel = `user:${userId}`;
+    await this.publish(userChannel, payload);
   }
 
   async sendMessage(room: string, payload: string): Promise<void> {

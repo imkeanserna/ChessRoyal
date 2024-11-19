@@ -42,6 +42,7 @@ export class GameManager {
 
     this.users.delete(id);
     this.redisPubSub.unsubscribe(id);
+    this.redisPubSub.unsubscribeUser(id);
 
     for (const [gameId, game] of this.games) {
       if (game.player1UserId === userId || game.player2UserId === userId) {
@@ -100,13 +101,14 @@ export class GameManager {
     });
 
     if (ongoingGame) {
-      console.error(`User ${user.userId} already has an ongoing game (${ongoingGame.id}).`);
-      user.socket.send(JSON.stringify({
+      console.error(`User ${user.id} already has an ongoing game (${ongoingGame.id}).`);
+      this.redisPubSub.subscribeUser(user.id, user.socket);
+      await this.redisPubSub.sendToUser(user.id, JSON.stringify({
         event: GameMessages.ERROR,
         payload: {
           gameId: ongoingGame.id
         }
-      }))
+      }));
       return;
     }
 
