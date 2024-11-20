@@ -37,6 +37,7 @@ export const SocketContextProvider: React.FC<SocketContextProviderProps> = ({
             id: user.id!,
             name: user.name,
             isGuest: false,
+            avatar: user.image,
           },
         }),
       );
@@ -49,12 +50,13 @@ export const SocketContextProvider: React.FC<SocketContextProviderProps> = ({
         }
         localStorage.setItem("id", guestId);
       }
+      const lastIdPart = guestId.split('-').pop()?.slice(-10);
       this.send(
         JSON.stringify({
           event: "auth",
           data: {
             id: guestId,
-            name: "Guest",
+            name: `Guest${lastIdPart}`,
             isGuest: true,
           },
         }),

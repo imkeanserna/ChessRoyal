@@ -57,11 +57,13 @@ export const gameMetadataSelector = selector<Players | null>({
             id: game.players[1].id,
             name: game.players[1].name,
             isGuest: game.players[1].isGuest,
+            avatar: game.players[1]?.image || null,
             remainingTime: game.blackPlayerRemainingTime || 0,
           },
           whitePlayer: {
             id: game.players[0].id,
             name: game.players[0].name,
+            avatar: game.players[0]?.image || null,
             isGuest: game.players[0].isGuest,
             remainingTime: game.whitePlayerRemainingTime || 0,
           },

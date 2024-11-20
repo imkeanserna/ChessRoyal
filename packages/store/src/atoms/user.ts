@@ -4,13 +4,6 @@ interface User {
   id: string;
 }
 
-// i think we need to store the user in localStorage here:
-// export const userAtom = atom<User | null>({
-//   key: "user",
-//   default: null
-// });
-//
-
 export const userAtom = atom<User | null>({
   key: "user",
   default: null,

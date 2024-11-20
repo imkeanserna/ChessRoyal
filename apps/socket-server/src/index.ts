@@ -29,7 +29,7 @@ class WebSocketGameServer {
       const { event, data } = JSON.parse(payload.toString())
 
       if (event == "auth") {
-        user = new User(ws, data.id, data.name, data.isGuest);
+        user = new User(ws, data.id, data.name, data.isGuest, data.avatar);
         this.gameManager.addUser(user);
         return;
       } else if (user) {

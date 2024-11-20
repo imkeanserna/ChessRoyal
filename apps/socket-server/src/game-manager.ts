@@ -280,7 +280,8 @@ export class GameManager {
     gameTimer?.switchTurn();
     const { player1RemainingTime, player2RemainingTime } = gameTimer?.getPlayerTimes() || {};
 
-    game.timerEnd(player1RemainingTime, player2RemainingTime);
+    // Putting 0's in the main if the timer is expired
+    game.timerEnd(0, 0);
   }
 
   private createTimer(gameId: string): void {

@@ -4,6 +4,7 @@ interface IAddUser {
   email: string;
   displayName?: string;
   password?: string;
+  image?: string;
 }
 
 export const getUserByEmail = async (email: string) => {
@@ -16,7 +17,8 @@ export const getUserByEmail = async (email: string) => {
 export const addUser = async ({
   email,
   displayName,
-  password
+  password,
+  image,
 }: IAddUser) => {
   try {
     const user = await db.user.create({
@@ -24,6 +26,7 @@ export const addUser = async ({
         email,
         displayName: displayName || email.split('@')[0], // Fallback to email username if no display name
         password,
+        image
       },
     });
     return user;

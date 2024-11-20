@@ -81,12 +81,14 @@ export const authOptions: NextAuthOptions = {
 
       token.id = existingUser.id;
       token.name = existingUser.displayName;
+      token.image = existingUser.image;
 
       return token;
     },
     async signIn({ user, account }) {
       const email = user.email;
       const profileName = user.name;
+      const profileImage = user.image;
 
       if (!email) {
         return false;
@@ -101,6 +103,7 @@ export const authOptions: NextAuthOptions = {
             await addUser({
               email: email,
               displayName: user.name || profileName || email.split('@')[0], // Fallback to email username if no name
+              image: profileImage,
             });
             return true;
           } catch (error) {
@@ -110,7 +113,7 @@ export const authOptions: NextAuthOptions = {
         }
         // For credentials provider
         await addUser({
-          email: email
+          email: email,
         });
       } else {
         // Prevent OAuth sign-in if user exists with password

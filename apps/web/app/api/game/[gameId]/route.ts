@@ -22,6 +22,7 @@ export async function GET(req: NextRequest, { params }: {
           id: true,
           name: true,
           isGuest: true,
+          image: true
         }
       }
     }
