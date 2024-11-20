@@ -250,15 +250,18 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
     return {
       name: player.name,
       remainingTime: player.remainingTime,
+      avatar: player?.avatar,
       isPaused: isTimerPaused(isPlayingAsBlack ? 'black' : 'white')
     };
   };
 
   const getOpponentInfo = () => {
     const player: any = isPlayingAsBlack ? whitePlayer : blackPlayer;
+    console.log(player)
     return {
       name: player.name,
       remainingTime: player.remainingTime,
+      avatar: player?.avatar,
       isPaused: isTimerPaused(isPlayingAsBlack ? 'white' : 'black')
     };
   };
@@ -284,6 +287,9 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
                 playerName={getOpponentInfo().name}
                 duration={getOpponentInfo().remainingTime}
                 isPaused={getOpponentInfo().isPaused}
+                avatar={getOpponentInfo().avatar}
+                isActive={chess.turn() !== myColor[0]}
+                color={isPlayingAsBlack ? 'black' : 'white'}
               />
               <Suspense fallback={<div>Loading...</div>}>
                 <ChessBoard
@@ -300,6 +306,9 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
                 playerName={getCurrentPlayerInfo().name}
                 duration={getCurrentPlayerInfo().remainingTime}
                 isPaused={getCurrentPlayerInfo().isPaused}
+                avatar={getCurrentPlayerInfo().avatar}
+                isActive={chess.turn() === myColor[0]}
+                color={isPlayingAsBlack ? 'white' : 'black'}
               />
             </div>
             <MovesTable

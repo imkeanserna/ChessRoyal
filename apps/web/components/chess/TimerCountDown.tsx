@@ -9,9 +9,10 @@ import { useRecoilValue } from "recoil";
 interface TimerCountDownProps {
   duration: number;
   isPaused: boolean;
+  isActive: boolean;
 }
 
-const TimerCountDown: React.FC<TimerCountDownProps> = ({ duration, isPaused }) => {
+const TimerCountDown: React.FC<TimerCountDownProps> = ({ duration, isPaused, isActive }) => {
   const [remainingTime, setRemainingTime] = useState(duration);
   const timerRef = useRef<NodeJS.Timeout>();
   const { sendMessage } = useSocketContext();
@@ -44,13 +45,19 @@ const TimerCountDown: React.FC<TimerCountDownProps> = ({ duration, isPaused }) =
   const seconds: string = String(Math.floor((remainingTime % (1000 * 60)) / 1000)).padStart(2, '0');
 
   return (
-    <div className="px-6 py-2 rounded-md border border-gray-300 space-x-2 text-white mx-auto inline-block">
-      <span className="text-2xl">
-        {minutes}
-      </span>
-      <span className="text-2xl">:</span>
-      <span className="text-2xl">
-        {seconds}
+    <div className={`
+      inline-flex items-center justify-center
+      px-4 py-2
+      rounded-xl
+      font-mono
+      transition-all duration-300
+      border-2
+      ${isActive
+        ? 'bg-amber-900/20 text-amber-200 border-amber-600/20 animate-pulse'
+        : 'bg-neutral-900/50 text-neutral-400 border-neutral-800'}
+    `}>
+      <span className="text-xl font-semibold">
+        {minutes}:{seconds}
       </span>
     </div>
   );
