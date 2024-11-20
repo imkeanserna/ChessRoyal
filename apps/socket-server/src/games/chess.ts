@@ -148,16 +148,20 @@ export class ChessGame {
   }
 
   async addFirstPlayer(user: User) {
+    console.log("SDSDSDSDS DSDSDSD SD________________________")
+    console.log(user)
     try {
-      await db.player.upsert({
+      const response = await db.player.upsert({
         where: { id: user.userId },
         update: {
-          id: user.userId
+          id: user.userId,
+          image: user?.avatar
         },
         create: {
           id: user.userId,
           name: user.name,
           isGuest: user.isGuest,
+          image: user?.avatar
         },
       });
 
@@ -195,12 +199,14 @@ export class ChessGame {
       const player2 = await db.player.upsert({
         where: { id: user.userId },
         update: {
-          id: user.userId
+          id: user.userId,
+          image: user?.avatar
         },
         create: {
           id: user.userId,
           name: user.name,
           isGuest: user.isGuest,
+          image: user?.avatar
         },
       });
 
