@@ -16,6 +16,7 @@ export class ChessGame {
   public player2UserId: string;
   public initializeTime: number;
   public gameTimer: GameTimer | null = null;
+  public drawOffererUserId: string | null;
   private board: Chess;
   private moves: Move[];
   private pieceValues: Record<string, number> = {
@@ -38,6 +39,7 @@ export class ChessGame {
     this.moves = [];
     this.status = GameStatus.NOT_STARTED;
     this.turn = player1UserId;
+    this.drawOffererUserId = null;
   }
 
   async move(user: User, move: Move) {
@@ -148,8 +150,6 @@ export class ChessGame {
   }
 
   async addFirstPlayer(user: User) {
-    console.log("SDSDSDSDS DSDSDSD SD________________________")
-    console.log(user)
     try {
       const response = await db.player.upsert({
         where: { id: user.userId },
@@ -279,6 +279,33 @@ export class ChessGame {
     }
   }
 
+  public getOpponentId(userId: string): string | null {
+    if (this.player1UserId === userId) {
+      return this.player2UserId;
+    }
+    if (this.player2UserId === userId) {
+      return this.player1UserId;
+    }
+    return null;
+  }
+
+  public async processDrawOffer(user: User): Promise<void> {
+    if (!this.isValidPlayer(user)) {
+      throw new Error('Invalid player attempting to offer draw');
+    }
+
+    if (this.status !== GameStatus.IN_PROGRESS) {
+      console.error(`Cannot end game. Game ${this.id} is not in progress.`);
+      return;
+    }
+
+    try {
+      this.gameEnded(GameResultType.DRAW, null);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   public async processResignation(user: User): Promise<void> {
     if (!this.isValidPlayer(user)) {
       throw new Error('Invalid player attempting to resign');
@@ -323,6 +350,14 @@ export class ChessGame {
       console.error('Failed to update game status:', error);
       throw error;
     }
+  }
+
+  public initiateDrawOffer(userId: string) {
+    this.drawOffererUserId = userId;
+  }
+
+  public cancelDrawOffer() {
+    this.drawOffererUserId = null;
   }
 
   public exitGame(user: User) {
