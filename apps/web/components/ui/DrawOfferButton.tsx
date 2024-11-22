@@ -27,7 +27,7 @@ export default function DrawOfferButton({ onOffer, gameId }: DrawOfferButtonProp
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <Tooltip content="Draw">
         <PopoverTrigger asChild>
-          <Button variant="outline" className="p-2 hover:bg-orange-800">1/2</Button>
+          <Button variant="outline" className="p-2">1/2</Button>
         </PopoverTrigger>
       </Tooltip>
       <PopoverContent className="w-80 bg-gradient-to-b from-neutral-900 to-neutral-950 border-amber-700 rounded-xl p-0 overflow-hidden shadow-2xl">

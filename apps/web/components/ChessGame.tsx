@@ -15,7 +15,6 @@ import { useRouter } from "next/navigation";
 import { gameResignedAtom } from "@repo/store/gameMetadata";
 import MovesTable from "./chess/MovesTable";
 import ModalGameOver from "./ui/ModalGameOver";
-import ThemeToggle from "@repo/ui/components/ui/themeToggle";
 import PlayerTimer from "./ui/PlayerTimer";
 import { useGameActions } from "@/hooks/useGameActions";
 import { toast } from "@repo/ui/components/ui/sonner";
@@ -342,7 +341,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
           setOpen={setOpen}
         />
       )}
-      <ThemeToggle />
       <div>
         {blackPlayer && whitePlayer ? (
           <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-8 lg:gap-10">
