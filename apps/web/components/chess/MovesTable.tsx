@@ -1,6 +1,6 @@
 import { movesAtom } from "@repo/store/chessBoard";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Move } from "chess.js";
 import { userSelectedMoveIndexAtom } from "@repo/store/user";
 import { gameResignedAtom } from "@repo/store/gameMetadata";
@@ -12,7 +12,12 @@ import ThemeToggle from "@repo/ui/components/ui/themeToggle";
 import { GameClipClipboard } from "../ui/GameCopyClipBoard";
 import { SettingsButton } from "../ui/SettingsIcon";
 import { ResignButton } from "../ui/ResignButton";
-
+import {
+  ChevronFirst,
+  ChevronLeft,
+  ChevronRight,
+  ChevronLast
+} from 'lucide-react';
 interface MovesTableProps {
   sendMessage: (event: string, data?: any) => void;
   gameId: string;
@@ -38,6 +43,44 @@ const MovesTable: React.FC<MovesTableProps> = ({
     resignGame(gameId);
     setModalOpen(false);
   };
+
+  const handleStartMove = () => {
+    if (moves.length > 0) {
+      setSelectedMove(0);
+      setUserSelectedMove(0);
+    }
+  };
+
+  const handlePreviousMove = () => {
+    if (selectedMove !== null && selectedMove > 0) {
+      setSelectedMove(selectedMove - 1);
+      setUserSelectedMove(selectedMove - 1);
+    } else if (selectedMove === null && moves.length > 0) {
+      setSelectedMove(moves.length - 1);
+      setUserSelectedMove(moves.length - 1);
+    }
+  };
+
+  const handleNextMove = () => {
+    if (selectedMove !== null && selectedMove < moves.length - 1) {
+      setSelectedMove(selectedMove + 1);
+      setUserSelectedMove(selectedMove + 1);
+    }
+  };
+
+  const handlePresentMove = () => {
+    if (moves.length > 0) {
+      setSelectedMove(moves.length - 1);
+      setUserSelectedMove(moves.length - 1);
+    }
+  };
+
+  useEffect(() => {
+    if (moves.length > 0) {
+      setSelectedMove(moves.length - 1);
+      setUserSelectedMove(moves.length - 1);
+    }
+  }, [moves, setUserSelectedMove]);
 
   return (
     <div className="rounded-xl overflow-hidden bg-gradient-to-b from-neutral-900 to-neutral-950 border border-amber-700 flex flex-col items-center w-full min-h-[810px] min-w-[450px] mx-auto shadow-xl">
@@ -98,6 +141,38 @@ const MovesTable: React.FC<MovesTableProps> = ({
         setOpen={setModalOpen}
         onConfirm={handleConfirmResign}
       />
+
+      {/* Moves Navigation Buttons */}
+      <div className="w-full flex justify-center items-center gap-4 p-4 bg-neutral-900/50 mt-auto">
+        <Button
+          onClick={handleStartMove}
+          disabled={selectedMove === null || moves.length === 0}
+          className="bg-amber-700/30 hover:bg-amber-700/50 text-amber-100 disabled:opacity-30"
+        >
+          <ChevronFirst className="h-5 w-5" />
+        </Button>
+        <Button
+          onClick={handlePreviousMove}
+          disabled={selectedMove === null || moves.length === 0}
+          className="bg-amber-700/30 hover:bg-amber-700/50 text-amber-100 disabled:opacity-30"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <Button
+          onClick={handleNextMove}
+          disabled={selectedMove === null || selectedMove === moves.length - 1}
+          className="bg-amber-700/30 hover:bg-amber-700/50 text-amber-100 disabled:opacity-30"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </Button>
+        <Button
+          onClick={handlePresentMove}
+          disabled={selectedMove === null || selectedMove === moves.length - 1}
+          className="bg-amber-700/30 hover:bg-amber-700/50 text-amber-100 disabled:opacity-30"
+        >
+          <ChevronLast className="h-5 w-5" />
+        </Button>
+      </div>
     </div>
   );
 };
