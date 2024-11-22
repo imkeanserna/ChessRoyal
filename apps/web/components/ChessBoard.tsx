@@ -100,13 +100,13 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
             promotion: move.promotion
           });
         });
-        setBoard(chess.board());
-        setLastMove({
-          from: lastMove.from,
-          to: lastMove.to
-        });
         setUserSelectedMoveIndex(null);
       }
+      setBoard(chess.board());
+      setLastMove({
+        from: lastMove.from,
+        to: lastMove.to
+      });
     }
   }, [moves, myColor]);
 

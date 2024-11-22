@@ -17,6 +17,9 @@ import MovesTable from "./chess/MovesTable";
 import ModalGameOver from "./ui/ModalGameOver";
 import ThemeToggle from "@repo/ui/components/ui/themeToggle";
 import PlayerTimer from "./ui/PlayerTimer";
+import { useGameActions } from "@/hooks/useGameActions";
+import { toast } from "@repo/ui/components/ui/sonner";
+import { CheckCircle, XCircle } from "lucide-react";
 
 interface ChessGameProps {
   gameId: string;
@@ -39,6 +42,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [myColor, setColor] = useState<"w" | "b">("w");
   const setRemoteGameIdAtom = useSetRecoilState(remoteGameIdAtom);
   const setIsResigned = useSetRecoilState(gameResignedAtom);
+  const { respondToDraw } = useGameActions(sendMessage);
 
   useEffect(() => {
     setRemoteGameId(gameId);
@@ -61,27 +65,27 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
     }
   }, []);
 
-  const startedGameHandler = async (gameId: string) => {
-    try {
-      const response = await fetch(`/api/game/${gameId}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-      if (response.ok) {
-        const { game } = await response.json();
-        if (!game.id) {
-          router.push("/play/online");
-          return;
-        }
-        setStarted(!!game.id);
-        const whitePlayer = gameMetadataState.whitePlayer.id;
-        setColor(user?.id === whitePlayer ? "w" : "b");
-      }
-    } catch (error) {
-      console.error("Error fetching game status:", error);
-    }
-  };
+  // const startedGameHandler = async (gameId: string) => {
+  //   try {
+  //     const response = await fetch(`/api/game/${gameId}`, {
+  //       method: "GET",
+  //       headers: { "Content-Type": "application/json" },
+  //       credentials: "include",
+  //     });
+  //     if (response.ok) {
+  //       const { game } = await response.json();
+  //       if (!game.id) {
+  //         router.push("/play/online");
+  //         return;
+  //       }
+  //       setStarted(!!game.id);
+  //       const whitePlayer = gameMetadataState.whitePlayer.id;
+  //       setColor(user?.id === whitePlayer ? "w" : "b");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching game status:", error);
+  //   }
+  // };
 
   const resetGameState = useCallback(() => {
     setChess(new Chess());
@@ -108,8 +112,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       }
 
       if (gameId) {
-        console.log('Joining room', gameId);
-        startedGameHandler(gameId);
+        // startedGameHandler(gameId);
         sendMessage(GameMessages.JOIN_ROOM, { gameId });
       }
     };
@@ -137,6 +140,64 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
             break;
           case GameMessages.WAITING:
             console.log("Waiting for players...");
+            break;
+          case GameMessages.DRAW_OFFERED:
+            toast("Opponent offered a draw", {
+              description: (
+                <div className="space-y-3 py-2">
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => {
+                        respondToDraw(gameId, "accept");
+                        toast.dismiss();
+                      }}
+                      className="bg-gradient-to-r from-amber-900 to-amber-800 text-amber-100 px-4 py-2 rounded-lg font-semibold hover:bg-amber-900/80 transition-all duration-200 ease-in-out transform active:scale-95 shadow-lg"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => {
+                        respondToDraw(gameId, "decline");
+                        toast.dismiss();
+                      }}
+                      className="bg-neutral-900 text-amber-200 px-4 py-2 rounded-lg font-semibold hover:bg-neutral-950 hover:text-amber-100 transition-all duration-200 ease-in-out transform active:scale-95 shadow-lg"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              ),
+              className:
+                "bg-gradient-to-b from-neutral-900 to-neutral-950 border border-amber-700 shadow-2xl rounded-lg p-2 text-amber-100",
+              duration: 10000,
+            });
+            break;
+          case GameMessages.DRAW_RESPONSED:
+            if (payload.response === "accept") {
+              toast(
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="h-6 w-6 text-green-500" />
+                  <span className="text-gray-800">Draw Accepted</span>
+                </div>,
+                {
+                  className:
+                    "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white border-none shadow-lg shadow-amber-900/20 hover:shadow-amber-900/40 rounded-lg p-4 transform transition-all duration-200",
+                  duration: 5000,
+                }
+              );
+            } else {
+              toast(
+                <div className="flex items-center space-x-3">
+                  <XCircle className="h-6 w-6 text-white" />
+                  <span className="text-white">Draw Declined</span>
+                </div>,
+                {
+                  className:
+                    "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-none shadow-lg shadow-red-900/20 hover:shadow-red-900/40 rounded-lg p-4 transform transition-all duration-200",
+                  duration: 5000,
+                }
+              );
+            }
             break;
           default:
             console.warn("Unhandled message event:", event);
@@ -188,9 +249,13 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       }
     });
 
+    const whitePlayer = payload.whitePlayer.id;
+
+    setColor(user?.id === whitePlayer ? "w" : "b");
+    setMoves(payload.moves);
+    setStarted(!!payload.gameId);
     setPlayer1ConsumeTimer(payload.whitePlayer.remainingTime);
     setPlayer2ConsumeTimer(payload.blackPlayer.remainingTime);
-    setMoves(payload.moves);
   };
 
   const handleMove = (payload: any) => {
@@ -257,7 +322,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
   const getOpponentInfo = () => {
     const player: any = isPlayingAsBlack ? whitePlayer : blackPlayer;
-    console.log(player)
     return {
       name: player.name,
       remainingTime: player.remainingTime,
