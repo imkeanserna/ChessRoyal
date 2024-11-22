@@ -57,7 +57,7 @@ class WebSocketGameServer {
 
   private handleDisconnection(user: User): void {
     console.log("Client disconnected");
-    this.gameManager.removeUser(user.id, user.userId);
+    this.gameManager.removeUser(user.userId);
   }
 
   private handleError(error: Error): void {

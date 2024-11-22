@@ -10,7 +10,7 @@ const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="flex items-center px-4 py-2 rounded-md transition-colors duration-300"
+      className="flex items-center rounded-md transition-colors duration-300"
       aria-label={`Switch to ${darkTheme ? 'light' : 'dark'} mode`} // Accessibility label
     >
       {darkTheme ? (

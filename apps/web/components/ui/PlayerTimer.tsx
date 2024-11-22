@@ -22,11 +22,13 @@ const PlayerTimer: React.FC<PlayerTimerProps> = ({
   return (
     <div className={`
       flex items-center justify-between
-      p-4 rounded-xl
+      ps-4 rounded-xl
+      overflow-hidden
       border-2
+      transition-all duration-300
       ${isActive
-        ? 'border-amber-600/20 bg-amber-900/20'
-        : 'border-neutral-800 bg-neutral-900/50'
+        ? 'border-amber-700/30 bg-gradient-to-r from-amber-900/30 to-amber-800/30'
+        : 'border-neutral-800 bg-gradient-to-b from-neutral-900/50 to-neutral-950/50'
       }
       transition-all duration-300
     `}>
@@ -37,8 +39,8 @@ const PlayerTimer: React.FC<PlayerTimerProps> = ({
               <Image
                 src={avatar}
                 alt={`${playerName}'s avatar`}
-                width={48}
-                height={48}
+                width={56}
+                height={56}
                 className={`
               rounded-full
               object-cover
@@ -55,11 +57,11 @@ const PlayerTimer: React.FC<PlayerTimerProps> = ({
             </div>
           ) : (
             <div className={`
-          w-12 h-12
-          rounded-full
-          flex items-center justify-center
-          border-2
-          relative
+              w-12 h-12
+              rounded-full
+              flex items-center justify-center
+              border-2
+              relative
           ${isActive
                 ? 'border-amber-600 bg-amber-900/30 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
                 : 'border-neutral-700 bg-neutral-800'
@@ -78,29 +80,42 @@ const PlayerTimer: React.FC<PlayerTimerProps> = ({
           )}
           {color && (
             <div className={`
-          absolute bottom-0 right-0
-          w-5 h-5
-          rounded-full
-          flex items-center justify-center
-          border
-          ${color === 'white'
-                ? 'bg-white border-neutral-600 text-black'
-                : 'bg-black text-white border-neutral-700'
-              }
-        `}>
-              <span className="text-xs">
-                {color === 'white' ? '♙' : '♟'}
-              </span>
+              absolute
+              bottom-[-8px]
+              right-[-8px]
+              z-20
+              w-8
+              h-8
+              rounded-full
+              flex
+              items-center
+              justify-center
+              bg-amber-900/30
+              border
+              border-amber-700/50
+              transition-transform
+              transform
+              hover:scale-110
+            `}>
+              <Image
+                src={`/cardinal/${color[0]}/p.svg`}
+                alt={`${color} pawn`}
+                width={30}
+                height={30}
+                className="brightness-125 hover:brightness-150"
+              />
             </div>
           )}
         </div>
         <div>
           <h3 className={`
-            text-md font-medium
+            text-md
+            font-medium
             ${isActive
               ? 'text-amber-200'
               : 'text-neutral-400'}
-            transition-colors duration-300
+              transition-colors
+              duration-300
           `}>
             {playerName}
           </h3>

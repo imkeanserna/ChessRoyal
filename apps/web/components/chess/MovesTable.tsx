@@ -9,6 +9,9 @@ import { GameMessages } from "@repo/chess/gameStatus";
 import { Flag, FlagOff } from 'lucide-react';
 import { Tooltip } from "@repo/ui/components/ui/tooltip";
 import { ConfirmResignModal } from "../ui/ConfirmResignModal";
+import DrawOfferButton from "../ui/DrawOfferButton";
+import { useGameActions } from "@/hooks/useGameActions";
+import ThemeToggle from "@repo/ui/components/ui/themeToggle";
 
 interface MovesTableProps {
   sendMessage: (event: string, data?: any) => void;
@@ -20,6 +23,7 @@ const MovesTable: React.FC<MovesTableProps> = ({
   gameId
 }) => {
   const moves = useRecoilValue<Move[]>(movesAtom);
+  const { offerDraw, resignGame } = useGameActions(sendMessage);
   const [selectedMove, setSelectedMove] = useState<number | null>(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const setUserSelectedMove = useSetRecoilState(userSelectedMoveIndexAtom);
@@ -31,7 +35,8 @@ const MovesTable: React.FC<MovesTableProps> = ({
   };
 
   const handleConfirmResign = () => {
-    sendMessage(GameMessages.USER_RESIGNED, { gameId });
+    resignGame(gameId);
+    setModalOpen(false);
   };
 
   return (
@@ -39,15 +44,19 @@ const MovesTable: React.FC<MovesTableProps> = ({
       <div className="border-b border-gray-300 w-full">
         <div className="flex flex-col sm:flex-row justify-between p-4 sm:p-8">
           <Tooltip content="Resign Game">
-            {isResigned ? (
-              <FlagOff className="cursor-not-allowed text-gray-500" />
-            ) : (
-              <Flag
-                onClick={() => setModalOpen(true)}
-                className="cursor-pointer hover:text-white transition-colors"
-              />
-            )}
+            <Button variant={"outline"} className="p-2 hover:bg-orange-800">
+              {isResigned ? (
+                <FlagOff className="cursor-not-allowed text-gray-500" />
+              ) : (
+                <Flag
+                  onClick={() => setModalOpen(true)}
+                  className="cursor-pointer hover:text-white transition-colors"
+                />
+              )}
+            </Button>
           </Tooltip>
+          <DrawOfferButton onOffer={offerDraw} gameId={gameId} />
+          <ThemeToggle />
         </div>
       </div>
       <div className="space-y-4 p-4 sm:p-8 md:w-full">

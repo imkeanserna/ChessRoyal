@@ -28,21 +28,21 @@ export class GameManager {
   }
 
   addUser(user: User) {
-    this.users.set(user.id, user);
+    this.users.set(user.userId, user);
     this.addHandler(user);
   }
 
-  removeUser(id: string, userId: string): void {
-    const user = this.users.get(id);
+  removeUser(userId: string): void {
+    const user = this.users.get(userId);
 
     if (!user) {
       console.error("Remove User: User not found");
       return;
     }
 
-    this.users.delete(id);
-    this.redisPubSub.unsubscribe(id);
-    this.redisPubSub.unsubscribeUser(id);
+    this.users.delete(userId);
+    this.redisPubSub.unsubscribe(userId);
+    this.redisPubSub.unsubscribeUser(userId);
 
     for (const [gameId, game] of this.games) {
       if (game.player1UserId === userId || game.player2UserId === userId) {
@@ -87,6 +87,12 @@ export class GameManager {
       case GameMessages.USER_RESIGNED:
         await this.handleResign(user, payload);
         break;
+      case GameMessages.DRAW_OFFERED:
+        await this.handleDrawOffer(user, payload);
+        break;
+      case GameMessages.DRAW_RESPONSED:
+        await this.handleDrawOfferResponse(user, payload);
+        break;
       default:
         console.warn(`Unhandled game event: ${event}`);
     }
@@ -101,9 +107,9 @@ export class GameManager {
     });
 
     if (ongoingGame) {
-      console.error(`User ${user.id} already has an ongoing game (${ongoingGame.id}).`);
-      this.redisPubSub.subscribeUser(user.id, user.socket);
-      await this.redisPubSub.sendToUser(user.id, JSON.stringify({
+      console.error(`User ${user.userId} already has an ongoing game (${ongoingGame.id}).`);
+      this.redisPubSub.subscribeUser(user.userId, user.socket);
+      await this.redisPubSub.sendToUser(user.userId, JSON.stringify({
         event: GameMessages.ERROR,
         payload: {
           gameId: ongoingGame.id
@@ -124,7 +130,7 @@ export class GameManager {
       }
 
       // Subscribe the second player to the game channel
-      this.redisPubSub.subscribe(user.id, game.id, user.socket);
+      this.redisPubSub.subscribe(user.userId, game.id, user.socket);
 
       await game.addSecondPlayer(user);
       this.createTimer(game.id);
@@ -135,7 +141,7 @@ export class GameManager {
       this.games.set(game.id, game);
 
       // Subscribe the first player to the game channel
-      this.redisPubSub.subscribe(user.id, game.id, user.socket);
+      this.redisPubSub.subscribe(user.userId, game.id, user.socket);
 
       // add first player
       await game.addFirstPlayer(user);
@@ -164,7 +170,7 @@ export class GameManager {
       return;
     }
 
-    this.redisPubSub.subscribe(user.id, game.id, user.socket);
+    this.redisPubSub.subscribe(user.userId, game.id, user.socket);
 
     if (!game.player2UserId) {
       await game.addSecondPlayer(user);
@@ -259,6 +265,101 @@ export class GameManager {
       }
     } catch (error) {
       console.error("An error occurred while processing resignation:", error);
+    }
+  }
+
+  private async handleDrawOffer(user: User, payload: any): Promise<void> {
+    // Validate payload and ensure gameId is present
+    if (!payload || !payload.gameId) {
+      console.error("Invalid payload or missing gameId:", payload);
+      return;
+    }
+
+    const game = this.games.get(payload.gameId);
+    if (!game) {
+      console.error(`Game not found for gameId: ${payload.gameId}`);
+      return;
+    }
+
+    if (game.getMoves().length <= 2) {
+      console.error(`Cannot respond to draw offer. Game ${game.id} has less than 3 moves.`);
+      return;
+    }
+
+    const opponentId = game.getOpponentId(user.userId);
+    if (!opponentId) {
+      console.error(`Opponent not found for user ${user.userId} in game ${game.id}`);
+      return;
+    }
+
+    const opponentSocket = this.users.get(opponentId)?.socket;
+    if (!opponentSocket) {
+      console.error(`Opponent socket not found for user ${opponentId}`);
+      return;
+    }
+
+    game.initiateDrawOffer(user.userId);
+
+    // Send a message to the opponent signaling the draw offer
+    this.redisPubSub.subscribeUser(opponentId, opponentSocket);
+    await this.redisPubSub.sendToUser(opponentId, JSON.stringify({
+      event: GameMessages.DRAW_OFFERED,
+      payload: {
+        offeredBy: user.userId,
+        gameId: game.id,
+      },
+    }));
+  }
+
+  private async handleDrawOfferResponse(user: User, payload: any): Promise<void> {
+    // Validate payload and ensure gameId and response are present
+    if (!payload || !payload.gameId || !payload.response) {
+      console.error("Invalid payload or missing gameId/response:", payload);
+      return;
+    }
+
+    const game = this.games.get(payload.gameId);
+    if (!game) {
+      console.error(`Game not found for gameId: ${payload.gameId}`);
+      return;
+    }
+
+    const offeredById = game.getOpponentId(user.userId);
+    if (!offeredById) {
+      console.error(`Original draw offer user not found`);
+      return;
+    }
+
+    if (game.drawOffererUserId !== offeredById || game.drawOffererUserId === null) {
+      console.error(`User ${user.userId} is not the original draw offer user`);
+      return;
+    }
+
+    const offererSocket = this.users.get(offeredById)?.socket;
+    if (!offererSocket) {
+      console.error(`Offerer socket not found for user ${offeredById}`);
+      return;
+    }
+
+    // Determine the response type
+    const isDrawAccepted = payload.response === 'accept';
+
+    this.redisPubSub.subscribeUser(offeredById, offererSocket);
+    await this.redisPubSub.sendToUser(offeredById, JSON.stringify({
+      event: GameMessages.DRAW_RESPONSED,
+      payload: {
+        respondedBy: user.userId,
+        gameId: game.id,
+        response: payload.response, // 'accept' or 'decline'
+      },
+    }));
+
+    // If draw is accepted, end the game
+    if (isDrawAccepted) {
+      game.processDrawOffer(user);
+      this.removeGame(game.id);
+    } else {
+      game.cancelDrawOffer();
     }
   }
 
