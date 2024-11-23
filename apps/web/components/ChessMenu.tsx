@@ -12,6 +12,8 @@ import { gameMetadataAtom, gameResignedAtom, remoteGameIdAtom } from "@repo/stor
 import { userAtom } from "@repo/store/user";
 import { OngoingGameModal } from "./ui/OngoingGameModal";
 import { isGameOverAtom, movesAtom } from "@repo/store/chessBoard";
+import { AuthModal } from "@repo/ui/components/auth-modal";
+import { signUpUser } from "@/lib";
 
 export interface Players {
   blackPlayer: Player;
@@ -130,10 +132,8 @@ const ChessMenu: React.FC = () => {
   return (
     <div>
       <WaitingForOpponent isWaiting={isWaiting} />
-      <Button>
-        Create Game
-      </Button>
-      <Button disabled={isWaiting} onClick={handleFindGame}>
+      <AuthModal onSubmitAction={signUpUser} />
+      <Button variant="outline" className="border border-gray-400" disabled={isWaiting} onClick={handleFindGame}>
         Play as Guest
       </Button>
       <OngoingGameModal
