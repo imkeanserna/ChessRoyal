@@ -1,4 +1,4 @@
-import { LoginForm } from "@repo/ui/components/loginForm";
+// import { LoginForm } from "@repo/ui/components/loginForm";
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib";
 
@@ -11,7 +11,7 @@ export default async function Page() {
 
   return (
     <div className="flex w-full h-full items-center justify-center">
-      <LoginForm />
+      {/* <LoginForm /> */}
     </div>
   );
 };

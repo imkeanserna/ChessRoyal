@@ -1,7 +1,6 @@
 "use server";
 
 import bcrypt from "bcrypt";
-import { redirect } from "next/navigation";
 import { addUser } from "@repo/db/user";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth";
@@ -16,24 +15,28 @@ export const signUpUser = async (
   email: string,
   password: string,
   displayName: string
-) => {
+): Promise<any> => {
   let success = false;
   let err: any;
+  let user: { email: string; password: string | null } | null = null;
 
   try {
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(password, salt);
-    await addUser({ email, password: hashedPassword, displayName });
+    user = await addUser({ email, password: hashedPassword, displayName });
     success = true;
   } catch (error: any) {
     err = error;
   }
 
   if (success) {
-    redirect("/auth/login");
+    return {
+      success: true,
+      user: user,
+    };
   } else {
-    if (err.message && err.message.includes("UNIQUE")) {
-      if (err.message.includes("users.email")) {
+    if (err.message) {
+      if (err.message === "Email already registered") {
         return { error: "Email already registered" };
       } else {
         return { error: "Display name already registered" };
@@ -43,27 +46,3 @@ export const signUpUser = async (
     }
   }
 };
-
-// export const profileUpdate = async (id: string, displayName: string) => {
-//   let success = false;
-//   let err: any;
-//   try {
-//     await updateUserDisplayName(id, displayName);
-//     success = true;
-//   } catch (error: any) {
-//     err = error;
-//   }
-//
-//   if (success) {
-//     redirect("/");
-//   } else {
-//     if (err.message.includes("UNIQUE")) {
-//       if (err.message.includes("users.email")) {
-//         return { error: "Email already registered" };
-//       } else {
-//         return { error: "Display name already registered" };
-//       }
-//     }
-//     return { error: "Something went wrong" };
-//   }
-// };

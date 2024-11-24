@@ -73,10 +73,32 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        float: {
+          "0%": { transform: "translate(0, 0) rotate(0deg)" },
+          "50%": { transform: "translate(-10px, -10px) rotate(5deg)" },
+          "100%": { transform: "translate(0, 0) rotate(0deg)" },
+        },
+        "float-delayed": {
+          "0%": { transform: "translate(0, 0) rotate(0deg)" },
+          "50%": { transform: "translate(10px, -15px) rotate(-5deg)" },
+          "100%": { transform: "translate(0, 0) rotate(0deg)" },
+        },
+        "spin-slow": {
+          from: { transform: "rotate(0deg)" },
+          to: { transform: "rotate(360deg)" }
+        },
+        "progress": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" }
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "float": "float 20s ease-in-out infinite",
+        "float-delayed": "float-delayed 25s ease-in-out infinite",
+        "animate-spin-slow": "spin-slow 3s linear infinite",
+        "animate-progress": "progress 2s ease-in-out infinite"
       },
       borderWidth: {
         '12': '12px',
