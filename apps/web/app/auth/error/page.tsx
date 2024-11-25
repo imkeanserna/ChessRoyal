@@ -8,7 +8,7 @@ const Page = () => {
       Something went wrong
       <div>
         <Button asChild>
-          <Link href="/auth/login">Log in</Link>
+          <Link href="/play">Log in</Link>
         </Button>
       </div>
     </div>

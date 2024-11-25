@@ -80,7 +80,6 @@ const ChessMenu: React.FC = () => {
 
   useEffect(() => {
     if (!socket) {
-      console.log("no socket");
       return;
     }
 
@@ -96,7 +95,6 @@ const ChessMenu: React.FC = () => {
           setUser({
             id: payload.userId
           })
-          setIsWaiting(true);
           handleGameAdded({ gameId: payload.gameId });
           break;
         case GameMessages.ERROR:
@@ -114,6 +112,7 @@ const ChessMenu: React.FC = () => {
       console.log("no socket");
       return
     }
+    setIsWaiting(true);
     sendMessage(GameMessages.INIT_GAME);
   }
 

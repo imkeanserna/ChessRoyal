@@ -11,7 +11,7 @@ const WaitingForOpponent: React.FC<WaitingForOpponentProps> = ({ isWaiting }) =>
   if (!isWaiting) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="fixed inset-[-30px] bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
       <div className="bg-neutral-900/90 border border-amber-600/20 rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl">
         <div className="flex flex-col items-center gap-6">
           {/* Animated chess pieces */}

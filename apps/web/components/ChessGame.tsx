@@ -98,7 +98,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
   const handleNewGame = useCallback(() => {
     resetGameState();
-    router.push('/play/online');
+    router.push('/play');
   }, [router, resetGameState]);
 
   useEffect(() => {
@@ -330,7 +330,17 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   };
 
   return (
-    <div className="w-full min-h-screen  flex items-center justify-center py-4">
+    <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-b from-neutral-900 to-neutral-950">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,53,15,0.2),rgba(0,0,0,0))]" />
+        <div className="absolute top-0 left-0 w-64 h-64 bg-amber-600/5 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-800/5 rounded-full blur-3xl animate-float-delayed" />
+      </div>
+
+      <div className="absolute inset-0 opacity-5">
+        <div className="h-full w-full bg-[repeating-conic-gradient(theme(colors.amber.900)_0%_25%,theme(colors.transparent)_0%_50%)] bg-[length:40px_40px]" />
+      </div>
+
       {isGameOver.playerWon && wonBy && (
         <ModalGameOver
           playerWon={isGameOver.playerWon === GameResultType.DRAW ? GameResultType.DRAW : isGameOver.playerWon}
@@ -341,37 +351,39 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
           setOpen={setOpen}
         />
       )}
-      <div>
+      <div className="relative z-10 w-full max-w-6xl px-4">
         {blackPlayer && whitePlayer ? (
-          <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-8 lg:gap-10">
-            <div className="text-end">
-              <PlayerTimer
-                playerName={getOpponentInfo().name}
-                duration={getOpponentInfo().remainingTime}
-                isPaused={getOpponentInfo().isPaused}
-                avatar={getOpponentInfo().avatar}
-                isActive={chess.turn() !== myColor[0]}
-                color={isPlayingAsBlack ? 'black' : 'white'}
-              />
-              <Suspense fallback={<div>Loading...</div>}>
-                <ChessBoard
-                  started={started}
-                  setBoard={setBoard}
-                  gameId={gameId}
-                  board={board}
-                  chess={chess}
-                  sendMessage={sendMessage}
-                  myColor={myColor}
+          <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-8 lg:gap-10 rounded-xl p-6 shadow-2xl">
+            <div className="w-full space-y-4">
+              <div className="text-end">
+                <PlayerTimer
+                  playerName={getOpponentInfo().name}
+                  duration={getOpponentInfo().remainingTime}
+                  isPaused={getOpponentInfo().isPaused}
+                  avatar={getOpponentInfo().avatar}
+                  isActive={chess.turn() !== myColor[0]}
+                  color={isPlayingAsBlack ? 'black' : 'white'}
                 />
-              </Suspense>
-              <PlayerTimer
-                playerName={getCurrentPlayerInfo().name}
-                duration={getCurrentPlayerInfo().remainingTime}
-                isPaused={getCurrentPlayerInfo().isPaused}
-                avatar={getCurrentPlayerInfo().avatar}
-                isActive={chess.turn() === myColor[0]}
-                color={isPlayingAsBlack ? 'white' : 'black'}
-              />
+                <Suspense fallback={<div>Loading...</div>}>
+                  <ChessBoard
+                    started={started}
+                    setBoard={setBoard}
+                    gameId={gameId}
+                    board={board}
+                    chess={chess}
+                    sendMessage={sendMessage}
+                    myColor={myColor}
+                  />
+                </Suspense>
+                <PlayerTimer
+                  playerName={getCurrentPlayerInfo().name}
+                  duration={getCurrentPlayerInfo().remainingTime}
+                  isPaused={getCurrentPlayerInfo().isPaused}
+                  avatar={getCurrentPlayerInfo().avatar}
+                  isActive={chess.turn() === myColor[0]}
+                  color={isPlayingAsBlack ? 'white' : 'black'}
+                />
+              </div>
             </div>
             <MovesTable
               sendMessage={sendMessage}
