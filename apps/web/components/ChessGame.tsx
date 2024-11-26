@@ -98,7 +98,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
   const handleNewGame = useCallback(() => {
     resetGameState();
-    router.push('/play');
+    router.push('/dashboard');
   }, [router, resetGameState]);
 
   useEffect(() => {

@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@repo/ui/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthProvider";
 import { Toaster } from "@repo/ui/components/ui/sonner";
+import RecoilContextProvider from "@/components/Provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,12 +17,16 @@ export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-}): JSX.Element {
+}) {
   return (
     <html lang="en">
       <body className={inter.className}>
         <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <RecoilContextProvider>
+              {children}
+            </RecoilContextProvider>
+          </AuthProvider>
           <Toaster richColors />
         </ThemeProvider>
       </body>

@@ -2,7 +2,7 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 const authRoutes = ["/auth/login", "/auth/sign-up"];
-const dashBoard = "/"; // Change this in the future.
+const dashBoard = "/dashboard"; // Change this in the future.
 const publicRoutes = ["/about", "/contact", "/blog"];
 
 export default withAuth(
