@@ -1,15 +1,13 @@
 'use client'
 
-import { FC, useEffect, useState } from 'react'
+import { FC, useState } from 'react'
 import { Dialog, DialogContent, DialogTrigger } from "@repo/ui/components/ui/dialog"
 import { Button } from "@repo/ui/components/ui/button"
 import { LoginForm } from './loginForm'
 import { SignUpForm } from './signupForm'
-import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog'
-import { FaGithub, FaChessKing, FaChessQueen } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
-import { signIn } from "next-auth/react";
+import { FaChessKing, FaChessQueen } from "react-icons/fa";
 import AnimatedAlert from '../ui/animated-alert'
+import { Description, DialogTitle } from '@radix-ui/react-dialog'
 
 interface SignUpFormProps {
   onSubmitAction: (
@@ -51,7 +49,10 @@ export const AuthModal: FC<SignUpFormProps> = ({ onSubmitAction }) => {
               <div className="bg-amber-500/10 p-3 rounded-full">
                 <FaChessQueen className="h-8 w-8 text-amber-200" />
               </div>
-              <h2 className="text-2xl font-bold text-amber-100">Chess Arena</h2>
+              <DialogTitle className='text-2xl font-bold text-amber-100'>
+                Chess Arena
+                <Description></Description>
+              </DialogTitle>
             </div>
           </div>
 

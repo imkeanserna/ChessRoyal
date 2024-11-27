@@ -1,5 +1,6 @@
 import ChessGameHistory from "@/components/GameHistory";
 import InitializeButton from "@/components/InitializeButton";
+import ProfileDropdown from "@/components/ProfileDropdown";
 import { currentUser } from "@/lib";
 import { User } from "next-auth";
 import { redirect } from "next/navigation";
@@ -13,6 +14,9 @@ export default async function Page() {
 
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center justify-end bg-gradient-to-b from-neutral-900 to-neutral-950">
+      <div className="z-50 absolute top-8 right-8">
+        <ProfileDropdown user={user} />
+      </div>
       {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"

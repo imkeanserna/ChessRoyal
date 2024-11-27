@@ -10,7 +10,7 @@ export const SocialMediaButtons: FC = () => {
       <Button
         variant="outline"
         className="w-full bg-white hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800"
-        onClick={() => signIn('google', { callbackUrl: '/' })}
+        onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
       >
         <FcGoogle className="w-5 h-5 mr-2" />
         Google
@@ -18,7 +18,7 @@ export const SocialMediaButtons: FC = () => {
       <Button
         variant="outline"
         className="w-full bg-white hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800"
-        onClick={() => signIn('github', { callbackUrl: '/' })}
+        onClick={() => signIn('github', { callbackUrl: '/dashboard' })}
       >
         <FaGithub className="w-5 h-5 mr-2" />
         GitHub
