@@ -1,3 +1,4 @@
+import ChessGameHistory from "@/components/GameHistory";
 import InitializeButton from "@/components/InitializeButton";
 import { currentUser } from "@/lib";
 import { User } from "next-auth";
@@ -11,22 +12,35 @@ export default async function Page() {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-b from-neutral-900 to-neutral-950">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,53,15,0.2),rgba(0,0,0,0))]" />
-        <div className="absolute top-0 left-0 w-64 h-64 bg-amber-600/5 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-800/5 rounded-full blur-3xl animate-float-delayed" />
+    <div className="relative min-h-screen w-full flex flex-col items-center justify-end bg-gradient-to-b from-neutral-900 to-neutral-950">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+        style={{
+          backgroundImage:
+            "url('https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdmx5bGkwbTVzaTAwNm45NTNlcWxkZmtnbW94NTJ2Mzd6ajUyM2dqNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9POMmQiLkvhRzKFXyT/giphy.webp')", // Replace with the actual image path
+        }}
+      >
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
       </div>
+
+      {/* Floating Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-amber-600/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-800/10 rounded-full blur-3xl animate-float-delayed" />
+      </div>
+
+      {/* Chessboard Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="h-full w-full bg-[repeating-conic-gradient(theme(colors.amber.900)_0%_25%,theme(colors.transparent)_0%_50%)] bg-[length:40px_40px]" />
       </div>
-      <div className="relative z-10 w-full max-w-6xl px-4">
-        <div className="flex flex-col justify-center items-center gap-8 rounded-xl p-6 shadow-2xl">
-          <div className="text-center space-y-4">
-            <p className="text-3xl text-amber-200">User Details</p>
-            <pre className="text-amber-100/70 p-4 bg-neutral-800/50 rounded-md overflow-auto max-h-64">
-              {JSON.stringify(user, null, 2)}
-            </pre>
+
+      {/* Main Content */}
+      <div className="relative z-10 w-full max-w-6xl px-4 space-y-12 mb-36">
+        <ChessGameHistory userId={"asdasdasd12"} />
+        <div className="text-center flex justify-center space-y-4 px-10">
+          <div className="w-[200px]">
             <InitializeButton user={user} />
           </div>
         </div>

@@ -78,6 +78,14 @@ const config = {
           "50%": { transform: "translate(-10px, -10px) rotate(5deg)" },
           "100%": { transform: "translate(0, 0) rotate(0deg)" },
         },
+        float1: {
+          '0%, 100%': { transform: 'translateY(0) rotate(45deg)' },
+          '50%': { transform: 'translateY(-50px) rotate(35deg)' },
+        },
+        float2: {
+          '0%, 100%': { transform: 'translateY(0) rotate(-45deg)' },
+          '50%': { transform: 'translateY(-30px) rotate(-35deg)' },
+        },
         "float-delayed": {
           "0%": { transform: "translate(0, 0) rotate(0deg)" },
           "50%": { transform: "translate(10px, -15px) rotate(-5deg)" },
@@ -98,7 +106,9 @@ const config = {
         "float": "float 20s ease-in-out infinite",
         "float-delayed": "float-delayed 25s ease-in-out infinite",
         "animate-spin-slow": "spin-slow 3s linear infinite",
-        "animate-progress": "progress 2s ease-in-out infinite"
+        "animate-progress": "progress 2s ease-in-out infinite",
+        'chess-piece-1': 'float1 10s ease-in-out infinite',
+        'chess-piece-2': 'float2 12s ease-in-out infinite',
       },
       borderWidth: {
         '12': '12px',
