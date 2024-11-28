@@ -5,6 +5,7 @@ import { ThemeProvider } from "@repo/ui/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthProvider";
 import { Toaster } from "@repo/ui/components/ui/sonner";
 import RecoilContextProvider from "@/components/Provider";
+import { GithubRepository } from "@/components/ui/GithubRepository";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +26,10 @@ export default function RootLayout({
           <AuthProvider>
             <RecoilContextProvider>
               {children}
+              <GithubRepository
+                className="z-50 fixed bottom-10 right-10"
+                link="https://github.com/imkeanserna/chess-game"
+              />
             </RecoilContextProvider>
           </AuthProvider>
           <Toaster richColors />

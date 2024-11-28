@@ -1,6 +1,7 @@
 import ChessGameHistory from "@/components/GameHistory";
 import InitializeButton from "@/components/InitializeButton";
 import ProfileDropdown from "@/components/ProfileDropdown";
+import { GithubRepository } from "@/components/ui/GithubRepository";
 import { currentUser } from "@/lib";
 import { User } from "next-auth";
 import { redirect } from "next/navigation";
