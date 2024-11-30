@@ -1,6 +1,7 @@
 "use client";
 
 import ChessMenu from "@/components/ChessMenu";
+import SkeletonGuest from "@/components/ui/skeleton/SkeletonGuest";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -16,7 +17,7 @@ export default function Page() {
   }, [session, router]);
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return <SkeletonGuest />;
   }
 
   return (

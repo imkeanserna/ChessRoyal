@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight, Clock, Trophy } from 'lucide-react';
 import { Card, CardContent } from '@repo/ui/components/ui/card';
+import GameHistorySkeleton from './ui/skeleton/GameHistorySkeleton';
 
 interface GameHistoryItem {
   id: string;
@@ -180,9 +181,7 @@ const ChessGameHistory = ({ userId }: { userId: string }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64 bg-neutral-900 rounded-xl">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-amber-500"></div>
-      </div>
+      <GameHistorySkeleton count={4} />
     );
   }
 

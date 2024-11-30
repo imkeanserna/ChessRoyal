@@ -19,6 +19,7 @@ import PlayerTimer from "./ui/PlayerTimer";
 import { useGameActions } from "@/hooks/useGameActions";
 import { toast } from "@repo/ui/components/ui/sonner";
 import { CheckCircle, XCircle } from "lucide-react";
+import ChessboardSkeleton from "./ui/skeleton/ChessboardSkeleton";
 
 interface ChessGameProps {
   gameId: string;
@@ -364,7 +365,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
                   isActive={chess.turn() !== myColor[0]}
                   color={isPlayingAsBlack ? 'black' : 'white'}
                 />
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<ChessboardSkeleton />}>
                   <ChessBoard
                     started={started}
                     setBoard={setBoard}
@@ -391,7 +392,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
             />
           </div>
         ) : (
-          <div>Loading...</div>
+          <ChessboardSkeleton />
         )
         }
       </div>
