@@ -315,7 +315,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       name: player.name,
       remainingTime: player.remainingTime,
       avatar: player?.avatar,
-      isPaused: isTimerPaused(isPlayingAsBlack ? 'black' : 'white')
+      isPaused: chess.turn() !== myColor[0]
     };
   };
 
@@ -325,7 +325,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       name: player.name,
       remainingTime: player.remainingTime,
       avatar: player?.avatar,
-      isPaused: isTimerPaused(isPlayingAsBlack ? 'white' : 'black')
+      isPaused: chess.turn() === myColor[0]
     };
   };
 
