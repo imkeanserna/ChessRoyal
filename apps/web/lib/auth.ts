@@ -81,6 +81,7 @@ export const authOptions: NextAuthOptions = {
 
       token.id = existingUser.id;
       token.name = existingUser.displayName;
+      token.email = existingUser.email;
       token.image = existingUser.image;
 
       return token;

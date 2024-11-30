@@ -34,9 +34,7 @@ model Player {
   userId   String?
   image    String?  @db.Text
 
-  ChessGame   ChessGame?    @relation(fields: [chessGameId], references: [id])
-  chessGameId String?
-  // chessMove   ChessMove[]
+  games       ChessGame[]
   chessResult ChessResult[]
 }
 
@@ -47,33 +45,40 @@ model ChessGame {
   updatedAt    DateTime     @default(now())
   status       GameStatus
   moves        ChessMove[]
-  players      Player[]
   result       ChessResult?
   currentBoard String
   turn         String
 
   whitePlayerRemainingTime Int
   blackPlayerRemainingTime Int
+
+  players Player[]
 }
 
 model ChessMove {
   id        String    @id @default(cuid())
   game      ChessGame @relation(fields: [gameId], references: [id])
   gameId    String
-  // player    Player    @relation(fields: [playerId], references: [id])
   playerId  String
   move      String
   createdAt DateTime  @default(now())
 }
 
 model ChessResult {
-  id         String         @id @default(cuid())
-  game       ChessGame      @relation(fields: [gameId], references: [id])
-  gameId     String         @unique
-  winner     Player?        @relation(fields: [winnerId], references: [id])
-  winnerId   String?
-  resultType GameResultType
-  finishedAt DateTime       @default(now())
+  id              String         @id @default(cuid())
+  game            ChessGame      @relation(fields: [gameId], references: [id])
+  gameId          String         @unique
+  winnerId        String?
+  resultType      GameResultType
+  whitePlayerId   String
+  blackPlayerId   String
+  whitePlayerName String?
+  blackPlayerName String?
+  whiteScore      Int
+  blackScore      Int
+  finishedAt      DateTime       @default(now())
+  Player          Player?        @relation(fields: [playerId], references: [id])
+  playerId        String?
 }
 
 enum GameStatus {

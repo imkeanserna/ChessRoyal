@@ -1,7 +1,6 @@
 import ChessGameHistory from "@/components/GameHistory";
 import InitializeButton from "@/components/InitializeButton";
 import ProfileDropdown from "@/components/ProfileDropdown";
-import { GithubRepository } from "@/components/ui/GithubRepository";
 import { currentUser } from "@/lib";
 import { User } from "next-auth";
 import { redirect } from "next/navigation";
@@ -43,7 +42,7 @@ export default async function Page() {
 
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-6xl px-4 space-y-12 mb-36">
-        <ChessGameHistory userId={"asdasdasd12"} />
+        <ChessGameHistory userId={user.id} />
         <div className="text-center flex justify-center space-y-4 px-10">
           <div className="w-[200px]">
             <InitializeButton user={user} />

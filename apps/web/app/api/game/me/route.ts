@@ -6,12 +6,11 @@ import { authOptions } from "@/lib/auth";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    console.log("ASdasdasdasddddddddddddd")
-    console.log(session)
 
     if (!session?.user?.id) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
+
     const userId = session.user.id;
     const games = await db.chessGame.findMany({
       where: {
@@ -28,9 +27,6 @@ export async function GET() {
         createdAt: 'desc',
       },
     });
-
-    console.log("+============================= games ==================================")
-    console.log(games)
 
     return NextResponse.json({ success: true, games });
   } catch (error) {

@@ -2,16 +2,20 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight, Clock, Trophy } from 'lucide-react';
-import { Card, CardContent } from '@repo/ui/components/ui/card'; // Or any other UI library you prefer
+import { Card, CardContent } from '@repo/ui/components/ui/card';
 
 interface GameHistoryItem {
   id: string;
   date: Date;
-  score: number;
   duration: number;
-  difficulty: string;
   result: string;
   opponent: string;
+  resultType: string;
+  player: {
+    name: string;
+    isGuest: boolean;
+  };
+  score: number;
 }
 
 const ChessGameHistory = ({ userId }: { userId: string }) => {
@@ -22,16 +26,71 @@ const ChessGameHistory = ({ userId }: { userId: string }) => {
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
 
+  const transformGames = (rawGames: any[], userId: string): GameHistoryItem[] => {
+    return rawGames.map(game => {
+      const isWhitePlayer = game.result.whitePlayerId === userId;
+      const isBlackPlayer = game.result.blackPlayerId === userId;
+
+      // Determine opponent name and player name
+      const opponentName = isWhitePlayer
+        ? game.result.blackPlayerName
+        : game.result.whitePlayerName;
+      const playerName = isWhitePlayer
+        ? game.result.whitePlayerName
+        : game.result.blackPlayerName;
+
+      // Calculate duration (in seconds)
+      const duration = isWhitePlayer
+        ? Math.floor((3600000 - game.whitePlayerRemainingTime) / 1000)
+        : Math.floor((3600000 - game.blackPlayerRemainingTime) / 1000);
+
+      // Determine result
+      const winnerId = game.result.winnerId;
+      const result = winnerId === userId ? 'win' : winnerId && winnerId !== userId ? 'loss' : 'draw';
+
+      const score = userId === game.result.whitePlayerId
+        ? game.result.whiteScore
+        : game.result.blackScore;
+
+      return {
+        id: game.id,
+        date: new Date(game.createdAt),
+        duration,
+        result,
+        resultType: game.result.resultType.toLowerCase(),
+        opponent: opponentName,
+        player: {
+          name: playerName,
+          isGuest: playerName.startsWith('Guest')
+        },
+        score
+      };
+    });
+  };
+
   useEffect(() => {
-    const dummyGames: GameHistoryItem[] = [
-      { id: '1', date: new Date('2024-11-20'), score: 120, duration: 1200, difficulty: 'beginner', result: 'win', opponent: 'AlphaChess AI' },
-      { id: '2', date: new Date('2024-11-21'), score: 250, duration: 1800, difficulty: 'intermediate', result: 'draw', opponent: 'ChessBot Pro' },
-      { id: '3', date: new Date('2024-11-22'), score: 420, duration: 2400, difficulty: 'master', result: 'loss', opponent: 'GrandMaster AI' },
-      { id: '4', date: new Date('2024-11-23'), score: 280, duration: 1500, difficulty: 'intermediate', result: 'win', opponent: 'Neural Chess' },
-      { id: '5', date: new Date('2024-11-24'), score: 390, duration: 2100, difficulty: 'master', result: 'draw', opponent: 'DeepMind Chess' },
-    ];
-    setGames(dummyGames);
-    setLoading(false);
+    const fetchGames = async () => {
+      try {
+        const response: any = await fetch(`/api/game/me`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+        const { games, success } = await response.json();
+
+        console.log(games)
+        if (success) {
+          const transformedGames = transformGames(games, userId);
+          setGames(transformedGames);
+        }
+      } catch (error) {
+        console.error('Error fetching games:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchGames();
   }, [userId]);
 
   useEffect(() => {
@@ -71,7 +130,7 @@ const ChessGameHistory = ({ userId }: { userId: string }) => {
     const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
       scrollContainer.addEventListener('scroll', checkScrollCapabilities);
-      checkScrollCapabilities(); // Initial check
+      checkScrollCapabilities();
       return () => scrollContainer.removeEventListener('scroll', checkScrollCapabilities);
     }
 
@@ -95,7 +154,7 @@ const ChessGameHistory = ({ userId }: { userId: string }) => {
   };
 
   // Color and icon for game result
-  const getResultStyle = (result: any) => {
+  const getResultStyle = (result: string) => {
     switch (result) {
       case 'win':
         return {
@@ -241,24 +300,17 @@ const ChessGameHistory = ({ userId }: { userId: string }) => {
                   {/* Opponent and Difficulty */}
                   <div className="flex justify-between items-center">
                     <div className="text-amber-100 font-bold text-xs truncate max-w-[120px]">
-                      {game.opponent}
-                    </div>
-                    <div
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${game.difficulty === 'beginner'
-                        ? 'bg-green-500/20 text-green-400'
-                        : game.difficulty === 'intermediate'
-                          ? 'bg-yellow-500/20 text-yellow-400'
-                          : 'bg-red-500/20 text-red-400'
-                        }`}
-                    >
-                      {game.difficulty.toUpperCase()}
+                      {game.opponent} {game.player.isGuest ? '(Guest)' : ''}
                     </div>
                   </div>
 
                   {/* Game Stats */}
                   <div className="grid grid-cols-3 gap-1 bg-neutral-950/50 rounded-lg p-2">
                     <div className="flex flex-col items-center">
-                      <div className="text-base font-bold text-amber-500">{game.score}</div>
+                      <div className="text-base font-bold text-amber-500">
+                        {game.result === 'win' ? '+' : game.result === 'loss' ? '-' : ''}
+                        {game.score}
+                      </div>
                       <div className="text-[10px] text-amber-200/50 mt-0.5">Score</div>
                     </div>
                     <div className="flex flex-col items-center">
@@ -269,11 +321,10 @@ const ChessGameHistory = ({ userId }: { userId: string }) => {
                       <div className="text-[10px] text-amber-200/50 mt-0.5">Duration</div>
                     </div>
                     <div className="flex flex-col items-center">
-                      <div className="text-base font-bold text-amber-100">
-                        {game.result === 'win' ? '+' : game.result === 'loss' ? '-' : ''}
-                        {game.score}
+                      <div className="text-base capitalize font-bold text-amber-100 overflow-hidden overflow-ellipsis" title={game.resultType}>
+                        {game.resultType.length > 12 ? `${game.resultType.substring(0, 12)}...` : game.resultType}
                       </div>
-                      <div className="text-[10px] text-amber-200/50 mt-0.5">Rating</div>
+                      <div className="text-[10px] text-amber-200/50 mt-0.5">Result Type</div>
                     </div>
                   </div>
                 </CardContent>

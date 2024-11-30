@@ -25,7 +25,7 @@ export class ChessGame {
     b: 3, // bishop
     r: 5, // rook
     q: 9, // queen
-    k: 0  // king (not captured)
+    k: 200 // king (not captured, but just to have a large value)
   };
   private status: GameStatus;
   private turn: string;
@@ -268,9 +268,9 @@ export class ChessGame {
     if (player1RemainingTime! <= 0 || player2RemainingTime! <= 0) {
       const { whiteScore, blackScore } = this.calculateMaterialDifference(this.board);
 
-      if (whiteScore < blackScore) {
+      if (whiteScore > blackScore) {
         this.gameEnded(GameResultType.TIMEOUT, PlayerWon.WHITE_WINS);
-      } else if (blackScore < whiteScore) {
+      } else if (blackScore > whiteScore) {
         this.gameEnded(GameResultType.TIMEOUT, PlayerWon.BLACK_WINS);
       } else {
         this.gameEnded(GameResultType.DRAW, null);
@@ -388,12 +388,20 @@ export class ChessGame {
       });
     });
 
-    const totalPieceValue = 39;
-    return {
-      whiteScore: totalPieceValue - whiteScore,
-      blackScore: totalPieceValue - blackScore,
+    // Check if the game ended in checkmate and adjust the score for the winner
+    const isCheckmate = this.board.isCheckmate();  // Adjust this based on your game's checkmate status
+    const winnerId = this.board.turn() === 'w' ? this.player2UserId : this.player1UserId;
+
+    if (isCheckmate) {
+      if (winnerId === this.player1UserId) {
+        whiteScore += 300;
+      } else if (winnerId === this.player2UserId) {
+        blackScore += 300;
+      }
     }
-  };
+
+    return { whiteScore, blackScore };
+  }
 
   getMoves() {
     return this.moves;
@@ -407,14 +415,10 @@ export class ChessGame {
     this.status = GameStatus.COMPLETED;
 
     try {
-      const winner = result === PlayerWon.WHITE_WINS
-        ? this.player1UserId
-        : result === PlayerWon.BLACK_WINS
-          ? this.player2UserId
-          : null;
+      const winner: string | null = this.getWinner(result);
 
       await db.$transaction(async (tx) => {
-        await tx.chessGame.update({
+        const game = await tx.chessGame.update({
           where: { id: this.id },
           data: {
             status: GameStatus.COMPLETED,
@@ -422,38 +426,72 @@ export class ChessGame {
             currentBoard: this.board.fen(),
             turn: this.turn,
           },
+          include: {
+            players: true,
+          },
         });
+
+        if (game.players.length < 2) {
+          throw new Error('Players data is incomplete.');
+        }
+
+        const { whiteScore, blackScore } = this.calculateMaterialDifference(this.board);
+        const whitePlayer = game.players.find((p) => p.id === this.player1UserId);
+        const blackPlayer = game.players.find((p) => p.id === this.player2UserId);
 
         await tx.chessResult.upsert({
           where: { gameId: this.id },
-          update: { winnerId: winner, resultType: status },
-          create: { gameId: this.id, winnerId: winner, resultType: status },
-        });
-      });
-
-      // remove if the they are guest
-      await deleteGameIfBothPlayersAreGuests(this.id, this.player1UserId, this.player2UserId);
-
-      RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
-        event: GameMessages.GAME_ENDED,
-        payload: {
-          result,
-          status,
-          whitePlayer: {
-            id: this.player1UserId,
-            name: "Guest",
-            isGuest: true
+          update: {
+            winnerId: winner ?? undefined,
+            resultType: status,
           },
-          blackPlayer: {
-            id: this.player2UserId,
-            name: "Guest",
-            isGuest: true
-          }
-        }
-      }));
+          create: {
+            winnerId: winner ?? undefined,
+            whitePlayerId: this.player1UserId,
+            blackPlayerId: this.player2UserId,
+            whitePlayerName: whitePlayer ? whitePlayer.name : undefined,
+            blackPlayerName: blackPlayer ? blackPlayer.name : undefined,
+            whiteScore: whiteScore || 0,
+            blackScore: blackScore || 0,
+            resultType: status,
+            game: {
+              connect: {
+                id: this.id,
+              },
+            },
+          },
+        });
+
+        // Remove game if both players are guests
+        await deleteGameIfBothPlayersAreGuests(this.id, this.player1UserId, this.player2UserId);
+
+        await RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
+          event: GameMessages.GAME_ENDED,
+          payload: {
+            result,
+            status,
+            whitePlayer: {
+              id: this.player1UserId,
+              name: whitePlayer ? whitePlayer.name : 'Guest',
+              isGuest: whitePlayer?.isGuest,
+            },
+            blackPlayer: {
+              id: this.player2UserId,
+              name: blackPlayer ? blackPlayer.name : 'Guest',
+              isGuest: blackPlayer?.isGuest,
+            },
+          },
+        }));
+      });
     } catch (error) {
       console.error("Error in gameEnded", error);
       return;
     }
+  }
+
+  private getWinner(result: PlayerWon | null): string | null {
+    if (result === PlayerWon.WHITE_WINS) return this.player1UserId;
+    if (result === PlayerWon.BLACK_WINS) return this.player2UserId;
+    return null;
   }
 }
