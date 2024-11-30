@@ -30,7 +30,6 @@ export async function GET() {
 
     return NextResponse.json({ success: true, games });
   } catch (error) {
-    console.error('Error fetching user games:', error);
     return NextResponse.json({ success: false, message: 'Failed to fetch games' }, { status: 500 });
   }
 }

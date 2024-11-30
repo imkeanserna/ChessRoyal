@@ -7,6 +7,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import {
   Tooltip
 } from "@repo/ui/components/ui/tooltip";
+import { toast } from "@repo/ui/components/ui/sonner";
 
 interface GameClipClipboardProps {
   clipUrl: string
@@ -21,7 +22,7 @@ export function GameClipClipboard({ clipUrl }: GameClipClipboardProps) {
       setIsCopied(true)
       setTimeout(() => setIsCopied(false), 3000)
     } catch (err) {
-      console.error("Failed to copy text: ", err)
+      toast.error("Something went wrong!")
     }
   }
 

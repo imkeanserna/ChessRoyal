@@ -4,6 +4,7 @@ import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { SocketContext } from "@repo/ui/context/socketContext";
 import { v4 as uuidv4 } from 'uuid';
 import type { User } from "next-auth";
+import { toast } from "sonner";
 
 interface EventHandlers {
   [key: string]: (data: any) => void
@@ -108,7 +109,7 @@ export const SocketContextProvider: React.FC<SocketContextProviderProps> = ({
 
   const sendMessage = (event: string, data?: any) => {
     if (!socket) {
-      console.log("no socket");
+      toast.info("Waiting for connection to server");
       return;
     }
 

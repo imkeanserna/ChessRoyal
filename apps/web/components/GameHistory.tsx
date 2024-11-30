@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight, Clock, Trophy } from 'lucide-react';
 import { Card, CardContent } from '@repo/ui/components/ui/card';
 import GameHistorySkeleton from './ui/skeleton/GameHistorySkeleton';
+import { toast } from '@repo/ui/components/ui/sonner';
 
 interface GameHistoryItem {
   id: string;
@@ -79,13 +80,12 @@ const ChessGameHistory = ({ userId }: { userId: string }) => {
         });
         const { games, success } = await response.json();
 
-        console.log(games)
         if (success) {
           const transformedGames = transformGames(games, userId);
           setGames(transformedGames);
         }
       } catch (error) {
-        console.error('Error fetching games:', error);
+        toast.error("Something went wrong. Please try again later.");
       } finally {
         setLoading(false);
       }

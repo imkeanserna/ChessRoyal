@@ -139,7 +139,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
             handleGameEnded(payload);
             break;
           case GameMessages.WAITING:
-            console.log("Waiting for players...");
             break;
           case GameMessages.DRAW_OFFERED:
             toast("Opponent offered a draw", {
@@ -200,7 +199,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
             }
             break;
           default:
-            console.warn("Unhandled message event:", event);
+            toast.error("Something went wrong while joining the room");
         }
       };
 
@@ -268,7 +267,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       setPlayer2ConsumeTimer(payload.player2RemainingTime);
       setIsCheck({ king_status: KingStatus.SAFE, player: "" });
     } catch (error) {
-      console.error("Error processing move:", error);
+      return;
     }
   };
 
@@ -296,7 +295,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         setIsResigned(true);
         break;
       default:
-        console.warn("Unhandled game end status:", payload.status);
+        toast.error("Unhandled game end status");
     }
   };
 

@@ -31,7 +31,6 @@ export class RedisPubSubManager {
     this.userChannels = new Map();
 
     this.subscriber.on("message", (channel: string, message: string) => {
-      console.log(`Received ${message} from ${channel}`);
       if (channel.startsWith("user:")) {
         const userId = channel.split(':')[1];
         if (userId) {

@@ -128,7 +128,6 @@ export const useGameFinder = () => {
 
   const findGame = useCallback(() => {
     if (!socket) {
-      console.log("no socket");
       return;
     }
     sendMessage(GameMessages.INIT_GAME);

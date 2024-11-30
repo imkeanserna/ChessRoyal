@@ -45,8 +45,12 @@ class WebSocketGameServer {
 
     ws.on("error", this.handleError);
     ws.on("close", () => {
-      if (user) {
-        this.handleDisconnection(user);
+      try {
+        if (user) {
+          this.handleDisconnection(user);
+        }
+      } catch (error) {
+        console.error("Error handling disconnection:", error);
       }
     });
   }

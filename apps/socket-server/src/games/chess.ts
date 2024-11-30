@@ -25,7 +25,7 @@ export class ChessGame {
     b: 3, // bishop
     r: 5, // rook
     q: 9, // queen
-    k: 200 // king (not captured, but just to have a large value)
+    k: 200 // king
   };
   private status: GameStatus;
   private turn: string;
@@ -44,27 +44,23 @@ export class ChessGame {
 
   async move(user: User, move: Move) {
     if (this.status !== GameStatus.IN_PROGRESS) {
-      console.error(`Cannot move. Game ${this.id} is not in progress`);
-      return;
+      throw new Error(`Cannot move. Game ${this.id} is not in progress`);
     }
 
     if (this.board.turn() === 'w' && (user.id !== this.player1UserId)) {
       if (user.userId !== "" && user.userId !== this.player1UserId) {
-        console.log("out 1")
-        return;
+        throw new Error(`User ${user.id} is not allowed to move. Game ${this.id} is not in progress`);
       }
     }
 
     if (this.board.turn() === "b" && (user.id !== this.player2UserId)) {
       if (user.userId !== "" && user.userId !== this.player2UserId) {
-        console.log("out 2")
-        return;
+        throw new Error(`User ${user.id} is not allowed to move. Game ${this.id} is not in progress`);
       }
     }
 
     if (this.result) {
-      console.error(`Game ${this.id} is already over with result ${this.result}`);
-      return;
+      throw new Error(`Game ${this.id} is already over with result ${this.result}`);
     }
 
     this.gameTimer?.switchTurn();
@@ -82,7 +78,7 @@ export class ChessGame {
         }
       });
     } catch (error) {
-      console.log(error);
+      throw error;
     }
 
     // check if the timer is expired both side.
@@ -103,8 +99,7 @@ export class ChessGame {
         });
       }
     } catch (error) {
-      console.error("Erorr in move", error);
-      return;
+      throw error;
     }
 
     // add the move to the database
@@ -137,15 +132,19 @@ export class ChessGame {
       }
     }));
 
-    if (this.board.isGameOver()) {
-      const result: boolean = this.board.isDraw();
-      if (result) {
-        this.result = GameResultType.DRAW;
-      } else {
-        this.result = GameResultType.WIN;
-        this.playerWon = this.board.turn() === "w" ? PlayerWon.BLACK_WINS : PlayerWon.WHITE_WINS;
+    try {
+      if (this.board.isGameOver()) {
+        const result: boolean = this.board.isDraw();
+        if (result) {
+          this.result = GameResultType.DRAW;
+        } else {
+          this.result = GameResultType.WIN;
+          this.playerWon = this.board.turn() === "w" ? PlayerWon.BLACK_WINS : PlayerWon.WHITE_WINS;
+        }
+        this.gameEnded(this.result, this.playerWon);
       }
-      this.gameEnded(this.result, this.playerWon);
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -170,19 +169,17 @@ export class ChessGame {
         this.player1UserId = user.userId;
       }
     } catch (error) {
-      console.error("Error adding first player:", error);
+      throw error;
     }
   }
 
   async addSecondPlayer(user: User) {
     if (this.status !== GameStatus.NOT_STARTED) {
-      console.error(`Cannot add second player. Game ${this.id} is not completed`);
-      return;
+      throw new Error(`Cannot add second player. Game ${this.id} is not in progress`);
     }
 
     if (this.player2UserId !== "") {
-      console.error("Game already has two players.");
-      return;
+      throw new Error(`Cannot add second player. Game ${this.id} already has two players`);
     }
 
 
@@ -259,23 +256,26 @@ export class ChessGame {
         })
       );
     } catch (error) {
-      console.error("Error in addSecondPlayer", error);
-      return;
+      throw error;
     }
   }
 
   public timerEnd(player1RemainingTime?: number, player2RemainingTime?: number) {
-    if (player1RemainingTime! <= 0 || player2RemainingTime! <= 0) {
-      const { whiteScore, blackScore } = this.calculateMaterialDifference(this.board);
+    try {
+      if (player1RemainingTime! <= 0 || player2RemainingTime! <= 0) {
+        const { whiteScore, blackScore } = this.calculateMaterialDifference(this.board);
 
-      if (whiteScore > blackScore) {
-        this.gameEnded(GameResultType.TIMEOUT, PlayerWon.WHITE_WINS);
-      } else if (blackScore > whiteScore) {
-        this.gameEnded(GameResultType.TIMEOUT, PlayerWon.BLACK_WINS);
-      } else {
-        this.gameEnded(GameResultType.DRAW, null);
+        if (whiteScore > blackScore) {
+          this.gameEnded(GameResultType.TIMEOUT, PlayerWon.WHITE_WINS);
+        } else if (blackScore > whiteScore) {
+          this.gameEnded(GameResultType.TIMEOUT, PlayerWon.BLACK_WINS);
+        } else {
+          this.gameEnded(GameResultType.DRAW, null);
+        }
+        return;
       }
-      return;
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -295,14 +295,13 @@ export class ChessGame {
     }
 
     if (this.status !== GameStatus.IN_PROGRESS) {
-      console.error(`Cannot end game. Game ${this.id} is not in progress.`);
-      return;
+      throw new Error(`Cannot offer draw. Game ${this.id} is not in progress.`);
     }
 
     try {
       this.gameEnded(GameResultType.DRAW, null);
     } catch (error) {
-      console.error(error);
+      throw error;
     }
   }
 
@@ -312,8 +311,7 @@ export class ChessGame {
     }
 
     if (this.status !== GameStatus.IN_PROGRESS) {
-      console.error(`Cannot end game. Game ${this.id} is not in progress.`);
-      return;
+      throw new Error(`Cannot resign. Game ${this.id} is not in progress.`);
     }
 
     try {
@@ -321,7 +319,7 @@ export class ChessGame {
 
       this.gameEnded(GameResultType.RESIGNATION, user.userId === this.player1UserId ? PlayerWon.BLACK_WINS : PlayerWon.WHITE_WINS);
     } catch (error) {
-      console.error(error);
+      throw error;
     }
   }
 
@@ -347,7 +345,6 @@ export class ChessGame {
 
       this.status = newStatus;
     } catch (error) {
-      console.error('Failed to update game status:', error);
       throw error;
     }
   }
@@ -361,7 +358,11 @@ export class ChessGame {
   }
 
   public exitGame(user: User) {
-    this.gameEnded(GameResultType.RESIGNATION, user.userId === this.player1UserId ? PlayerWon.BLACK_WINS : PlayerWon.WHITE_WINS);
+    try {
+      this.gameEnded(GameResultType.RESIGNATION, user.userId === this.player1UserId ? PlayerWon.BLACK_WINS : PlayerWon.WHITE_WINS);
+    } catch (error) {
+      throw error;
+    }
   }
 
   private calculateMaterialDifference(game: Chess): {
@@ -409,7 +410,7 @@ export class ChessGame {
 
   public async gameEnded(status: GameResultType, result: PlayerWon | null) {
     if (![GameStatus.IN_PROGRESS, GameStatus.RESIGNED].includes(this.status)) {
-      console.error(`Cannot end game. Game ${this.id} is not in progress.`);
+      console.error('Cannot end game. Game is not in progress or has been resigned.');
       return;
     }
     this.status = GameStatus.COMPLETED;
@@ -484,8 +485,7 @@ export class ChessGame {
         }));
       });
     } catch (error) {
-      console.error("Error in gameEnded", error);
-      return;
+      throw error;
     }
   }
 
