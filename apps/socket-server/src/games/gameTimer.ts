@@ -1,6 +1,5 @@
 import { GameResultType, PlayerWon } from "@repo/chess/gameStatus";
 import { ChessGame } from "./chess";
-import { deleteGameIfBothPlayersAreGuests } from "../services/gameService";
 
 export class GameTimer {
   private player1RemainingTime: number;
