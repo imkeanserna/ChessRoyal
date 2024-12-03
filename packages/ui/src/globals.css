@@ -119,3 +119,259 @@
 .animate-spin-slow {
   animation: spin-slow 3s linear infinite;
 }
+
+.background-animate {
+  background-size: 200% 200%;
+  animation: gradient-x 15s ease infinite;
+}
+
+.star1 {
+  background-color: white;
+  border: 2px solid white;
+  border-radius: 100%;
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  animation: star1 linear 5s forwards infinite;
+  animation-delay: 2s;
+}
+
+@keyframes star1 {
+  from {
+    left: 0%;
+  }
+
+  to {
+    left: 99%;
+  }
+}
+
+.star2 {
+  background-color: white;
+  border: 2px solid white;
+  border-radius: 100%;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  animation: star2 linear 3s forwards infinite;
+  animation-delay: 1s;
+}
+
+@keyframes star2 {
+  from {
+    left: 0%;
+    top: 0%;
+  }
+
+  to {
+    left: 99%;
+    top: 100%;
+  }
+}
+
+.star3 {
+  background-color: white;
+  border: 2px solid white;
+  border-radius: 100%;
+  position: absolute;
+  top: 0%;
+  left: 50%;
+  animation: star3 linear 2s forwards infinite;
+  animation-delay: 4s;
+}
+
+@keyframes star3 {
+  from {
+    left: 50%;
+    top: 0%;
+  }
+
+  to {
+    left: 80%;
+    top: 100%;
+  }
+}
+
+.star4 {
+  background-color: white;
+  border: 2px solid white;
+  border-radius: 100%;
+  position: absolute;
+  top: 100%;
+  left: 100%;
+  animation: star4 linear 3s forwards infinite;
+  animation-delay: 5s;
+}
+
+@keyframes star4 {
+  from {
+    left: 100%;
+    top: 100%;
+  }
+
+  to {
+    left: 50%;
+    top: 0%;
+  }
+}
+
+.star5 {
+  background-color: white;
+  border: 2px solid white;
+  border-radius: 100%;
+  position: absolute;
+  top: 100%;
+  left: 30%;
+  animation: star5 linear 5s forwards infinite;
+  animation-delay: 5.5s;
+}
+
+@keyframes star5 {
+  from {
+    left: 30%;
+    top: 100%;
+  }
+
+  to {
+    left: 50%;
+    top: 0%;
+  }
+}
+
+.star6 {
+  background-color: white;
+  border: 2px solid white;
+  border-radius: 100%;
+  position: absolute;
+  top: 100%;
+  left: 0%;
+  animation: star6 linear 5s forwards infinite;
+  animation-delay: 4.5s;
+}
+
+@keyframes star6 {
+  from {
+    left: 0%;
+    top: 100%;
+  }
+
+  to {
+    left: 85%;
+    top: 0%;
+  }
+}
+
+.star7 {
+  background-color: white;
+  border: 2px solid white;
+  border-radius: 100%;
+  position: absolute;
+  top: 70%;
+  left: 0%;
+  animation: star7 linear 4s forwards infinite;
+  animation-delay: 3.5s;
+}
+
+@keyframes star7 {
+  from {
+    left: 0%;
+    top: 70%;
+  }
+
+  to {
+    left: 85%;
+    top: 0%;
+  }
+}
+
+.star8 {
+  background-color: white;
+  border: 2px solid white;
+  border-radius: 100%;
+  position: absolute;
+  top: 0%;
+  left: 10%;
+  animation: star8 linear 5.5s forwards infinite;
+  animation-delay: 2.5s;
+}
+
+@keyframes star8 {
+  from {
+    left: 10%;
+    top: 0%;
+  }
+
+  to {
+    left: 60%;
+    top: 100%;
+  }
+}
+
+.star9 {
+  background-color: white;
+  border: 2px solid white;
+  border-radius: 100%;
+  position: absolute;
+  top: 60%;
+  left: 100%;
+  animation: star9 linear 4.5s forwards infinite;
+  animation-delay: 3s;
+}
+
+@keyframes star9 {
+  from {
+    left: 100%;
+    top: 55%;
+  }
+
+  to {
+    left: 55%;
+    top: 100%;
+  }
+}
+
+.star10 {
+  background-color: white;
+  border: 2px solid white;
+  border-radius: 100%;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  animation: star10 linear 5s forwards infinite;
+  animation-delay: 4s;
+}
+
+@keyframes star10 {
+  from {
+    left: 50%;
+    top: 100%;
+  }
+
+  to {
+    left: 15%;
+    top: 0%;
+  }
+}
+
+.star11 {
+  background-color: white;
+  border: 2px solid white;
+  border-radius: 100%;
+  position: absolute;
+  top: 30%;
+  left: 0%;
+  animation: star11 linear 2s forwards infinite;
+  animation-delay: 4s;
+}
+
+@keyframes star11 {
+  from {
+    left: 0%;
+    top: 70%;
+  }
+
+  to {
+    left: 25%;
+    top: 0%;
+  }
+}

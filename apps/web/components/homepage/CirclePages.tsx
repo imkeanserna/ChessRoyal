@@ -1,4 +1,5 @@
-import { Button } from "@repo/ui/components/ui/button";
+"use client";
+
 import AnimatedPlayButton from "./AnimatedPlayButton";
 
 export default function CirclesPages() {
@@ -51,10 +52,8 @@ export default function CirclesPages() {
               <div className="flex flex-col items-center px-12 gap-12 absolute top-[50px]">
                 <div className="text-center">
                   <p className="text-5xl">Play Now</p>
-                  {/* Description Above Button */}
                   <p className="text-sm text-gray-400 mt-4">Get ready for an exciting game! Click the button to start your challenge.</p>
                 </div>
-                {/* Play Now Button */}
                 <AnimatedPlayButton />
               </div>
             </div>

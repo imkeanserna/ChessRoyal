@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { useTheme } from '@repo/ui/context/ThemeContext';
 import { Button } from "@repo/ui/components/ui/button";
-import { Sun, Moon, GamepadIcon, ChevronRightIcon } from 'lucide-react';
+import { Sun, Moon, GamepadIcon, ChevronRightIcon, Sword } from 'lucide-react';
+import { useRouter } from "next/navigation";
 
 interface NavbarProps {
   title: string;
@@ -25,19 +26,48 @@ export function Navbar({ title, className = '' }: NavbarProps) {
       <Link
         href="/"
         className={`
-          text-3xl font-extrabold
-          transition-all duration-300
+          text-4xl font-black
+          tracking-tight
+          flex items-center
+          space-x-2
+          transition-all
+          duration-300
           hover:scale-105
-          ${isDarkTheme
-            ? 'text-amber-300 hover:text-amber-200'
-            : 'text-amber-700 hover:text-amber-600'
-          }
+          hover:tracking-wider
+          group
         `}
       >
-        {title}
+        <Sword
+          className={`
+            h-10 w-10 -mt-1
+            transition-all
+            duration-300
+            group-hover:rotate-12
+            ${isDarkTheme
+              ? 'text-amber-400'
+              : 'text-amber-100'
+            }
+          `}
+        />
+        <span
+          className={`
+            bg-gradient-to-r
+            ${isDarkTheme
+              ? 'from-amber-300 to-orange-400'
+              : 'from-amber-100 to-orange-200'
+            }
+            bg-clip-text
+            text-transparent
+            transition-all
+            duration-300
+            group-hover:from-amber-200
+            group-hover:to-orange-200
+          `}
+        >
+          {title}
+        </span>
       </Link>
       <div className="flex items-center space-x-4">
-        {/* Theme Toggle Button */}
         <Button
           variant="ghost"
           size="icon"
@@ -56,8 +86,6 @@ export function Navbar({ title, className = '' }: NavbarProps) {
             : <Moon className="h-6 w-6" />}
           <span className="sr-only">Toggle theme</span>
         </Button>
-
-        {/* Play Now Button */}
         <NavbarButton />
       </div>
     </nav>
@@ -67,6 +95,7 @@ export function Navbar({ title, className = '' }: NavbarProps) {
 export function NavbarButton() {
   const { theme } = useTheme();
   const isDarkTheme = theme === 'dark';
+  const router = useRouter();
 
   return (
     <Button
@@ -91,6 +120,7 @@ export function NavbarButton() {
         shadow-lg
         hover:shadow-xl
       `}
+      onClick={() => router.push('/play')}
     >
       <GamepadIcon className="h-5 w-5 mr-2" />
       Play Now

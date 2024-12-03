@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { Button } from "@repo/ui/components/ui/button";
 import { ChevronRightIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function AnimatedPlayButton() {
   const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
 
   return (
     <Button
@@ -23,7 +25,7 @@ export default function AnimatedPlayButton() {
         active:scale-95
         transition-all
         duration-300
-        z-20
+        z-10
         uppercase
         relative
         overflow-hidden
@@ -31,6 +33,7 @@ export default function AnimatedPlayButton() {
       "
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={() => router.push('/play')}
     >
       {/* Animated Background Layer */}
       <div
@@ -75,7 +78,6 @@ export default function AnimatedPlayButton() {
         />
       ))}
 
-      {/* Button Content */}
       <div className="flex items-center gap-3">
         <span className="relative">
           Play Now

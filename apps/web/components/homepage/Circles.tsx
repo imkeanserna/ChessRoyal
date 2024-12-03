@@ -2,8 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 
-export const SaturnCircle = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+interface CircleProps {
+  width?: string;
+  height?: string;
+  position?: { top?: string; left?: string; right?: string; bottom?: string };
+}
+
+export const SaturnCircle: React.FC<CircleProps> = ({
+  width = '200px',
+  height = '200px',
+  position = {}
+}) => {
+  const [mousePosition, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleMouseMove = (event: any) => {
@@ -19,13 +29,26 @@ export const SaturnCircle = () => {
 
   return (
     <div
-      className="absolute left-[300px] top-[70px] flex items-center justify-center"
+      className="absolute flex items-center justify-center"
       style={{
-        width: '200px',
-        height: '200px',
-        transform: `translate(${position.x}px, ${position.y}px)`,
+        width,
+        height,
+        ...position,
+        transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)`,
       }}
     >
+      {/* Back Shadow */}
+      <div
+        className="absolute animate-pulse"
+        style={{
+          width: `calc(${width} * 2)`,
+          height: `calc(${height} * 2)`,
+          background: 'radial-gradient(circle, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 70%)',
+          borderRadius: '50%',
+          filter: 'blur(10px)',
+          zIndex: -1,
+        }}
+      />
       {/* Saturn's Rings */}
       <div
         className="absolute rounded-full w-52 h-52 border-4 border-black"
@@ -63,8 +86,12 @@ export const SaturnCircle = () => {
 };
 
 
-export const StripeCircle = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+export const StripeCircle: React.FC<CircleProps> = ({
+  width = '200px',
+  height = '200px',
+  position = {}
+}) => {
+  const [mousePosition, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleMouseMove = (event: any) => {
@@ -80,13 +107,26 @@ export const StripeCircle = () => {
 
   return (
     <div
-      className="absolute right-[500px] flex items-center justify-center"
+      className="absolute flex items-center justify-center"
       style={{
-        width: '200px',
-        height: '200px',
-        transform: `translate(${position.x}px, ${position.y}px)`,
+        width,
+        height,
+        ...position,
+        transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)`,
       }}
     >
+      {/* Back Shadow */}
+      <div
+        className="absolute animate-pulse"
+        style={{
+          width: `calc(${width} * 2)`,
+          height: `calc(${height} * 2)`,
+          background: 'radial-gradient(circle, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 70%)',
+          borderRadius: '50%',
+          filter: 'blur(10px)',
+          zIndex: -1,
+        }}
+      />
       {/* Saturn's Rings */}
       <div
         className="absolute rounded-full w-52 h-52 border-4 border-amber-200"
@@ -124,8 +164,13 @@ export const StripeCircle = () => {
   );
 }
 
-export const OrangePlanet = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+export const OrangePlanet: React.FC<CircleProps> = ({
+  width = '200px',
+  height = '200px',
+  position = {}
+}
+) => {
+  const [mousePosition, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleMouseMove = (event: any) => {
@@ -141,16 +186,19 @@ export const OrangePlanet = () => {
 
   return (
     <svg width="160" height="160" viewBox="0 0 200 200"
-      className="absolute right-[300px] top-[280px]"
+      className="absolute"
       style={{
-        transform: `translate(${position.x}px, ${position.y}px)`,
+        width,
+        height,
+        ...position,
+        transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)`,
       }}
     >
       <defs>
         <linearGradient id="planetGradient" x1="50%" y1="50%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ec6b37" stopOpacity="1" /> {/* Tailwind's border-amber-200 color */}
+          <stop offset="0%" stopColor="#ec6b37" stopOpacity="1" />
           <stop offset="50%" stopColor="b94e2e" stopOpacity="1" />
-          <stop offset="100%" stopColor="#black" stopOpacity="1" /> {/* Dark orange color */}
+          <stop offset="100%" stopColor="#black" stopOpacity="1" />
         </linearGradient>
 
         {/* Drop shadow filter */}
@@ -163,7 +211,15 @@ export const OrangePlanet = () => {
           />
         </filter>
       </defs>
-
+      {/* Back Shadow */}
+      <circle
+        cx="100"
+        cy="100"
+        r="95"
+        fill="black"
+        opacity="0.1"
+        filter="blur(10px)"
+      />
       <circle
         cx="100"
         cy="100"
@@ -175,8 +231,12 @@ export const OrangePlanet = () => {
   );
 }
 
-export const BlackPlanet = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+export const BlackPlanet: React.FC<CircleProps> = ({
+  width,
+  height,
+  position = {}
+}) => {
+  const [mousePosition, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleMouseMove = (event: any) => {
@@ -192,13 +252,26 @@ export const BlackPlanet = () => {
 
   return (
     <div
-      className="absolute right-[320px] bottom-[200px] flex items-center justify-center"
+      className="absolute flex items-center justify-center"
       style={{
-        width: '200px',
-        height: '200px',
-        transform: `translate(${position.x}px, ${position.y}px)`,
+        width,
+        height,
+        ...position,
+        transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)`,
       }}
     >
+      {/* Back Shadow */}
+      <div
+        className="absolute animate-pulse"
+        style={{
+          width: `calc(${width} * 1.5)`,
+          height: `calc(${height} * 1.5)`,
+          background: 'radial-gradient(circle, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 70%)',
+          borderRadius: '50%',
+          filter: 'blur(10px)',
+          zIndex: -1,
+        }}
+      />
       {/* Saturn's Rings */}
       <div
         className="absolute rounded-full w-40 h-40 border-2 border-black"
@@ -238,8 +311,12 @@ export const BlackPlanet = () => {
   );
 }
 
-export const HalfMoonPlanet = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+export const HalfMoonPlanet: React.FC<CircleProps> = ({
+  width,
+  height,
+  position = {}
+}) => {
+  const [mousePosition, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleMouseMove = (event: any) => {
@@ -257,34 +334,47 @@ export const HalfMoonPlanet = () => {
     <svg width="70" height="70" viewBox="0 0 200 200"
       className="absolute right-[200px] bottom-[400px]"
       style={{
-        transform: `translate(${position.x}px, ${position.y}px)`,
+        width,
+        height,
+        ...position,
+        transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)`,
       }}
     >
       {/* Gradient Definitions */}
       <defs>
         {/* Gradient for the Outer Circle */}
         <linearGradient id="outerGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="white" stopOpacity="0.8" /> {/* Top gradient */}
-          <stop offset="100%" stopColor="orange" stopOpacity="1" /> {/* Bottom color */}
+          <stop offset="0%" stopColor="white" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="orange" stopOpacity="1" />
         </linearGradient>
 
         {/* Gradient for the Crescent Moon */}
         <linearGradient id="moonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ea580c" /> {/* Dark orange */}
-          <stop offset="50%" stopColor="#f59e0b" /> {/* Amber */}
-          <stop offset="100%" stopColor="#ea580c" /> {/* Dark orange */}
+          <stop offset="0%" stopColor="#ea580c" />
+          <stop offset="50%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#ea580c" />
         </linearGradient>
 
         {/* Shadow Filter */}
         <filter id="shadowFilter" x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow
-            dx="0" /* Horizontal shadow offset */
-            dy="4" /* Vertical shadow offset */
-            stdDeviation="6" /* Blur amount */
-            floodColor="rgba(0, 0, 0, 0.5)" /* Shadow color */
+            dx="0"
+            dy="4"
+            stdDeviation="6"
+            floodColor="rgba(0, 0, 0, 0.5)"
           />
         </filter>
       </defs>
+
+      {/* Back Shadow */}
+      <circle
+        cx="100"
+        cy="100"
+        r="95"
+        fill="black"
+        opacity="0.1"
+        filter="blur(10px)"
+      />
 
       {/* Outer Circle */}
       <circle
@@ -301,15 +391,19 @@ export const HalfMoonPlanet = () => {
         d="M100 20
          C140 60, 140 140, 100 180
          A80 80 0 0 1 100 20"
-        fill="url(#moonGradient)" /* Applying the gradient */
+        fill="url(#moonGradient)"
         transform="rotate(40 100 100)"
       />
     </svg>
   );
 }
 
-export const GradientOrangeCircle = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+export const GradientOrangeCircle: React.FC<CircleProps> = ({
+  width,
+  height,
+  position = {}
+}) => {
+  const [mousePosition, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -325,36 +419,36 @@ export const GradientOrangeCircle = () => {
 
   return (
     <svg
-      width="90"
-      height="90"
       viewBox="0 0 200 200"
-      className="absolute right-[500px] top-[500px]"
+      className="absolute z-10"
       style={{
-        transform: `translate(${position.x}px, ${position.y}px)`,
+        width,
+        height,
+        ...position,
+        transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)`,
       }}
     >
-      {/* Gradient Definitions */}
       <defs>
         {/* Gradient for the Outer Circle */}
         <linearGradient id="outerGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="white" stopOpacity="0.8" /> {/* Top gradient */}
-          <stop offset="100%" stopColor="orange" stopOpacity="1" /> {/* Bottom color */}
+          <stop offset="0%" stopColor="white" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="orange" stopOpacity="1" />
         </linearGradient>
 
         {/* Gradient for the Crescent Moon */}
         <linearGradient id="moonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ea580c" /> {/* Dark orange */}
-          <stop offset="50%" stopColor="#f59e0b" /> {/* Amber */}
-          <stop offset="100%" stopColor="#ea580c" /> {/* Dark orange */}
+          <stop offset="0%" stopColor="#ea580c" />
+          <stop offset="50%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#ea580c" />
         </linearGradient>
 
         {/* Shadow Filter */}
         <filter id="shadowFilter" x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow
-            dx="0" /* Horizontal shadow offset */
-            dy="4" /* Vertical shadow offset */
-            stdDeviation="6" /* Blur amount */
-            floodColor="rgba(0, 0, 0, 0.5)" /* Shadow color */
+            dx="0"
+            dy="4"
+            stdDeviation="6"
+            floodColor="rgba(0, 0, 0, 0.5)"
           />
         </filter>
       </defs>
@@ -364,7 +458,17 @@ export const GradientOrangeCircle = () => {
         cx="100"
         cy="100"
         r="80"
-        fill="url(#outerGradient)" /* Changed to use the orange gradient */
+        fill="black"
+        strokeWidth="2"
+        filter="url(#shadowFilter)"
+      />
+
+      {/* Outer Circle */}
+      <circle
+        cx="100"
+        cy="100"
+        r="80"
+        fill="url(#outerGradient)"
         strokeWidth="2"
         filter="url(#shadowFilter)"
       />

@@ -54,10 +54,10 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        blackPlayer: "#BB9979", // Background color for black player
-        whitePlayer: "#E9E9DF", // Background color for white player
-        customBorder: "#634833", // Custom border color
-        boardBackground: "#3A1A0C", // Board background color
+        blackPlayer: "#BB9979",
+        whitePlayer: "#E9E9DF",
+        customBorder: "#634833",
+        boardBackground: "#3A1A0C",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,6 +65,10 @@ const config = {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
+        "twinkle": {
+          '0%, 100%': { opacity: '0.3' },
+          '50%': { opacity: '1' }
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -98,7 +102,7 @@ const config = {
         "progress": {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" }
-        }
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -109,6 +113,7 @@ const config = {
         "animate-progress": "progress 2s ease-in-out infinite",
         'chess-piece-1': 'float1 10s ease-in-out infinite',
         'chess-piece-2': 'float2 12s ease-in-out infinite',
+        'twinkle': 'twinkle 3s infinite',
       },
       borderWidth: {
         '12': '12px',

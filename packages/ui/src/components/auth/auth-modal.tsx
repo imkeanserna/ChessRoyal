@@ -50,7 +50,7 @@ export const AuthModal: FC<SignUpFormProps> = ({ onSubmitAction }) => {
                 <FaChessQueen className="h-8 w-8 text-amber-200" />
               </div>
               <DialogTitle className='text-2xl font-bold text-amber-100'>
-                Chess Arena
+                Chess Royal
                 <Description></Description>
               </DialogTitle>
             </div>
