@@ -21,7 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { FC, useState } from "react";
+import { Dispatch, FC, SetStateAction, useState } from "react";
 import FormError from "./formError";
 import { FaChessQueen } from "react-icons/fa";
 import { SocialMediaButtons } from "./social-media";
@@ -32,7 +32,7 @@ interface SignUpFormProps {
     password: string,
     displayName: string
   ) => Promise<{ error: string }>;
-  setActiveView: (string) => void;
+  setActiveView: Dispatch<SetStateAction<"login" | "signup">>;
   handleShowAlert: () => void;
 }
 

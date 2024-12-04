@@ -1,6 +1,4 @@
-import { signUpUser } from "@/lib";
 import { currentUser } from "@/lib";
-import { SignUpForm } from "@repo/ui/components/auth/signupForm";
 import { redirect } from "next/navigation";
 
 export default async function Page() {
@@ -15,4 +13,4 @@ export default async function Page() {
       {/* <SignUpForm onSubmitAction={signUpUser} /> */}
     </div>
   );
-};
+}

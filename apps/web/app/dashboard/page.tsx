@@ -21,8 +21,7 @@ export default async function Page() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
         style={{
-          backgroundImage:
-            "url('https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdmx5bGkwbTVzaTAwNm45NTNlcWxkZmtnbW94NTJ2Mzd6ajUyM2dqNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9POMmQiLkvhRzKFXyT/giphy.webp')", // Replace with the actual image path
+          backgroundImage: `url("/homepage/chess-background.webp")`,
         }}
       >
         {/* Gradient Overlay */}

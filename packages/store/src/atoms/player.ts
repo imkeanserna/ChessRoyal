@@ -78,7 +78,7 @@ export const gameMetadataSelector = selector<Players | null>({
       return null;
     }
 
-    return () => controller.abort();  // abort the fetch if the component unmounts
+    return null;  // abort the fetch if the component unmounts
   },
 });
 

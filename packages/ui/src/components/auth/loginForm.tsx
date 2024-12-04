@@ -17,7 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { FC, useEffect, useState } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 import FormError from "./formError";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -27,7 +27,7 @@ import { useRouter } from 'next/navigation';
 
 interface LoginFormProps {
   onSuccess?: () => void;
-  setActiveView: (string) => void
+  setActiveView: Dispatch<SetStateAction<"login" | "signup">>;
 }
 
 export const LoginForm: FC<LoginFormProps> = ({ onSuccess, setActiveView }) => {

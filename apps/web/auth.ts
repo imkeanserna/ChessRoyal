@@ -45,7 +45,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               return null;
             }
 
-            return existingUser;
+            return {
+              ...existingUser,
+              image: existingUser.image ?? undefined,
+            };
           } catch (error) {
             return null;
           }

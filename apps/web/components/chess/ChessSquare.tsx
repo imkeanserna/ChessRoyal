@@ -3,6 +3,7 @@
 import { Color, PieceSymbol, Square } from "chess.js";
 import { useRecoilValue } from "recoil";
 import { isGameOverAtom } from "@repo/store/chessBoard";
+import Image from "next/image";
 
 interface ChessSquareProps {
   isKingChecked: boolean;
@@ -56,8 +57,8 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
   };
 
   const woodTexture = isMainBoxColor
-    ? 'bg-blackPlayer' // Background color for black player
-    : 'bg-whitePlayer'; // Background color for white player
+    ? 'bg-blackPlayer'
+    : 'bg-whitePlayer';
 
   return (
     <div
@@ -105,19 +106,39 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
               <div className="w-8 h-8 bg-red-400 rounded-full shadow-md animate-pulse opacity-70" />
             </div>
           )}
-          <img
-            className={`w-18 pointer-events-none`}
+          <Image
             src={`/cardinal/${square?.color}/${piece}.svg`}
             alt={`${square?.color} ${piece}`}
+            width={72}
+            height={72}
+            className="pointer-events-none"
           />
           {piece === "k" && gameOver.isGameOver && gameOver.playerWon?.[0]?.toLowerCase() === square?.color ? (
-            <img className="w-6 absolute top-1 right-1" src={`/crown.svg`} alt="" />
+            <Image
+              src="/crown.svg"
+              alt="Crown for winner king"
+              width={24}
+              height={24}
+              className="absolute top-1 right-1"
+            />
           ) : null}
           {gameOver.isGameOver && piece === "k" && gameOver.playerWon?.[0]?.toLowerCase() !== square?.color && (
             gameOver.playerWon?.[0]?.toLowerCase() !== "w" ? (
-              <img className="w-6 absolute top-1 right-1" src={`/black-mate.svg`} alt="" />
+              <Image
+                src="/black-mate.svg"
+                alt="Black mate icon"
+                width={24}
+                height={24}
+                className="absolute top-1 right-1"
+              />
             ) : (
-              <img className="w-6 absolute top-1 right-1" src={`/white-mate.svg`} alt="" />
+              <Image
+                src="/white-mate.svg"
+                alt="White mate icon"
+                width={24}
+                height={24}
+                className="absolute top-1 right-1"
+              />
             )
           )}
         </div>

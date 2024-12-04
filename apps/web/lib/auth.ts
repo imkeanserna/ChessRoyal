@@ -24,7 +24,6 @@ export const authOptions: NextAuthOptions = {
         email: {},
         password: {},
       },
-
       authorize: async (credentials) => {
         const validatedCredentials = LoginSchema.safeParse(credentials);
 
@@ -46,7 +45,10 @@ export const authOptions: NextAuthOptions = {
               return null;
             }
 
-            return existingUser;
+            return {
+              ...existingUser,
+              image: existingUser.image ?? undefined,
+            };
           } catch (error) {
             return null;
           }
