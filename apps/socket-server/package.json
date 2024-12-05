@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js --sourcemap && node dist/index.js",
-    "build": "rm -rf dist && npx esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js",
-    "start": "pnpm -F @repo/db db:generate && node dist/index.js"
+    "build": "npx prisma generate && rm -rf dist && npx esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js",
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
