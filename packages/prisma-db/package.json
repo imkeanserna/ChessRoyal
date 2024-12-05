@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "rm -rf dist && tsc -b",
     "db:generate": "prisma generate",
     "db:push": "prisma db push --skip-generate"
   },

@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "next build",
+    "postinstall": "prisma generate",
     "start": "next start",
-    "lint": "eslint . --max-warnings 0"
+    "lint": "eslint . --max-warnings 0",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@repo/chess": "workspace:*",
