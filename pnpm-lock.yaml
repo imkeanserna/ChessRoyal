@@ -23,6 +23,9 @@ importers:
 
   apps/socket-server:
     dependencies:
+      '@prisma/client':
+        specifier: ^5.19.1
+        version: 5.19.1(prisma@5.19.1)
       '@repo/chess':
         specifier: workspace:*
         version: link:../../packages/chess
@@ -66,6 +69,9 @@ importers:
       esbuild:
         specifier: 0.23.1
         version: 0.23.1
+      prisma:
+        specifier: ^5.19.1
+        version: 5.19.1
       tsc-watch:
         specifier: ^6.2.0
         version: 6.2.0(typescript@5.4.5)
@@ -151,6 +157,9 @@ importers:
       postcss:
         specifier: ^8.4.38
         version: 8.4.38
+      prisma:
+        specifier: ^5.19.1
+        version: 5.19.1
       tailwindcss:
         specifier: ^3.4.4
         version: 3.4.4(ts-node@10.9.2(@types/node@20.11.6)(typescript@5.4.5))
