@@ -298,8 +298,10 @@ export class GameManager {
 
     // If draw is accepted, end the game
     if (isDrawAccepted) {
-      game.processDrawOffer(user);
-      this.removeGame(game.id);
+      await game.processDrawOffer(user);
+      if (game.result) {
+        await this.removeGame(game.id);
+      }
     } else {
       game.cancelDrawOffer();
     }

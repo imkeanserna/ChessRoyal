@@ -418,7 +418,7 @@ export class ChessGame {
     try {
       const winner: string | null = this.getWinner(result);
 
-      await db.$transaction(async (tx) => {
+      const gameResult = await db.$transaction(async (tx) => {
         const game = await tx.chessGame.update({
           where: { id: this.id },
           data: {
@@ -433,7 +433,8 @@ export class ChessGame {
         });
 
         if (game.players.length < 2) {
-          throw new Error('Players data is incomplete.');
+          console.error('Players data is incomplete.');
+          return;
         }
 
         const { whiteScore, blackScore } = this.calculateMaterialDifference(this.board);
@@ -463,27 +464,29 @@ export class ChessGame {
           },
         });
 
-        // Remove game if both players are guests
-        await deleteGameIfBothPlayersAreGuests(this.id, this.player1UserId, this.player2UserId);
-
-        await RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
-          event: GameMessages.GAME_ENDED,
-          payload: {
-            result,
-            status,
-            whitePlayer: {
-              id: this.player1UserId,
-              name: whitePlayer ? whitePlayer.name : 'Guest',
-              isGuest: whitePlayer?.isGuest,
-            },
-            blackPlayer: {
-              id: this.player2UserId,
-              name: blackPlayer ? blackPlayer.name : 'Guest',
-              isGuest: blackPlayer?.isGuest,
-            },
-          },
-        }));
+        return { game, whitePlayer, blackPlayer };
       });
+
+      // Remove game if both players are guests
+      await deleteGameIfBothPlayersAreGuests(this.id, this.player1UserId, this.player2UserId);
+
+      await RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
+        event: GameMessages.GAME_ENDED,
+        payload: {
+          result,
+          status,
+          whitePlayer: {
+            id: this.player1UserId,
+            name: gameResult?.whitePlayer ? gameResult?.whitePlayer.name : 'Guest',
+            isGuest: gameResult?.whitePlayer?.isGuest,
+          },
+          blackPlayer: {
+            id: this.player2UserId,
+            name: gameResult?.blackPlayer ? gameResult?.blackPlayer.name : 'Guest',
+            isGuest: gameResult?.blackPlayer?.isGuest,
+          },
+        },
+      }));
     } catch (error) {
       throw error;
     }
