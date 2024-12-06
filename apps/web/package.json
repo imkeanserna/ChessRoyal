@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "next build",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate --schema=packages/prisma-db/prisma/schema.prisma",
     "start": "next start",
     "lint": "eslint . --max-warnings 0"
   },

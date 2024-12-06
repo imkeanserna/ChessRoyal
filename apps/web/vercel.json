@@ -13,6 +13,6 @@
     }
   ],
   "env": {
-      "PRISMA_GENERATE_SKIP_AUTOINSTALL": "true"
+      "PRISMA_GENERATE_SKIP_AUTOINSTALL": "packages/prisma-db/prisma/schema.prisma"
   }
 }
