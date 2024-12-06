@@ -11,5 +11,8 @@
       "src": "/(.*)",
       "dest": "/$1"
     }
-  ]
+  ],
+  "env": {
+      "PRISMA_GENERATE_SKIP_AUTOINSTALL": "true"
+  }
 }
