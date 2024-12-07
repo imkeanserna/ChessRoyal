@@ -73,6 +73,24 @@ const config = {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
         },
+        blob: {
+          '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+          '50%': { transform: 'translate(50px, 50px) scale(1.2)' }
+        },
+        'drop-in': {
+          '0%': {
+            transform: 'translateY(-100vh) rotate(360deg)',
+            opacity: '0'
+          },
+          '80%': {
+            transform: 'translateY(10px) rotate(0deg)',
+            opacity: '0.8'
+          },
+          '100%': {
+            transform: 'translateY(0) rotate(0deg)',
+            opacity: '1'
+          }
+        },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
@@ -114,6 +132,8 @@ const config = {
         'chess-piece-1': 'float1 10s ease-in-out infinite',
         'chess-piece-2': 'float2 12s ease-in-out infinite',
         'twinkle': 'twinkle 3s infinite',
+        blob: 'blob 7s infinite',
+        'drop-in': 'drop-in 1s forwards'
       },
       borderWidth: {
         '12': '12px',

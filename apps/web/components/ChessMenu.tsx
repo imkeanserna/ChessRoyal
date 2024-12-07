@@ -4,6 +4,7 @@ import { Player } from "@repo/chess/playerTypes";
 import { AuthModal } from "@repo/ui/components/auth/auth-modal";
 import { signUpUser } from "@/lib";
 import InitializeButton from "./InitializeButton";
+import { ChessBoardAnimation } from "./SocketError";
 
 export interface Players {
   blackPlayer: Player;
@@ -29,6 +30,10 @@ const ChessMenu: React.FC = () => {
             Chess Royal
           </h1>
           <p className="text-amber-200/60">Challenge players from around the world</p>
+        </div>
+
+        <div className="relative z-10 flex flex-col items-center">
+          <ChessBoardAnimation />
         </div>
 
         <div className="relative z-20 w-full">

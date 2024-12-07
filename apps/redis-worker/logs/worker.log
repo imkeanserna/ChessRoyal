@@ -1,0 +1,125 @@
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:08:00.317Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:17:43.609Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:22:00.977Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:22:05.140Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:22:15.962Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:22:51.103Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:22:55.027Z"}
+{"job1Id":"1","job2Id":"2","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:22:55.356Z"}
+{"level":"info","message":"Processing job 1 in queue my-app-queue","timestamp":"2024-12-07T06:22:55.401Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 1 failed","timestamp":"2024-12-07T06:22:55.402Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 1 failed","timestamp":"2024-12-07T06:22:55.517Z"}
+{"level":"info","message":"Processing job 2 in queue my-app-queue","timestamp":"2024-12-07T06:22:55.520Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 2 failed","timestamp":"2024-12-07T06:22:55.521Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 2 failed","timestamp":"2024-12-07T06:22:55.590Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:23:39.355Z"}
+{"job1Id":"3","job2Id":"4","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:23:39.852Z"}
+{"level":"info","message":"Processing job 3 in queue my-app-queue","timestamp":"2024-12-07T06:23:39.875Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 3 failed","timestamp":"2024-12-07T06:23:39.877Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 3 failed","timestamp":"2024-12-07T06:23:39.991Z"}
+{"level":"info","message":"Processing job 4 in queue my-app-queue","timestamp":"2024-12-07T06:23:39.992Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 4 failed","timestamp":"2024-12-07T06:23:39.993Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 4 failed","timestamp":"2024-12-07T06:23:40.061Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:24:47.893Z"}
+{"job1Id":"5","job2Id":"6","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:24:48.220Z"}
+{"data":"First job","id":1,"level":"info","message":"Processing job 5","timestamp":"2024-12-07T06:24:48.427Z"}
+{"level":"info","message":"Job 5 completed","timestamp":"2024-12-07T06:24:48.489Z"}
+{"data":"Second job","id":2,"level":"info","message":"Processing job 6","timestamp":"2024-12-07T06:24:48.490Z"}
+{"level":"info","message":"Job 6 completed","timestamp":"2024-12-07T06:24:48.549Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:26:30.651Z"}
+{"job1Id":"7","job2Id":"8","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:26:31.041Z"}
+{"data":"First job","id":1,"level":"info","message":"Processing job 7","timestamp":"2024-12-07T06:26:31.258Z"}
+{"level":"info","message":"Job 7 completed","timestamp":"2024-12-07T06:26:31.332Z"}
+{"data":"Second job","id":2,"level":"info","message":"Processing job 8","timestamp":"2024-12-07T06:26:31.332Z"}
+{"level":"info","message":"Job 8 completed","timestamp":"2024-12-07T06:26:31.393Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:26:38.305Z"}
+{"job1Id":"9","job2Id":"10","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:26:38.692Z"}
+{"level":"info","message":"Processing job 9 in queue my-app-queue","timestamp":"2024-12-07T06:26:38.762Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 9 failed","timestamp":"2024-12-07T06:26:38.763Z"}
+{"level":"info","message":"Processing job 10 in queue my-app-queue","timestamp":"2024-12-07T06:26:38.767Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 10 failed","timestamp":"2024-12-07T06:26:38.768Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 9 failed","timestamp":"2024-12-07T06:26:38.880Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 10 failed","timestamp":"2024-12-07T06:26:38.920Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:28:58.784Z"}
+{"job1Id":"11","job2Id":"12","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:28:59.207Z"}
+{"level":"info","message":"Processing job 11 in queue my-app-queue","timestamp":"2024-12-07T06:28:59.237Z"}
+{"level":"info","message":"Job 11 completed successfully","timestamp":"2024-12-07T06:28:59.313Z"}
+{"level":"info","message":"Processing job 12 in queue my-app-queue","timestamp":"2024-12-07T06:28:59.333Z"}
+{"level":"info","message":"Job 12 completed successfully","timestamp":"2024-12-07T06:28:59.391Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:29:44.869Z"}
+{"job1Id":"13","job2Id":"14","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:29:45.314Z"}
+{"level":"info","message":"Processing job 13 in queue my-app-queue","timestamp":"2024-12-07T06:29:45.338Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 13 failed","timestamp":"2024-12-07T06:29:45.339Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 13 failed","timestamp":"2024-12-07T06:29:45.445Z"}
+{"level":"info","message":"Processing job 14 in queue my-app-queue","timestamp":"2024-12-07T06:29:45.454Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 14 failed","timestamp":"2024-12-07T06:29:45.455Z"}
+{"error":"Unknown job type: undefined","level":"error","message":"Job 14 failed","timestamp":"2024-12-07T06:29:45.523Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:32:10.398Z"}
+{"job1Id":"15","job2Id":"16","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:32:10.748Z"}
+{"level":"info","message":"Processing job 15 in queue my-app-queue","timestamp":"2024-12-07T06:32:10.820Z"}
+{"level":"info","message":"Processing user registration","timestamp":"2024-12-07T06:32:10.821Z"}
+{"level":"info","message":"Processing job 16 in queue my-app-queue","timestamp":"2024-12-07T06:32:10.821Z"}
+{"error":"Unknown job type: send_email","level":"error","message":"Job 16 failed","timestamp":"2024-12-07T06:32:10.824Z"}
+{"error":"Unknown job type: send_email","level":"error","message":"Job 16 failed","timestamp":"2024-12-07T06:32:10.912Z"}
+{"level":"info","message":"Job 15 completed successfully","timestamp":"2024-12-07T06:32:10.933Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:32:22.669Z"}
+{"job1Id":"17","job2Id":"18","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:32:22.983Z"}
+{"level":"info","message":"Processing job 17 in queue my-app-queue","timestamp":"2024-12-07T06:32:23.026Z"}
+{"level":"info","message":"Processing user registration","timestamp":"2024-12-07T06:32:23.028Z"}
+{"level":"info","message":"Processing job 18 in queue my-app-queue","timestamp":"2024-12-07T06:32:23.030Z"}
+{"error":"Unknown job type: send_email","level":"error","message":"Job 18 failed","timestamp":"2024-12-07T06:32:23.037Z"}
+{"level":"info","message":"Job 17 completed successfully","timestamp":"2024-12-07T06:32:23.174Z"}
+{"error":"Unknown job type: send_email","level":"error","message":"Job 18 failed","timestamp":"2024-12-07T06:32:23.174Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:32:46.286Z"}
+{"job1Id":"19","job2Id":"20","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:32:46.672Z"}
+{"level":"info","message":"Processing job 19 in queue my-app-queue","timestamp":"2024-12-07T06:32:46.735Z"}
+{"error":"Unknown job type: user_registration","level":"error","message":"Job 19 failed","timestamp":"2024-12-07T06:32:46.743Z"}
+{"level":"info","message":"Processing job 20 in queue my-app-queue","timestamp":"2024-12-07T06:32:46.748Z"}
+{"error":"Unknown job type: send_email","level":"error","message":"Job 20 failed","timestamp":"2024-12-07T06:32:46.750Z"}
+{"error":"Unknown job type: user_registration","level":"error","message":"Job 19 failed","timestamp":"2024-12-07T06:32:46.856Z"}
+{"error":"Unknown job type: send_email","level":"error","message":"Job 20 failed","timestamp":"2024-12-07T06:32:46.928Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:33:08.684Z"}
+{"job1Id":"21","job2Id":"22","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:33:09.071Z"}
+{"level":"info","message":"Processing job 21 in queue my-app-queue","timestamp":"2024-12-07T06:33:09.135Z"}
+{"level":"info","message":"Processing job 22 in queue my-app-queue","timestamp":"2024-12-07T06:33:09.137Z"}
+{"level":"info","message":"Job 21 completed successfully","timestamp":"2024-12-07T06:33:09.214Z"}
+{"level":"info","message":"Job 22 completed successfully","timestamp":"2024-12-07T06:33:09.215Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:34:39.890Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-12-07T06:34:41.916Z"}
+{"job1Id":"23","job2Id":"24","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:34:42.235Z"}
+{"level":"info","message":"Processing job 23 in queue my-app-queue","timestamp":"2024-12-07T06:34:42.315Z"}
+{"level":"info","message":"Processing job 24 in queue my-app-queue","timestamp":"2024-12-07T06:34:42.324Z"}
+{"level":"info","message":"Job 23 completed successfully","timestamp":"2024-12-07T06:34:42.404Z"}
+{"level":"info","message":"Job 24 completed successfully","timestamp":"2024-12-07T06:34:42.405Z"}
+{"level":"info","message":"Server running on port 3002","timestamp":"2024-12-07T06:38:44.664Z"}
+{"job1Id":"25","job2Id":"26","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:38:45.002Z"}
+{"level":"info","message":"Processing job 25 in queue my-app-queue","timestamp":"2024-12-07T06:38:45.067Z"}
+{"level":"info","message":"Processing job 26 in queue my-app-queue","timestamp":"2024-12-07T06:38:45.080Z"}
+{"level":"info","message":"Job 25 completed successfully","timestamp":"2024-12-07T06:38:45.147Z"}
+{"level":"info","message":"Job 26 completed successfully","timestamp":"2024-12-07T06:38:45.167Z"}
+{"level":"info","message":"Server running on port 3002","timestamp":"2024-12-07T06:44:10.047Z"}
+{"job1Id":"27","job2Id":"28","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:44:10.387Z"}
+{"data":"First job","id":1,"level":"info","message":"Processing job 27","timestamp":"2024-12-07T06:44:10.580Z","type":"user_registration"}
+{"level":"info","message":"Job 27 completed","timestamp":"2024-12-07T06:44:10.652Z"}
+{"data":"Second job","id":2,"level":"info","message":"Processing job 28","timestamp":"2024-12-07T06:44:10.654Z","type":"send_email"}
+{"level":"info","message":"Job 28 completed","timestamp":"2024-12-07T06:44:10.710Z"}
+{"level":"info","message":"Server running on port 3002","timestamp":"2024-12-07T06:44:40.025Z"}
+{"job1Id":"29","job2Id":"30","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:44:40.370Z"}
+{"data":"First job","id":1,"level":"info","message":"Processing job 29","timestamp":"2024-12-07T06:44:40.571Z","type":"user_registration"}
+{"level":"info","message":"Job 29 completed","timestamp":"2024-12-07T06:44:40.641Z"}
+{"data":"Second job","id":2,"level":"info","message":"Processing job 30","timestamp":"2024-12-07T06:44:40.643Z","type":"send_email"}
+{"level":"info","message":"Job 30 completed","timestamp":"2024-12-07T06:44:40.710Z"}
+{"level":"info","message":"Server running on port 3002","timestamp":"2024-12-07T06:46:01.472Z"}
+{"job1Id":"31","job2Id":"32","level":"info","message":"Jobs added to queue","timestamp":"2024-12-07T06:46:01.774Z"}
+{"data":"First job","id":1,"level":"info","message":"Processing job 31","timestamp":"2024-12-07T06:46:01.990Z","type":"user_registration"}
+{"level":"info","message":"Job 31 completed","timestamp":"2024-12-07T06:46:02.054Z"}
+{"data":"Second job","id":2,"level":"info","message":"Processing job 32","timestamp":"2024-12-07T06:46:02.055Z","type":"send_email"}
+{"level":"info","message":"Job 32 completed","timestamp":"2024-12-07T06:46:02.114Z"}
+{"level":"info","message":"Server running on port 3002","timestamp":"2024-12-07T06:46:20.897Z"}
+{"level":"info","message":"Server running on port 3002","timestamp":"2024-12-07T06:48:39.284Z"}
+{"level":"info","message":"Server running on port 3002","timestamp":"2024-12-07T06:49:16.962Z"}
+{"level":"info","message":"Server running on port 3002","timestamp":"2024-12-07T06:49:29.626Z"}
+{"level":"info","message":"Server running on port 3002","timestamp":"2024-12-07T06:50:06.338Z"}
+{"level":"info","message":"Server running on port 3002","timestamp":"2024-12-07T06:50:38.582Z"}
+{"level":"info","message":"Server running on port 3002","timestamp":"2024-12-07T06:50:41.739Z"}
+{"level":"info","message":"Server running on port 3002","timestamp":"2024-12-07T06:54:24.837Z"}

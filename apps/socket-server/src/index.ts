@@ -22,6 +22,18 @@ class WebSocketGameServer {
   }
 
   private handleConnection(ws: WebSocket, req: IncomingMessage): void {
+    const origin = req.headers.origin;
+
+    const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:3000"];
+
+    if (origin) {
+      if (!allowedOrigins.includes(origin)) {
+        console.log(`Connection rejected from origin: ${origin}`);
+        ws.close();
+        return;
+      }
+    }
+
     let user: User | undefined;
     console.log("Client connected");
 

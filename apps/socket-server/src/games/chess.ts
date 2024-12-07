@@ -467,9 +467,6 @@ export class ChessGame {
         return { game, whitePlayer, blackPlayer };
       });
 
-      // Remove game if both players are guests
-      await deleteGameIfBothPlayersAreGuests(this.id, this.player1UserId, this.player2UserId);
-
       await RedisPubSubManager.getInstance().sendMessage(this.id, JSON.stringify({
         event: GameMessages.GAME_ENDED,
         payload: {
@@ -487,6 +484,9 @@ export class ChessGame {
           },
         },
       }));
+
+      // Remove game if both players are guests
+      await deleteGameIfBothPlayersAreGuests(this.id, this.player1UserId, this.player2UserId);
     } catch (error) {
       throw error;
     }
