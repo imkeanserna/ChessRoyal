@@ -208,7 +208,7 @@ export const ChessBoardAnimation = () => {
         <ChessPiece
           key={piece.position}
           type={piece.type}
-          color={piece.color as any}
+          color={piece.color as "white" | "black"}
           position={piece.position}
           index={index}
         />
