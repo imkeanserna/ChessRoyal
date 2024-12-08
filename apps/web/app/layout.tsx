@@ -12,6 +12,24 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Chess Royal",
   description: "Chess game for royal players",
+  icons: {
+    icon: [
+      {
+        url: "/favicon/favicon.ico",
+        sizes: "48x48",
+      },
+      {
+        url: "/favicon/favicon-16x16.png",
+        sizes: "16x16",
+        type: "image/png",
+      },
+    ],
+    apple: {
+      url: "/favicon/apple-touch-icon.png",
+      sizes: "180x180",
+    },
+    shortcut: '/favicon/favicon.ico',
+  }
 };
 
 export default function RootLayout({
