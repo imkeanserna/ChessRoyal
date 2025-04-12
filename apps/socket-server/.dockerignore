@@ -1,0 +1,35 @@
+# Version control
+**/.git
+**/.github
+
+# Development environments
+**/.vscode
+**/.idea
+
+# Build artifacts
+**/.turbo
+**/.next
+**/.cache
+**/dist
+**/build
+
+# Dependencies
+**/node_modules
+
+# Logs and reports
+**/coverage
+**/*.log
+
+# Documentation
+**/README.md
+**/LICENSE
+**/CHANGELOG.md
+
+# Environment variables
+**/.env
+**/.env.*
+!**/.env.example
+
+# Exclude other apps (only keep socket-server)
+/apps/web/**
+/apps/redis-worker/**
