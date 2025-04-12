@@ -1,4 +1,6 @@
-import db from "@repo/db/client";
+import { db } from "../db";
+
+export const runtime = 'edge';
 
 export async function deleteGameIfBothPlayersAreGuests(gameId: string, player1Id: string, player2Id: string) {
   try {

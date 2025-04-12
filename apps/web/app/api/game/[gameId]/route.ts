@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import db from "@repo/db/client";
+import { db } from "@repo/db/server";
+
+export const runtime = 'edge';
 
 export async function GET(req: NextRequest, { params }: {
   params: { gameId: string }

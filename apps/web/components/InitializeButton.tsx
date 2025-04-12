@@ -8,7 +8,7 @@ import { User } from "next-auth";
 import { useState } from "react";
 
 type InitializeButtonProps = {
-  user: User | null; // Ensure this matches the structure of your `User` object
+  user: User | null;
 };
 
 const InitializeButton: React.FC<InitializeButtonProps> = ({ user }) => {
@@ -36,7 +36,8 @@ const InitializeButton: React.FC<InitializeButtonProps> = ({ user }) => {
             onClick={findGame}
             className={`relative w-full bg-gradient-to-r from-amber-900/90 to-amber-800/90 hover:from-amber-800/90 hover:to-amber-700/90
                 text-amber-100 border-2 border-amber-600/20 shadow-lg shadow-amber-900/20 hover:shadow-amber-900/40
-                transform transition-all duration-300 px-8 py-6 ${isHovering ? '-translate-y-1' : 'translate-y-0'}`}
+                transform transition-all duration-300 px-8 py-6 ${isHovering ? '-translate-y-1' : 'translate-y-0'}
+                active:scale-[0.98]`}
           >
             <div className="flex items-center gap-3">
               <span className="text-lg font-semibold">{user ? `Play online` : "Play as Guest"}</span>

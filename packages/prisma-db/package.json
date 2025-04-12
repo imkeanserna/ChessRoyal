@@ -21,6 +21,7 @@
   },
   "exports": {
     "./client": "./src/index.ts",
-    "./user": "./src/utils.ts"
+    "./user": "./src/utils.ts",
+    "./server": "./src/server/index.ts"
   }
 }

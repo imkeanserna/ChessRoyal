@@ -7,13 +7,15 @@ import Image from "next/image";
 import { useTheme } from '@repo/ui/context/ThemeContext';
 import ShootingStars from "@/components/homepage/ShootingStars";
 
+export const runtime = 'edge';
+
 export default function Page() {
   const { theme } = useTheme();
   const darkTheme = theme === 'dark';
 
   return (
     <div
-      className={`relative min-h-screen overflow-hidden background-animate animate-gradient-x ${darkTheme
+      className={`relative h-screen overflow-hidden background-animate animate-gradient-x ${darkTheme
         ? 'bg-background'
         : 'bg-gradient-to-r from-orange-700 via-amber-600 to-orange-700'
         }`}
@@ -54,15 +56,16 @@ export default function Page() {
       <div
         className={`
         absolute
-        left-[-30px]
-        bottom-[-30px]
-        w-[700px]
+        left-[-600px]
+        -bottom-28
+        w-[1200px]
         h-[400px]
         ${darkTheme ? 'bg-white/10' : 'bg-black/50'}
         blur-2xl
         transform
         origin-top-right
-        z-30
+        z-0
+        rotate-[-40deg]
       `}
       ></div>
       <div className="pt-6 px-12">
@@ -136,7 +139,7 @@ export default function Page() {
           duration-300
         ">
           <Image
-            src={`/homepage/chessBoard.png`}
+            src={`/homepage/chessBoard.webp`}
             alt={`chess board`}
             fill
             className="

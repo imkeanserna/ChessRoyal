@@ -3,10 +3,12 @@ import { User } from './user';
 import { GameMessages, PlayerWon, GameStatus, KingStatus, GameResultType } from "@repo/chess/gameStatus";
 import { Chess, Move } from 'chess.js';
 import { GameTimer } from './gameTimer';
-import db from "@repo/db/client";
+import { db } from "../db";
 import { isPromoting } from '@repo/chess/isPromoting';
 import { deleteGameIfBothPlayersAreGuests } from '../services/gameService';
 import { RedisPubSubManager } from '../pubsub/redisClient';
+
+export const runtime = 'edge';
 
 export class ChessGame {
   public id: string;
@@ -390,7 +392,8 @@ export class ChessGame {
     });
 
     // Check if the game ended in checkmate and adjust the score for the winner
-    const isCheckmate = this.board.isCheckmate();  // Adjust this based on your game's checkmate status
+    // Adjust this based on your game's checkmate status
+    const isCheckmate = this.board.isCheckmate();
     const winnerId = this.board.turn() === 'w' ? this.player2UserId : this.player1UserId;
 
     if (isCheckmate) {

@@ -3,9 +3,11 @@ import { ChessGame } from "./games/chess";
 import { User } from "./games/user";
 import { GameMessages, GameStatus } from "@repo/chess/gameStatus";
 import { GameTimer } from "./games/gameTimer";
-import db from "@repo/db/client";
+import { db } from "./db";
 import { deleteGameIfBothPlayersAreGuests } from "./services/gameService";
 import { RedisPubSubManager } from "./pubsub/redisClient";
+
+export const runtime = 'edge';
 
 interface GameEvent {
   event: GameMessages;
@@ -292,7 +294,7 @@ export class GameManager {
       payload: {
         respondedBy: user.userId,
         gameId: game.id,
-        response: payload.response, // 'accept' or 'decline'
+        response: payload.response,
       },
     }));
 
