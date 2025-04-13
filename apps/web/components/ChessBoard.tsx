@@ -359,7 +359,6 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                     isFlipped={isFlipped}
                     isValidMoveTarget={isValidMoveTarget}
                     isAnimationSource={animating && animationSource === squareRepresentation}
-                    isAnimationDestination={animating && animationDestination === squareRepresentation}
                     isBeingCaptured={isBeingCaptured}
                   />
                 );
