@@ -46,7 +46,7 @@ export class ChessGame {
 
   async move(user: User, move: Move) {
     if (this.status !== GameStatus.IN_PROGRESS) {
-      throw new Error(`Cannot move. Game ${this.id} is not in progress`);
+      return null;
     }
 
     if (this.board.turn() === 'w' && (user.id !== this.player1UserId)) {

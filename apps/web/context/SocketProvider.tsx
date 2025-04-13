@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 interface ISocketContext {
   socket: WebSocket | null;
@@ -39,8 +39,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const _socket = new WebSocket("ws://localhost:3001");
     setSocket(_socket);
-
-    // _socket.onmessage = onMessageReceived;
 
     _socket.onopen = () => {
       setIsConnected(true);

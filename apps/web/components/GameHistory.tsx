@@ -31,7 +31,6 @@ const ChessGameHistory = ({ userId }: { userId: string }) => {
   const transformGames = (rawGames: any[], userId: string): GameHistoryItem[] => {
     return rawGames.map(game => {
       const isWhitePlayer = game.result.whitePlayerId === userId;
-      const isBlackPlayer = game.result.blackPlayerId === userId;
 
       // Determine opponent name and player name
       const opponentName = isWhitePlayer

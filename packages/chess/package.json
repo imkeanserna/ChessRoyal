@@ -12,7 +12,8 @@
   "exports": {
     "./gameStatus": "./src/GameEnums.ts",
     "./playerTypes": "./src/PlayerTypes.ts",
-    "./isPromoting": "./src/IsPromoting.ts"
+    "./isPromoting": "./src/IsPromoting.ts",
+    "./chessUtils": "./utils/chessUtils.ts"
   },
   "dependencies": {
     "chess.js": "1.0.0-beta.8"

@@ -4,6 +4,7 @@ import { Color, PieceSymbol, Square } from "chess.js";
 import { useRecoilValue } from "recoil";
 import { isGameOverAtom } from "@repo/store/chessBoard";
 import Image from "next/image";
+import { useRef } from "react";
 
 interface ChessSquareProps {
   isKingChecked: boolean;
@@ -17,21 +18,19 @@ interface ChessSquareProps {
     type: PieceSymbol;
     color: Color;
   } | null;
-  onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDragEnd: () => void;
+  onMouseDown: (element: HTMLElement, e: React.MouseEvent | React.TouchEvent) => void;
   isDragging: boolean;
+  isHovered: boolean;
   row: number;
   col: number;
   isFlipped: boolean;
+  isValidMoveTarget?: boolean;
+  isAnimationSource?: boolean;
+  isBeingCaptured?: boolean;
 }
 
 const ChessSquare: React.FC<ChessSquareProps> = ({
-  onDragStart,
-  onDragOver,
-  onDrop,
-  onDragEnd,
+  onMouseDown,
   isKingChecked,
   isCaptured,
   isHighlightedSquare,
@@ -40,11 +39,16 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
   piece,
   square,
   isDragging,
+  isHovered = false,
   row,
   col,
-  isFlipped
+  isFlipped,
+  isValidMoveTarget = false,
+  isAnimationSource = false,
+  isBeingCaptured = false,
 }) => {
   const gameOver = useRecoilValue(isGameOverAtom);
+  const pieceRef = useRef<HTMLDivElement>(null);
 
   // Determine the column label based on whether the board is flipped
   const getColumnLabel = () => {
@@ -60,20 +64,44 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
     ? 'bg-blackPlayer'
     : 'bg-whitePlayer';
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (pieceRef.current && square) {
+      e.preventDefault();
+      onMouseDown(pieceRef.current, e);
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (pieceRef.current && square) {
+      e.preventDefault();
+      onMouseDown(pieceRef.current, e);
+    }
+  };
+
   return (
     <div
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      onDragEnd={onDragEnd}
       className={`
         ${woodTexture}
         ${isHighlightedSquare ? "bg-yellow-500" : ""}
-        w-20 h-20 relative
+        ${isHovered ? "shadow-[inset_0_0_0_4px_rgba(75,85,99,0.3)] z-10" : ""}
+        w-20 h-20 relative transition-colors duration-150
       `}
     >
+      {/* Legal move indicator */}
       {isHighlighted && (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-gray-950 shadow-md rounded-full opacity-40" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-gray-950 rounded-full opacity-40 transition-opacity duration-200" />
+      )}
+
+      {/* Valid move target indicator when dragging */}
+      {isValidMoveTarget && isDragging && !isHighlighted && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-2 border-gray-600 rounded-full opacity-30" />
+      )}
+
+      {/* Capture indicator */}
+      {isCaptured && (
+        <div className="absolute inset-0 flex justify-center items-center z-50">
+          <div className="w-8 h-8 bg-red-400 rounded-full shadow-md animate-pulse opacity-70" />
+        </div>
       )}
 
       {/* Column label (bottom row if white, top row if flipped for black) */}
@@ -90,28 +118,25 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
         </div>
       )}
 
-      {square ? (
+      {square && !isAnimationSource && !isBeingCaptured ? (
         <div
-          draggable
+          ref={pieceRef}
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
           className={`
             cursor-grab active:cursor-grabbing
-            ${isKingChecked ? "bg-red-600" : ""}
+            ${isKingChecked ? "bg-red-600 bg-opacity-40 rounded-full" : ""}
             w-full h-full relative flex justify-center items-center
             ${isDragging ? 'opacity-0' : 'opacity-100'}
-            transition-opacity duration-200
+            transition-all duration-200
           `}
         >
-          {isCaptured && (
-            <div className="absolute inset-0 flex justify-center items-center">
-              <div className="w-8 h-8 bg-red-400 rounded-full shadow-md animate-pulse opacity-70" />
-            </div>
-          )}
           <Image
             src={`/cardinal/${square?.color}/${piece}.svg`}
             alt={`${square?.color} ${piece}`}
             width={72}
             height={72}
-            className="pointer-events-none"
+            className={`pointer-events-none transition-transform duration-200 ${isDragging ? 'scale-95' : 'scale-100'}`}
           />
           {piece === "k" && gameOver.isGameOver && gameOver.playerWon?.[0]?.toLowerCase() === square?.color ? (
             <Image
@@ -119,7 +144,7 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
               alt="Crown for winner king"
               width={24}
               height={24}
-              className="absolute top-1 right-1"
+              className="absolute top-1 right-1 animate-bounce"
             />
           ) : null}
           {gameOver.isGameOver && piece === "k" && gameOver.playerWon?.[0]?.toLowerCase() !== square?.color && (
@@ -143,6 +168,11 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
           )}
         </div>
       ) : null}
+      {isBeingCaptured && (
+        <div className="absolute inset-0 flex justify-center items-center z-10">
+          <div className="w-full h-full flex justify-center items-center opacity-30 bg-red-500 animate-pulse"></div>
+        </div>
+      )}
     </div>
   );
 };

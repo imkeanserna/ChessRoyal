@@ -50,10 +50,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
   const { blackPlayer, whitePlayer } = useRecoilValue<Players | null>(gameMetadataSelector) || {};
 
-  // let's wait for further coding if this thing is very important in the component.
-  const [player1ConsumeTimer, setPlayer1ConsumeTimer] = useState(blackPlayer?.remainingTime || 0);
-  const [player2ConsumeTimer, setPlayer2ConsumeTimer] = useState(whitePlayer?.remainingTime || 0);
-
   const handleGameInit = useCallback((payload: any) => {
     const user: { id: string } | null = JSON.parse(localStorage.getItem("user") as string);
     if (!user || user.id !== payload.whitePlayer.id) {
@@ -65,36 +61,12 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
     }
   }, []);
 
-  // const startedGameHandler = async (gameId: string) => {
-  //   try {
-  //     const response = await fetch(`/api/game/${gameId}`, {
-  //       method: "GET",
-  //       headers: { "Content-Type": "application/json" },
-  //       credentials: "include",
-  //     });
-  //     if (response.ok) {
-  //       const { game } = await response.json();
-  //       if (!game.id) {
-  //         router.push("/play/online");
-  //         return;
-  //       }
-  //       setStarted(!!game.id);
-  //       const whitePlayer = gameMetadataState.whitePlayer.id;
-  //       setColor(user?.id === whitePlayer ? "w" : "b");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching game status:", error);
-  //   }
-  // };
-
   const resetGameState = useCallback(() => {
     setChess(new Chess());
     setIsCheck({ king_status: KingStatus.SAFE, player: "" });
     setIsGameOver({ isGameOver: false, playerWon: null });
     setWonBy(null);
     setOpen(false);
-    setPlayer1ConsumeTimer(blackPlayer?.remainingTime || 0);
-    setPlayer2ConsumeTimer(whitePlayer?.remainingTime || 0);
   }, [setMoves, setIsCheck, setIsGameOver]);
 
   const handleNewGame = useCallback(() => {
@@ -112,7 +84,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
       }
 
       if (gameId) {
-        // startedGameHandler(gameId);
         sendMessage(GameMessages.JOIN_ROOM, { gameId });
       }
     };
@@ -253,8 +224,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
     setColor(user?.id === whitePlayer ? "w" : "b");
     setMoves(payload.moves);
     setStarted(!!payload.gameId);
-    setPlayer1ConsumeTimer(payload.whitePlayer.remainingTime);
-    setPlayer2ConsumeTimer(payload.blackPlayer.remainingTime);
   };
 
   const handleMove = (payload: any) => {
@@ -263,8 +232,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
         { from: payload.move.from, to: payload.move.to, promotion: 'q' } :
         { from: payload.move.from, to: payload.move.to });
       setMoves(prev => [...prev, payload.move]);
-      setPlayer1ConsumeTimer(payload.player1RemainingTime);
-      setPlayer2ConsumeTimer(payload.player2RemainingTime);
       setIsCheck({ king_status: KingStatus.SAFE, player: "" });
     } catch (error) {
       return;
@@ -301,12 +268,6 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
 
   // Determine if the current user is playing as black
   const isPlayingAsBlack = user?.id === blackPlayer?.id;
-
-  // Helper function to determine if a timer should be paused
-  const isTimerPaused = (playerColor: string) => {
-    const isWhite = playerColor === 'white';
-    return chess.turn() !== (isWhite ? 'w' : 'b');
-  };
 
   // Get opponent and current player info based on user's color
   const getCurrentPlayerInfo = () => {
