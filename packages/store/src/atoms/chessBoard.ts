@@ -30,3 +30,8 @@ export const isGameOverAtom = atom<IsGameOver>({
     playerWon: null
   }
 });
+
+export const isOpponentMoveAtom = atom({
+  key: "isOpponentMove",
+  default: false
+})

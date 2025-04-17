@@ -1,7 +1,7 @@
 "use client";
 
 import { Color, PieceSymbol, Square, Move, Chess } from "chess.js";
-import { DragEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GameMessages } from "@repo/chess/gameStatus";
 import { isPromoting } from "@repo/chess/isPromoting";
 import { useRecoilState } from "recoil";
@@ -98,23 +98,42 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
 
   // Handle reviewing specific moves
   useEffect(() => {
-    if (userSelectedMoveIndex === null || !moves[userSelectedMoveIndex]) return;
+    if (userSelectedMoveIndex === null) return;
 
-    const move = moves[userSelectedMoveIndex];
-    if (!move || !move.after) return;
-
-    // Only update if we're actually changing position
-    const moveSignature = `review-${userSelectedMoveIndex}`;
-    if (processedMovesRef.current.has(moveSignature)) return;
-    processedMovesRef.current.add(moveSignature);
-
-    try {
-      chess.load(move.after);
-      setLastMove({ from: move.from, to: move.to });
-      setBoard(chess.board());
-    } catch (error) {
-      console.error("Error loading position:", error);
+    if (userSelectedMoveIndex === moves.length - 1 && chess.history().length === moves.length) {
+      return;
     }
+
+    // Reset the board and replay moves up to the selected index
+    chess.reset();
+
+    for (let i = 0; i <= userSelectedMoveIndex; i++) {
+      const move = moves[i];
+      if (move) {
+        try {
+          chess.move({
+            from: move.from,
+            to: move.to,
+            promotion: move.promotion
+          });
+        } catch (error) {
+          console.error(`Error replaying move ${i}:`, error);
+        }
+      }
+    }
+
+    // Update the visual last move highlight
+    if (moves[userSelectedMoveIndex]) {
+      const selectedMove = moves[userSelectedMoveIndex];
+      if (selectedMove) {
+        setLastMove({
+          from: selectedMove.from,
+          to: selectedMove.to
+        });
+      }
+    }
+
+    setBoard(chess.board());
   }, [userSelectedMoveIndex, moves, chess, setBoard]);
 
   // Handle new moves (especially opponent moves)
@@ -124,16 +143,15 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     const lastMoveIndex = moves.length - 1;
     const lastMove = moves[lastMoveIndex];
     if (!lastMove) return;
-
-    // Create a unique key for this move
     const moveKey = `${lastMove.from}-${lastMove.to}-${lastMoveIndex}`;
 
     if (processedMovesRef.current.has(moveKey)) return;
     processedMovesRef.current.add(moveKey);
 
+    // If the new move is from the opponent and we're in review mode,
+    // we need to update to show this move
     if (lastMove.color !== myColor) {
       isAnimatingRef.current = true;
-
       animateMove(
         lastMove.from,
         lastMove.to,
@@ -142,7 +160,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
 
       setTimeout(() => {
         resetChessPosition();
-        setUserSelectedMoveIndex(null);
+        setUserSelectedMoveIndex(lastMoveIndex);
         setBoard(chess.board());
         setLastMove({ from: lastMove.from, to: lastMove.to });
         isAnimatingRef.current = false;

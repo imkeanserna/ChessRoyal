@@ -1,7 +1,9 @@
+"use client";
+
 import { movesAtom } from "@repo/store/chessBoard";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import React, { useEffect, useState } from "react";
-import { Move } from "chess.js";
+import { Color, Move } from "chess.js";
 import { userSelectedMoveIndexAtom } from "@repo/store/user";
 import { gameResignedAtom } from "@repo/store/gameMetadata";
 import { Button } from "@repo/ui/components/ui/button";
@@ -18,14 +20,19 @@ import {
   ChevronRight,
   ChevronLast
 } from 'lucide-react';
+
 interface MovesTableProps {
   sendMessage: (event: string, data?: any) => void;
   gameId: string;
+  myColor: Color;
+  isMyTurn: boolean;
 }
 
 const MovesTable: React.FC<MovesTableProps> = ({
   sendMessage,
-  gameId
+  gameId,
+  myColor,
+  isMyTurn
 }) => {
   const moves = useRecoilValue<Move[]>(movesAtom);
   const { offerDraw, resignGame } = useGameActions(sendMessage);
@@ -35,8 +42,10 @@ const MovesTable: React.FC<MovesTableProps> = ({
   const isResigned = useRecoilValue(gameResignedAtom);
 
   const handleMoveClick = (index: number) => {
-    setSelectedMove(index);
-    setUserSelectedMove(index);
+    if (isMyTurn) {
+      setSelectedMove(index);
+      setUserSelectedMove(index);
+    }
   };
 
   const handleConfirmResign = () => {
@@ -77,10 +86,17 @@ const MovesTable: React.FC<MovesTableProps> = ({
 
   useEffect(() => {
     if (moves.length > 0) {
-      setSelectedMove(moves.length - 1);
-      setUserSelectedMove(moves.length - 1);
+      const latestMoveIndex = moves.length - 1;
+      const latestMove = moves[latestMoveIndex];
+      const isOpponentMove = latestMove && latestMove.color !== myColor;
+
+      // Only auto-update to latest position if it's an opponent move
+      if (isOpponentMove) {
+        setSelectedMove(latestMoveIndex);
+        setUserSelectedMove(latestMoveIndex);
+      }
     }
-  }, [moves, setUserSelectedMove]);
+  }, [moves.length, myColor]);
 
   return (
     <div className="rounded-xl overflow-hidden bg-gradient-to-b from-neutral-900 to-neutral-950 border border-amber-700 flex flex-col items-center w-full min-h-[810px] min-w-[450px] mx-auto shadow-xl">

@@ -9,7 +9,7 @@ import { Players } from "./ChessMenu";
 import ChessBoard from "./ChessBoard";
 import { Chess, Move } from "chess.js";
 import { isPromoting } from "@repo/chess/isPromoting";
-import { isCheckAtom, isGameOverAtom, movesAtom } from "@repo/store/chessBoard";
+import { isCheckAtom, isGameOverAtom, isOpponentMoveAtom, movesAtom } from "@repo/store/chessBoard";
 import { userAtom } from "@repo/store/user";
 import { useRouter } from "next/navigation";
 import { gameResignedAtom } from "@repo/store/gameMetadata";
@@ -32,6 +32,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [board, setBoard] = useState(chess.board());
   const setMoves = useSetRecoilState(movesAtom);
   const [user, setUser] = useRecoilState(userAtom);
+  const [isOpponentMoveState, setIsOpponentMove] = useRecoilState(isOpponentMoveAtom);
   const router = useRouter();
   const [started, setStarted] = useState(false);
   const [isCheck, setIsCheck] = useRecoilState(isCheckAtom);
@@ -39,7 +40,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
   const [open, setOpen] = useState(false);
   const [wonBy, setWonBy] = useState<GameResultType | null>(null);
   const [gameMetadataState, setGameMetaDataAtom] = useRecoilState<Players>(gameMetadataAtom);
-  const [myColor, setColor] = useState<"w" | "b">("w");
+  const [myColor, setColor] = useState<"w" | "b">(user?.id === gameMetadataState.blackPlayer.id ? "w" : "b");
   const setRemoteGameIdAtom = useSetRecoilState(remoteGameIdAtom);
   const setIsResigned = useSetRecoilState(gameResignedAtom);
   const { respondToDraw } = useGameActions(sendMessage);
@@ -101,6 +102,11 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
             handleJoinRoom(payload);
             break;
           case GameMessages.MOVE:
+            if (payload.move.color === myColor) {
+              setIsOpponentMove(true);
+            } else {
+              setIsOpponentMove(false);
+            }
             handleMove(payload);
             break;
           case GameMessages.KING_STATUS:
@@ -349,6 +355,8 @@ const ChessGame: React.FC<ChessGameProps> = ({ gameId }) => {
             <MovesTable
               sendMessage={sendMessage}
               gameId={gameId}
+              myColor={myColor}
+              isMyTurn={isOpponentMoveState}
             />
           </div>
         ) : (
