@@ -134,7 +134,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     }
 
     setBoard(chess.board());
-  }, [userSelectedMoveIndex, moves, chess, setBoard]);
+  }, [userSelectedMoveIndex, chess, setBoard]);
 
   // Handle new moves (especially opponent moves)
   useEffect(() => {
