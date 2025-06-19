@@ -16,6 +16,7 @@
     "@repo/store": "workspace:*",
     "@repo/ui": "workspace:*",
     "@types/bcrypt": "^5.0.2",
+    "@vercel/analytics": "^1.5.0",
     "bcrypt": "^5.1.1",
     "chess.js": "1.0.0-beta.8",
     "clsx": "^2.1.1",

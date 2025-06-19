@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthProvider";
 import { Toaster } from "@repo/ui/components/ui/sonner";
 import RecoilContextProvider from "@/components/Provider";
 import { GithubRepository } from "@/components/ui/GithubRepository";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,8 +29,8 @@ export const metadata: Metadata = {
       url: "/favicon/apple-touch-icon.png",
       sizes: "180x180",
     },
-    shortcut: '/favicon/favicon.ico',
-  }
+    shortcut: "/favicon/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -44,6 +45,7 @@ export default function RootLayout({
           <AuthProvider>
             <RecoilContextProvider>
               {children}
+              <Analytics />
               <GithubRepository
                 className="z-50 fixed bottom-10 right-10"
                 link="https://github.com/imkeanserna/chess-game"
